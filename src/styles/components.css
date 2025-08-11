@@ -1,0 +1,85 @@
+/* Estilos para botones */
+.btn {
+  @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-green {
+  @apply bg-green-text text-white hover:bg-green-highcontrast focus:ring-green-text;
+}
+
+.btn-plain {
+  @apply bg-transparent border-2 border-white text-white hover:bg-white hover:text-green-text-dark focus:ring-white;
+}
+
+/* Estilos para colores personalizados */
+.text-green-text {
+  color: #E8E215;
+}
+
+.text-green-text-dark {
+  color: #ACA81F;
+}
+
+.text-green-menu {
+  color: #645E5A;
+}
+
+.text-green-highcontrast {
+  color: #7A7720;
+}
+
+.bg-green-highcontrast {
+  background-color: #7A7720;
+}
+
+.bg-medium-grey {
+  background-color: #9F9C9A;
+}
+
+.border-green-highcontrast {
+  border-color: #7A7720;
+}
+
+.border-gray-border {
+  border-color: #E4E7E9;
+}
+
+/* Estilos para el marker */
+.marker {
+  @apply relative;
+}
+
+.marker::before {
+  content: '';
+  @apply absolute left-0 top-0 w-1 h-full bg-green-text rounded-full;
+}
+
+.marker-offset-left::before {
+  @apply -left-2;
+}
+
+/* Estilos para tamaños de texto */
+.text-xxs {
+  font-size: 0.625rem;
+  line-height: 0.75rem;
+}
+
+/* Estilos para el contenedor */
+.container {
+  @apply max-w-7xl mx-auto;
+}
+
+/* Estilos para imágenes con opacidad */
+.image-opacity-500 {
+  @apply relative;
+}
+
+.image-opacity-500::before {
+  content: '';
+  @apply absolute inset-0 bg-black bg-opacity-50;
+}
+
+/* Estilos para el warning */
+.text-warning {
+  @apply text-yellow;
+}
