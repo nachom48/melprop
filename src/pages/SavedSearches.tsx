@@ -1,101 +1,158 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useUser } from '../context/UserContext';
-import { useNavigate } from 'react-router-dom';
-import { removeSavedSearch } from '../services/auth';
+import ProfileLayout from '../components/ProfileLayout';
+import styled from 'styled-components';
+
+const SearchesContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
+
+const EmptyState = styled.div`
+  text-align: center;
+  padding: 48px 24px;
+  color: #6b7280;
+`;
+
+const EmptyIcon = styled.div`
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #d1d5db;
+`;
+
+const EmptyTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #374151;
+`;
+
+const EmptyText = styled.p`
+  font-size: 14px;
+  color: #6b7280;
+`;
+
+const SearchesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const SearchCard = styled.div`
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  background: white;
+  transition: all 0.2s;
+  
+  &:hover {
+    border-color: #059669;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+const SearchTitle = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+`;
+
+const SearchDetails = styled.p`
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 8px;
+`;
+
+const SearchUrl = styled.a`
+  color: #059669;
+  text-decoration: none;
+  font-size: 12px;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const RemoveButton = styled.button`
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background: #dc2626;
+  }
+`;
 
 const SavedSearches: React.FC = () => {
-  const { user, isLoggedIn, savedSearches, loadSavedSearches } = useUser();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/');
-      return;
-    }
-    loadSavedSearches();
-  }, [isLoggedIn, navigate, loadSavedSearches]);
+  const { savedSearches, removeSavedSearch } = useUser();
 
   const handleRemoveSearch = async (id: number) => {
-    try {
+    if (window.confirm('¿Estás seguro de que quieres eliminar esta búsqueda guardada?')) {
       await removeSavedSearch(id);
-      await loadSavedSearches();
-    } catch (error) {
-      console.error('Error removing saved search:', error);
     }
   };
 
-  if (!isLoggedIn) {
-    return null;
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-green-text">Búsquedas guardadas</h1>
-        </div>
-
+    <ProfileLayout
+      title="Búsquedas guardadas"
+      favoritesCount={0}
+      searchesCount={savedSearches.length}
+    >
+      <SearchesContainer>
         {savedSearches.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <i className="fas fa-search text-6xl"></i>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">
-              No hay búsquedas guardadas
-            </h3>
-            <p className="text-gray-500">
-              Cuando guardes búsquedas, aparecerán aquí
-            </p>
-          </div>
+          <EmptyState>
+            <EmptyIcon>🔍</EmptyIcon>
+            <EmptyTitle>No tienes búsquedas guardadas</EmptyTitle>
+            <EmptyText>
+              Aún no has guardado ninguna búsqueda.
+              <br />
+              Cuando realices búsquedas, podrás guardarlas para recibir notificaciones.
+            </EmptyText>
+          </EmptyState>
         ) : (
-          <div>
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-green-text mb-2">
-                Búsquedas <span className="text-gray-500">({savedSearches.length})</span>
-              </h2>
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#374151' }}>
+                Búsquedas guardadas ({savedSearches.length})
+              </h3>
             </div>
 
-            <div className="space-y-4">
-              {savedSearches.map((search) => (
-                <div key={search.id} className="search-card">
-                  <div className="search-content">
-                    <div className="search-info">
-                      <h3 className="search-name text-lg font-semibold text-green-text mb-2">
-                        {search.name}
-                      </h3>
-                      <p className="search-type text-sm text-gray-600 mb-2">
-                        Tipo: {search.alert_type}
-                      </p>
-                      <p className="search-url text-sm text-gray-500">
-                        {search.url}
-                      </p>
-                    </div>
-
-                    <div className="search-actions">
-                      <a
-                        href={search.url}
-                        className="btn btn-green"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Ver resultados
-                      </a>
-                      <button
-                        onClick={() => handleRemoveSearch(search.id)}
-                        className="btn btn-white text-red-600 hover:bg-red-50"
-                        title="Eliminar búsqueda"
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
-                    </div>
+            <SearchesList>
+              {savedSearches.map((search: any) => (
+                <SearchCard key={search.id}>
+                  <SearchTitle>{search.name || 'Búsqueda sin nombre'}</SearchTitle>
+                  <SearchDetails>
+                    {search.alert_type && `Tipo de alerta: ${search.alert_type} • `}
+                    Guardada recientemente
+                  </SearchDetails>
+                  {search.url && (
+                    <SearchUrl href={search.url} target="_blank" rel="noopener noreferrer">
+                      Ver búsqueda
+                    </SearchUrl>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                    <span style={{ fontSize: '12px', color: '#9ca3af' }}>
+                      Recibirás notificaciones cuando haya nuevas propiedades
+                    </span>
+                    <RemoveButton onClick={() => handleRemoveSearch(search.id)}>
+                      Eliminar búsqueda
+                    </RemoveButton>
                   </div>
-                </div>
+                </SearchCard>
               ))}
-            </div>
-          </div>
+            </SearchesList>
+          </>
         )}
-      </div>
-    </div>
+      </SearchesContainer>
+    </ProfileLayout>
   );
 };
 

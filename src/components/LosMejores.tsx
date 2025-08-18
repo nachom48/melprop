@@ -36,15 +36,15 @@ const LosMejores: React.FC = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="my-2 flex flex-col justify-between md:my-8 md:flex-row md:gap-20">
+            <div className="my-2 flex flex-col justify-between md:my-20 md:flex-row md:gap-20">
                 <div className="flex basis-full flex-col justify-center md:basis-[250px]">
-                    <h2 className="!text-green-text mb-4 text-4xl font-larken">Los mejores</h2>
-                    <div className="mb-4">
+                    <h2 className="!text-green-text mb-8 text-4xl font-larken">Los mejores</h2>
+                    <div className="mb-8">
                         <a href="#" className="text-light-green flex justify-between leading-4 font-jakarta hover:text-green-text-dark transition-colors">
                             Encontralos en Mel <i className="fas fa-circle-chevron-right"></i>
                         </a>
                     </div>
-                    <div className="mb-4">
+                    <div className="mb-6">
                         <div className="swiper-best-nav">
                             <div className="swiper-wrapper flex flex-row gap-4 md:flex-col">
                                 <div className="swiper-slide">
@@ -87,9 +87,9 @@ const LosMejores: React.FC = () => {
 
                 <div className="flex-1">
                     <div className="swiper-best !m-0">
-                        <div className="swiper-wrapper flex flex-row gap-8">
+                        <div className="swiper-wrapper flex flex-row gap-4 md:gap-8 overflow-x-auto md:overflow-visible">
                             {bestProperties.map((property) => (
-                                <div key={property.id} className="swiper-slide flex-shrink-0">
+                                <div key={property.id} className="swiper-slide flex-shrink-0 min-w-[280px] md:min-w-0">
                                     <BestPropertyCard property={property} />
                                 </div>
                             ))}

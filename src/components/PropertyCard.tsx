@@ -1,108 +1,135 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useUser } from '../context/UserContext';
 import '../styles/propertyCard.css';
 
 export interface Property {
     id: number;
-    image?: string;
-    type?: string;
+    title: string;
     price: string;
     address: string;
-    location?: string;
+    neighborhood: string;
     area: number;
     rooms: number;
     bathrooms: number;
-    garage?: number;
-    title?: string;
-    main_image?: string;
-    operation_type?: "Venta" | "Alquiler";
-    neighborhood?: string;
-    parking?: number;
+    parking: number;
+    main_image: string;
+    operation_type: string;
 }
 
 export interface PropertyCardProps {
     property: Property;
     className?: string;
+    showFavoriteButton?: boolean;
+    isFavorite?: boolean;
+    onToggleFavorite?: () => void;
 }
 
-const PropertyCard: React.FC<PropertyCardProps> = ({ property, className = "" }) => {
+const PropertyCard: React.FC<PropertyCardProps> = ({
+    property,
+    className = "",
+    showFavoriteButton = true,
+    isFavorite: externalIsFavorite,
+    onToggleFavorite
+}) => {
+    const { isLoggedIn, favorites, addToFavorites, removeFromFavorites } = useUser();
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+
+    // Verificar si la propiedad está en favoritos
+    useEffect(() => {
+        if (externalIsFavorite !== undefined) {
+            setIsFavorite(externalIsFavorite);
+        } else if (favorites && favorites.length > 0) {
+            const isInFavorites = favorites.some(fav => fav.id === property.id);
+            setIsFavorite(isInFavorites);
+        } else {
+            setIsFavorite(false);
+        }
+    }, [favorites, property.id, externalIsFavorite]);
+
+    const handleFavoriteClick = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!isLoggedIn) {
+            alert('Debes iniciar sesión para agregar favoritos');
+            return;
+        }
+
+        if (isLoading) return;
+
+        setIsLoading(true);
+        try {
+            if (isFavorite) {
+                // Remover de favoritos
+                if (onToggleFavorite) {
+                    onToggleFavorite();
+                } else {
+                    await removeFromFavorites(property.id);
+                }
+                setIsFavorite(false);
+            } else {
+                // Agregar a favoritos
+                if (onToggleFavorite) {
+                    onToggleFavorite();
+                } else {
+                    await addToFavorites(property.id);
+                }
+                setIsFavorite(true);
+            }
+
+            // Mostrar animación de éxito
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 600);
+        } catch (error) {
+            console.error('Error al manejar favoritos:', error);
+            // Revertir el estado en caso de error
+            setIsFavorite(!isFavorite);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className={`border-grey-border-light rounded-3xl border-1 overflow-hidden ${className}`.trim()}>
             <div className="image relative overflow-hidden rounded-tl-3xl rounded-tr-3xl">
                 <img
                     className="w-full"
-                    src={property.main_image || property.image || '/placeholder.jpg'}
-                    alt={property.title || `${property.type || 'Propiedad'} en ${property.address}`}
+                    src={property.main_image || '/placeholder.jpg'}
+                    alt={property.title || `Propiedad en ${property.address}`}
                 />
-                <button
-                    className="fav"
-                    onClick={(e) => {
-                        e.preventDefault();
-                        // TODO: Implementar lógica de favoritos
-                    }}
-                    style={{
-                        color: 'var(--color-green-text)'
-                    }}
-                >
-                    <i className="far fa-heart"></i>
-                </button>
+                {showFavoriteButton && (
+                    <button
+                        className={`fav ${isLoading ? 'loading' : ''} ${isFavorite ? 'active' : ''} ${showSuccess ? 'success' : ''}`}
+                        onClick={handleFavoriteClick}
+                        disabled={isLoading}
+                        title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                    >
+                        <i className={`${isFavorite ? 'fas' : 'far'} fa-heart`}></i>
+                    </button>
+                )}
             </div>
-            <div className="p-4">
-                <span className="text-green-text-dark text-sm">
-                    {property.operation_type || property.type || 'Venta'}
-                </span>
-                <h3 className="text-2xl marker mb-3" style={{
-                    fontFamily: 'var(--font-larken)',
-                    color: 'var(--color-green-menu)',
-                    fontStyle: 'normal',
-                    fontWeight: 700
-                }}>{property.price}</h3>
-                <div className="mb-3">
-                    <strong style={{
-                        fontFamily: 'var(--font-jakarta)',
-                        fontOpticalSizing: 'auto',
-                        color: 'var(--color-green-text)',
-                        fontStyle: 'normal',
-                        fontWeight: 400
-                    }}>{property.address}</strong>
-                    <p className="text-sm" style={{
-                        fontFamily: 'var(--font-jakarta)',
-                        fontOpticalSizing: 'auto',
-                        color: 'var(--color-green-text)',
-                        fontStyle: 'normal',
-                        fontWeight: 400
-                    }}>{property.neighborhood || property.location}</p>
+            <div className="content p-4">
+                <div className="operation-badge text-green-menu text-sm font-semibold mb-2">
+                    {property.operation_type} - {property.neighborhood}
                 </div>
-                <ul className="text-xxs flex flex-wrap gap-2">
-                    <li style={{
-                        fontFamily: 'var(--font-jakarta)',
-                        fontOpticalSizing: 'auto',
-                        color: 'var(--color-green-text)',
-                        fontStyle: 'normal',
-                        fontWeight: 400
-                    }}>{property.area} m<sup>2</sup></li>
-                    <li style={{
-                        fontFamily: 'var(--font-jakarta)',
-                        fontOpticalSizing: 'auto',
-                        color: 'var(--color-green-text)',
-                        fontStyle: 'normal',
-                        fontWeight: 400
-                    }}>{property.rooms} Ambientes</li>
-                    <li style={{
-                        fontFamily: 'var(--font-jakarta)',
-                        fontOpticalSizing: 'auto',
-                        color: 'var(--color-green-text)',
-                        fontStyle: 'normal',
-                        fontWeight: 400
-                    }}>{property.bathrooms} Baños</li>
-                    {(property.garage || property.parking) &&
-                        <li style={{
-                            fontFamily: 'var(--font-jakarta)',
-                            fontOpticalSizing: 'auto',
-                            color: 'var(--color-green-text)',
-                            fontStyle: 'normal',
-                            fontWeight: 400
-                        }}>{property.garage || property.parking} Cochera</li>
-                    }
+                <div className="price text-green-menu text-2xl font-bold mb-3">
+                    {property.price}
+                </div>
+                <div className="address mb-3">
+                    <strong className="block text-sm font-semibold mb-1">
+                        {property.title || property.address}
+                    </strong>
+                    <p className="text-sm text-gray-600">
+                        {property.neighborhood || property.address}
+                    </p>
+                </div>
+                <ul className="features flex flex-wrap gap-2 text-xs">
+                    {property.area && <li className="bg-gray-100 px-2 py-1 rounded">{property.area} m²</li>}
+                    {property.rooms && <li className="bg-gray-100 px-2 py-1 rounded">{property.rooms} Ambientes</li>}
+                    {property.bathrooms && <li className="bg-gray-100 px-2 py-1 rounded">{property.bathrooms} Baños</li>}
+                    {property.parking && <li className="bg-gray-100 px-2 py-1 rounded">{property.parking} Cochera</li>}
                 </ul>
             </div>
         </div>

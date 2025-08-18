@@ -61,48 +61,59 @@ const Footer: React.FC = () => {
                             <div className="footer-nav">
                                 <ul>
                                     <li>
-                                        <h3 className="title-light-green">Sucursales</h3>
+                                        <h3 className="text-green-fluo text-sm md:text-lg font-bold mb-1 md:mb-2">Sucursales</h3>
                                     </li>
-                                    <li>Belgrano Fco.Lacroze 2200</li>
-                                    <li>Palermo Cabello 3672</li>
-                                    <li>V. Urquiza Mendoza 5302</li>
+                                    <li className="text-white text-xs md:text-base mb-1">Belgrano Fco.Lacroze 2200</li>
+                                    <li className="text-white text-xs md:text-base mb-1">Palermo Cabello 3672</li>
+                                    <li className="text-white text-xs md:text-base mb-1">V. Urquiza Mendoza 5302</li>
                                 </ul>
                                 <ul>
                                     <li>
-                                        <h3 className="title-light-green">Atención al cliente</h3>
+                                        <h3 className="text-green-fluo text-sm md:text-lg font-bold mb-1 md:mb-2">Atención al cliente</h3>
                                     </li>
-                                    <li>Lunes a Viernes de 10 a 19 hs.</li>
-                                    <li>Sábados de 10 a 14 hs.</li>
+                                    <li className="text-white text-xs md:text-base mb-1">Lunes a Viernes de 10 a 19 hs.</li>
+                                    <li className="text-white text-xs md:text-base mb-1">Sábados de 10 a 14 hs.</li>
                                 </ul>
                                 <ul>
                                     <li>
-                                        <h3 className="title-light-green">Somos Mel</h3>
+                                        <h3 className="text-green-fluo text-sm md:text-lg font-bold mb-1 md:mb-2">Somos Mel</h3>
                                     </li>
-                                    <li><a href="#">Nuestra Historia</a></li>
-                                    <li><a href="#">Club de Beneficios</a></li>
-                                    <li><a href="#">Sumate al equipo</a></li>
-                                    <li><a href="#">Prensa</a></li>
+                                    <li className="text-white text-xs md:text-base mb-1"><a href="#" className="hover:text-green-fluo transition-colors">Nuestra Historia</a></li>
+                                    <li className="text-white text-xs md:text-base mb-1"><a href="#" className="hover:text-green-fluo transition-colors">Club de Beneficios</a></li>
+                                    <li className="text-white mb-1"><a href="#" className="hover:text-green-fluo transition-colors">Sumate al equipo</a></li>
+                                    <li className="text-white mb-1"><a href="#" className="hover:text-green-fluo transition-colors">Prensa</a></li>
                                 </ul>
                                 <ul>
                                     <li>
-                                        <h3 className="title-light-green">Servicios</h3>
+                                        <h3 className="text-green-fluo text-sm md:text-lg font-bold mb-1 md:mb-2">Servicios</h3>
                                     </li>
-                                    <li><a href="#">Tasaciones</a></li>
-                                    <li><a href="#">Venta y alquiler</a></li>
-                                    <li><a href="#">Adm. de alquileres</a></li>
-                                    <li><a href="#">As. Jurídico</a></li>
+                                    <li className="text-white text-xs md:text-base mb-1"><a href="#" className="hover:text-green-fluo transition-colors">Tasaciones</a></li>
+                                    <li className="text-white text-xs md:text-base mb-1"><a href="#" className="hover:text-green-fluo transition-colors">Venta y alquiler</a></li>
+                                    <li className="text-white text-xs md:text-base mb-1"><a href="#" className="hover:text-green-fluo transition-colors">Adm. de alquileres</a></li>
+                                    <li className="text-white text-xs md:text-base mb-1"><a href="#" className="hover:text-green-fluo transition-colors">As. Jurídico</a></li>
                                 </ul>
                             </div>
                         </div>
 
                         {/* Columna 3: Newsletter */}
-                        <div className="column search-box-wrapper">
-                            <h3 className="title-light-green">Newsletter</h3>
-                            <p>Suscribite ahora y recibí las mejores ofertas de acuerdo a tu interés!</p>
-                            <div className="wrapper-search-input">
-                                <form onSubmit={handleNewsletterSubmit}>
-                                    <input type="text" placeholder="Ingresá tu mail..." />
-                                    <button type="submit"><i className="fas fa-arrow-right"></i></button>
+                        <div className="column">
+                            <h3 className="text-green-fluo text-sm md:text-xl font-bold mb-2 md:mb-4">Newsletter</h3>
+                            <p className="text-white text-xs md:text-base mb-4">Suscribite ahora y recibí las mejores ofertas de acuerdo a tu interés!</p>
+                            <div className="relative flex justify-center md:justify-start">
+                                <form onSubmit={handleNewsletterSubmit} className="relative w-[70%] md:w-full">
+                                    <input
+                                        type="email"
+                                        placeholder="Ingresá tu mail..."
+                                        className="w-full bg-white text-black placeholder-gray-500 px-4 py-3 md:px-4 md:py-3 text-xs md:text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-green-fluo"
+                                        style={{ fontSize: '11px' }}
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="absolute top-1/2 right-2 -translate-y-1/2 bg-light-green text-white rounded-full w-8 h-8 md:w-10 md:h-10 hover:bg-green-fluo transition-colors duration-200 flex items-center justify-center"
+                                        style={{ zIndex: 1 }}
+                                    >
+                                        <i className="fas fa-arrow-right text-xs md:text-sm"></i>
+                                    </button>
                                 </form>
                             </div>
                         </div>

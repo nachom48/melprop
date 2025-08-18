@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { UserProvider } from './context/UserContext';
 import Home from './pages/Home';
-import NavbarNextUI from './components/NavbarNextUI';
+import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Terrenos from './pages/Terrenos';
 import TasacionesPage from './pages/TasacionesPage';
@@ -29,7 +29,7 @@ function App() {
       <BrowserRouter>
         <UserProvider>
           <div className="min-h-screen bg-white text-black">
-            <NavbarNextUI />
+            <Navbar />
             <main>
               <Routes>
                 <Route path="/" element={<Home />} />

@@ -15,6 +15,8 @@ module.exports = {
         'yellow': '#E8E215',
         'black': '#332E29',
         'white': '#FCFCFC',
+        'light-green': '#89ce48',
+        'green-fluo': '#E8E215',
       },
       fontFamily: {
         'raleway': ['Raleway', 'sans-serif'],

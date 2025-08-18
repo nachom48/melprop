@@ -4,38 +4,42 @@ import PropertyCard from './PropertyCard';
 const properties = [
     {
         id: 1,
-        image: '/destacado_1.jpg',
-        type: 'Venta - Casa',
+        title: 'Casa en Venta',
+        main_image: '/destacado_1.jpg',
         price: 'U$S 630.000',
         address: 'Moldes 1757',
-        location: 'Belgrano, Capital Federal',
+        neighborhood: 'Belgrano, Capital Federal',
         area: 430,
         rooms: 5,
         bathrooms: 3,
-        garage: 1
+        parking: 1,
+        operation_type: 'Venta'
     },
     {
         id: 2,
-        image: '/destacado_2.jpg',
-        type: 'Venta - Casa',
+        title: 'Casa en Venta',
+        main_image: '/destacado_2.jpg',
         price: 'U$S 265.000',
         address: 'Bucarelli 2989',
-        location: 'Villa Úrquiza, Capital Federal',
+        neighborhood: 'Villa Úrquiza, Capital Federal',
         area: 110,
         rooms: 4,
         bathrooms: 2,
-        garage: 1
+        parking: 1,
+        operation_type: 'Venta'
     },
     {
         id: 3,
-        image: '/destacado_3.jpg',
-        type: 'Venta - Casa',
+        title: 'Casa en Venta',
+        main_image: '/destacado_3.jpg',
         price: 'U$S 630.000',
         address: 'Burela 2300',
-        location: 'Villa Úrquiza, Capital Federal',
+        neighborhood: 'Villa Úrquiza, Capital Federal',
         area: 256,
         rooms: 4,
-        bathrooms: 2
+        bathrooms: 2,
+        parking: 0,
+        operation_type: 'Venta'
     }
 ];
 

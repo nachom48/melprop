@@ -42,7 +42,7 @@ const Checkbox = styled.input`
 
 const Notifications: React.FC = () => {
     const navigate = useNavigate();
-    const { user, isLoggedIn } = useUser();
+    const { user, isLoggedIn, favorites, savedSearches } = useUser();
     const [notifications, setNotifications] = useState({
         newsletter: false,
         community: false,
@@ -60,7 +60,11 @@ const Notifications: React.FC = () => {
     };
 
     return (
-        <ProfileLayout title="Suscripciones y notificaciones">
+        <ProfileLayout
+            title="Suscripciones y notificaciones"
+            favoritesCount={favorites.length}
+            searchesCount={savedSearches.length}
+        >
             <NotificationsContainer>
                 <NotificationCard>
                     <NotificationTitle>Newsletter</NotificationTitle>

@@ -4,6 +4,7 @@ export { default as PropertyCardOverlay } from './PropertyCardOverlay';
 export type { PropertyCardOverlayProps } from './PropertyCardOverlay';
 export { default as ClubBeneficios } from './ClubBeneficios';
 export { default as Emprendimientos } from './Emprendimientos';
+export { default as Hero } from './Hero';
 export { default as LoginModal } from './LoginModal';
 export { default as Navbar } from './Navbar';
 export { default as NuestrosServicios } from './NuestrosServicios';
