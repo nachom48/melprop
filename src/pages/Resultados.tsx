@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import propertiesService from '../services/propertiesService';
-import { Property, SearchFilters } from '../repositories/propertiesRepository';
+import { Property, SearchFilters as PropertySearchFilters } from '../repositories/propertiesRepository';
 import PropertyCard from '../components/PropertyCard';
+import SearchFilters, { FilterValues } from '../components/SearchFilters';
+import PropertyMap from '../components/PropertyMap';
 import styled from 'styled-components';
 
 const ResultadosContainer = styled.div`
@@ -10,37 +12,6 @@ const ResultadosContainer = styled.div`
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
-  }
-
-  .results-header {
-    margin: 2rem 0;
-    padding: 1.5rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border-left: 4px solid #12782e;
-  }
-
-  .results-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #12782e;
-    margin-bottom: 0.5rem;
-  }
-
-  .filters-summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 1rem;
-  }
-
-  .filter-tag {
-    background: #12782e;
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.875rem;
-    font-weight: 500;
   }
 
   .loading {
@@ -106,27 +77,22 @@ const ResultadosContainer = styled.div`
     background: #12782e;
     color: white;
   }
-
-  .results-count {
-    text-align: center;
-    color: #666;
-    margin: 1rem 0;
-    font-size: 0.875rem;
-  }
 `;
 
 const Resultados: React.FC = () => {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [total, setTotal] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [isMapView, setIsMapView] = useState(false);
 
     // Extraer filtros de la URL
-    const getFiltersFromURL = (): SearchFilters => {
-        const filters: SearchFilters = {};
+    const getFiltersFromURL = (): PropertySearchFilters => {
+        const filters: PropertySearchFilters = {};
 
         // Parámetros principales
         const operation = searchParams.get('operation');
@@ -145,6 +111,49 @@ const Resultados: React.FC = () => {
         });
 
         return filters;
+    };
+
+    // Convertir filtros del componente SearchFilters a PropertySearchFilters
+    const convertFilters = (filters: FilterValues): PropertySearchFilters => {
+        const converted: PropertySearchFilters = {};
+
+        if (filters.location) converted.location = filters.location;
+        if (filters.operation) converted.operation = filters.operation;
+        if (filters.propertyType) converted.properties = filters.propertyType;
+        if (filters.rooms) converted.rooms = filters.rooms;
+        if (filters.price) converted.price = filters.price;
+
+        return converted;
+    };
+
+    // Manejador de cambios de filtros
+    const handleFiltersChange = (newFilters: FilterValues) => {
+        console.log('🔍 Filtros actualizados:', newFilters);
+
+        // Convertir filtros y actualizar URL
+        const convertedFilters = convertFilters(newFilters);
+        const newSearchParams = new URLSearchParams();
+
+        // Agregar filtros activos a la URL
+        Object.entries(convertedFilters).forEach(([key, value]) => {
+            if (value) {
+                newSearchParams.set(key, value.toString());
+            }
+        });
+
+        // Mantener la página actual si existe
+        if (searchParams.get('page')) {
+            newSearchParams.set('page', searchParams.get('page')!);
+        }
+
+        // Actualizar URL
+        setSearchParams(newSearchParams);
+    };
+
+    // Toggle entre vista de listado y mapa
+    const handleToggleView = () => {
+        setIsMapView(!isMapView);
+        console.log('🔄 Cambiando vista:', !isMapView ? 'Mapa' : 'Listado');
     };
 
     // Cargar propiedades
@@ -182,24 +191,29 @@ const Resultados: React.FC = () => {
         if (newPage >= 1 && newPage <= totalPages) {
             const newParams = new URLSearchParams(searchParams);
             newParams.set('page', newPage.toString());
-            window.history.pushState({}, '', `?${newParams.toString()}`);
+            setSearchParams(newParams);
             setCurrentPage(newPage);
         }
     };
 
-    // Obtener filtros activos para mostrar
-    const getActiveFilters = () => {
+    // Obtener texto de resultados personalizado
+    const getResultsText = () => {
         const filters = getFiltersFromURL();
-        const activeFilters: string[] = [];
+        let text = "Propiedades";
 
         if (filters.operation) {
-            activeFilters.push(`Operación: ${filters.operation}`);
-        }
-        if (filters.properties) {
-            activeFilters.push(`Tipo: ${filters.properties}`);
+            text += ` en ${filters.operation}`;
         }
 
-        return activeFilters;
+        if (filters.properties) {
+            text += ` - ${filters.properties}`;
+        }
+
+        if (filters.location) {
+            text += ` en ${filters.location}`;
+        }
+
+        return text;
     };
 
     if (loading) {
@@ -231,77 +245,75 @@ const Resultados: React.FC = () => {
 
     return (
         <ResultadosContainer>
+            {/* Componente de filtros reutilizable */}
+            <SearchFilters
+                onFiltersChange={handleFiltersChange}
+                resultsCount={total}
+                resultsText={getResultsText()}
+                isMapView={isMapView}
+                onToggleView={handleToggleView}
+            />
+
             <div className="container">
-                {/* Header con resumen de resultados */}
-                <div className="results-header">
-                    <h1 className="results-title">
-                        Resultados de búsqueda
-                    </h1>
-                    <div className="results-count">
-                        {total > 0 ? `${total} propiedades encontradas` : 'No se encontraron propiedades'}
+                {/* Vista de Mapa */}
+                {isMapView ? (
+                    <div className="my-6">
+                        <PropertyMap properties={properties} />
                     </div>
-
-                    {/* Mostrar filtros activos */}
-                    {getActiveFilters().length > 0 && (
-                        <div className="filters-summary">
-                            {getActiveFilters().map((filter, index) => (
-                                <span key={index} className="filter-tag">
-                                    {filter}
-                                </span>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Grid de propiedades */}
-                {properties.length > 0 ? (
+                ) : (
+                    /* Vista de Listado */
                     <>
-                        <div className="properties-grid">
-                            {properties.map((property) => (
-                                <PropertyCard
-                                    key={property.id}
-                                    property={property}
-                                    showFavoriteButton={true}
-                                />
-                            ))}
-                        </div>
+                        {/* Grid de propiedades */}
+                        {properties.length > 0 ? (
+                            <>
+                                <div className="properties-grid">
+                                    {properties.map((property) => (
+                                        <PropertyCard
+                                            key={property.id}
+                                            property={property}
+                                            showFavoriteButton={true}
+                                        />
+                                    ))}
+                                </div>
 
-                        {/* Paginación */}
-                        {totalPages > 1 && (
-                            <div className="pagination">
-                                <button
-                                    onClick={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage <= 1}
-                                >
-                                    ← Anterior
-                                </button>
+                                {/* Paginación */}
+                                {totalPages > 1 && (
+                                    <div className="pagination">
+                                        <button
+                                            onClick={() => handlePageChange(currentPage - 1)}
+                                            disabled={currentPage <= 1}
+                                        >
+                                            ← Anterior
+                                        </button>
 
-                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                    <button
-                                        key={page}
-                                        onClick={() => handlePageChange(page)}
-                                        className={page === currentPage ? 'current-page' : ''}
-                                    >
-                                        {page}
-                                    </button>
-                                ))}
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                            <button
+                                                key={page}
+                                                onClick={() => handlePageChange(page)}
+                                                className={page === currentPage ? 'current-page' : ''}
+                                            >
+                                                {page}
+                                            </button>
+                                        ))}
 
-                                <button
-                                    onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage >= totalPages}
-                                >
-                                    Siguiente →
-                                </button>
+                                        <button
+                                            onClick={() => handlePageChange(currentPage + 1)}
+                                            disabled={currentPage >= totalPages}
+                                        >
+                                            Siguiente →
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="no-results">
+                                <div>🏠 No se encontraron propiedades con los filtros seleccionados</div>
+                                <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#888' }}>
+                                    Intenta ajustar los filtros de búsqueda
+                                </div>
                             </div>
                         )}
                     </>
-                ) : (
-                    <div className="no-results">
-                        <div>🏠 No se encontraron propiedades con los filtros seleccionados</div>
-                        <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#888' }}>
-                            Intenta ajustar los filtros de búsqueda
-                        </div>
-                    </div>
                 )}
             </div>
         </ResultadosContainer>

@@ -8,4 +8,6 @@ export { default as Hero } from './Hero';
 export { default as LoginModal } from './LoginModal';
 export { default as Navbar } from './Navbar';
 export { default as NuestrosServicios } from './NuestrosServicios';
-export { default as ProfileLayout } from './ProfileLayout'; 
+export { default as ProfileLayout } from './ProfileLayout';
+export { default as SearchFilters } from './SearchFilters';
+export { default as PropertyMap } from './PropertyMap'; 

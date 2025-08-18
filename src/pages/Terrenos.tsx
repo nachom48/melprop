@@ -2,19 +2,27 @@ import React, { useState } from 'react';
 import { Terreno } from '../types/terreno';
 import { mockTerrenosResponse } from '../data/mockTerrenos';
 import PropertyCard from '../components/PropertyCard';
+import SearchFilters, { FilterValues } from '../components/SearchFilters';
 
 const Terrenos: React.FC = () => {
     const [terrenos] = useState<Terreno[]>(mockTerrenosResponse.results);
-    const [filters, setFilters] = useState({
+    const [filters, setFilters] = useState<FilterValues>({
         location: '',
         operation: '',
         propertyType: '',
         rooms: '',
-        price: ''
+        price: '',
+        additionalFilters: []
     });
 
     const formatPrice = (price: number, currency: string) => {
         return `${currency} ${price.toLocaleString()}`;
+    };
+
+    const handleFiltersChange = (newFilters: FilterValues) => {
+        setFilters(newFilters);
+        console.log('Filtros actualizados:', newFilters);
+        // Aquí puedes implementar la lógica de filtrado
     };
 
     const toggleFavorite = (id: string) => {
@@ -24,102 +32,12 @@ const Terrenos: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-white">
-            {/* Barra de búsqueda */}
-            <div className="container mx-auto px-4">
-                <div className="mt-10 flex flex-col gap-4 md:flex-row">
-                    <div className="wrapper-input-search flex-1">
-                        <input
-                            type="text"
-                            placeholder="Ingresá ciudades o barrios"
-                            className="input w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                        />
-                    </div>
-                    <div>
-                        <select
-                            name=""
-                            id=""
-                            className="select rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            value={filters.operation}
-                            onChange={(e) => setFilters({ ...filters, operation: e.target.value })}
-                        >
-                            <option value="">Comprar</option>
-                            <option value="vender">Vender</option>
-                        </select>
-                    </div>
-                    <div>
-                        <select
-                            name=""
-                            id=""
-                            className="select rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            value={filters.propertyType}
-                            onChange={(e) => setFilters({ ...filters, propertyType: e.target.value })}
-                        >
-                            <option value="">Propiedades</option>
-                        </select>
-                    </div>
-                    <div>
-                        <select
-                            name=""
-                            id=""
-                            className="select rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            value={filters.rooms}
-                            onChange={(e) => setFilters({ ...filters, rooms: e.target.value })}
-                        >
-                            <option value="">Amb | Dorm</option>
-                        </select>
-                    </div>
-                    <div>
-                        <select
-                            name=""
-                            id=""
-                            className="select rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            value={filters.price}
-                            onChange={(e) => setFilters({ ...filters, price: e.target.value })}
-                        >
-                            <option value="">Precio</option>
-                            <option value="50000">Mas de 50.000$</option>
-                            <option value="100000">Mas de 100.000$</option>
-                        </select>
-                    </div>
-                    <div className="relative">
-                        <div className="bg-green-menu text-small absolute top-[-10px] right-[-10px] z-4 flex h-8 w-8 items-center justify-center rounded-full border-3 border-white text-sm font-bold text-white">
-                            <span>3</span>
-                        </div>
-                        <button className="btn btn-white rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50">
-                            Más filtros
-                        </button>
-                    </div>
-                </div>
-
-                {/* Barra de resultados */}
-                <div className="mt-4 flex flex-col items-center justify-between rounded-lg bg-gray-100 p-4 md:flex-row">
-                    <div>
-                        <div className="text-green-menu text-sm font-bold">Casas, Departamentos y PH en Oportunidad</div>
-                        <div className="text-sm">{mockTerrenosResponse.count} resultados</div>
-                    </div>
-                    <div>
-                        <ul className="flex flex-col items-center gap-6 md:flex-row">
-                            <li className="flex gap-2">
-                                <button type="button" className="text-sm text-gray-600 hover:text-green-600">Ver mapa</button>
-                                <img src="/img/map.svg" alt="" />
-                            </li>
-                            <li className="flex gap-2">
-                                <button type="button" className="text-sm text-gray-600 hover:text-green-600">Ver favoritos</button>
-                                <img src="/img/heart.svg" alt="" />
-                            </li>
-                            <li className="flex gap-2">
-                                <button type="button" className="text-sm text-gray-600 hover:text-green-600">Guardar búsqueda</button>
-                                <img src="/img/save.svg" alt="" />
-                            </li>
-                            <li>
-                                <select name="" id="" className="select rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
-                                    <option value="">En oportunidad</option>
-                                </select>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+            {/* Componente de filtros reutilizable */}
+            <SearchFilters
+                onFiltersChange={handleFiltersChange}
+                resultsCount={mockTerrenosResponse.count}
+                resultsText="Terrenos en Oportunidad"
+            />
 
             {/* Sección de oportunidades destacadas */}
             <div className="my-10">
