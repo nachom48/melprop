@@ -3,17 +3,39 @@ import { useUser } from '../context/UserContext';
 import '../styles/propertyCard.css';
 
 export interface Property {
+    url: string;
     id: number;
-    title: string;
-    price: string;
+    type: string;
+    subtype: string;
+    development_assigned: boolean;
+    operation_type: string;
+    name: string;
+    slug: string;
+    description: string;
     address: string;
+    address_floor: string;
     neighborhood: string;
-    area: number;
+    country: string;
+    currency_symbol: string;
+    city: string;
+    covered_m2: number | { source: string; parsedValue: number };
+    uncovered_m2: number | { source: string; parsedValue: number };
+    total_m2: number | { source: string; parsedValue: number };
     rooms: number;
     bathrooms: number;
-    parking: number;
+    parking_lots: number;
+    status: string;
+    substatus: string;
     main_image: string;
-    operation_type: string;
+    latitude: number | { source: string; parsedValue: number };
+    longitude: number | { source: string; parsedValue: number };
+    reference_code: string;
+    add_to_homepage: boolean;
+    media: {
+        images: Array<{ url: string }>;
+    };
+    updated: string;
+    price: number;
 }
 
 export interface PropertyCardProps {
@@ -97,7 +119,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                 <img
                     className="w-full"
                     src={property.main_image || '/placeholder.jpg'}
-                    alt={property.title || `Propiedad en ${property.address}`}
+                    alt={property.name || `Propiedad en ${property.address}`}
                 />
                 {showFavoriteButton && (
                     <button
@@ -115,21 +137,23 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                     {property.operation_type} - {property.neighborhood}
                 </div>
                 <div className="price text-green-menu text-2xl font-bold mb-3">
-                    {property.price}
+                    {property.currency_symbol} {property.price.toLocaleString()}
                 </div>
                 <div className="address mb-3">
                     <strong className="block text-sm font-semibold mb-1">
-                        {property.title || property.address}
+                        {property.name || property.address}
                     </strong>
                     <p className="text-sm text-gray-600">
-                        {property.neighborhood || property.address}
+                        {property.neighborhood}, {property.city}
                     </p>
                 </div>
                 <ul className="features flex flex-wrap gap-2 text-xs">
-                    {property.area && <li className="bg-gray-100 px-2 py-1 rounded">{property.area} m²</li>}
+                    {property.total_m2 && <li className="bg-gray-100 px-2 py-1 rounded">
+                        {typeof property.total_m2 === 'number' ? property.total_m2 : property.total_m2.parsedValue} m²
+                    </li>}
                     {property.rooms && <li className="bg-gray-100 px-2 py-1 rounded">{property.rooms} Ambientes</li>}
                     {property.bathrooms && <li className="bg-gray-100 px-2 py-1 rounded">{property.bathrooms} Baños</li>}
-                    {property.parking && <li className="bg-gray-100 px-2 py-1 rounded">{property.parking} Cochera</li>}
+                    {property.parking_lots > 0 && <li className="bg-gray-100 px-2 py-1 rounded">{property.parking_lots} Cochera</li>}
                 </ul>
             </div>
         </div>

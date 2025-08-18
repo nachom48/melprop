@@ -1,49 +1,26 @@
 import React from 'react';
-import PropertyCard from './PropertyCard';
 
 const Oportunidades: React.FC = () => {
-    const properties = [
-        {
-            id: 1,
-            title: 'Casa en Venta',
-            main_image: '/destacado_3.jpg',
-            price: 'U$S 630.000',
-            address: 'Moldes 1757',
-            neighborhood: 'Belgrano, Capital Federal',
-            area: 430,
-            rooms: 5,
-            bathrooms: 3,
-            parking: 1,
-            operation_type: 'Venta'
-        },
-        {
-            id: 2,
-            title: 'Casa en Venta',
-            main_image: '/destacado_3.jpg',
-            price: 'U$S 265.000',
-            address: 'Bucarelli 2989',
-            neighborhood: 'Villa Úrquiza, Capital Federal',
-            area: 110,
-            rooms: 4,
-            bathrooms: 2,
-            parking: 1,
-            operation_type: 'Venta'
-        },
-    ];
+    console.log('Oportunidades component rendering...');
 
     return (
-        <div className="container mx-auto px-4 ">
+        <div className="container mx-auto px-4 bg-red-100 border-2 border-red-500">
             <div className="mt-5 mb-5 flex flex-col md:mt-0 md:flex-row md:items-center md:justify-between">
-                <h2 className="!text-green-text mb-4 text-4xl font-larken">Oportunidades</h2>
-                <a href="#" className="text-light-green flex items-center gap-5 leading-4 font-jakarta hover:text-green-text-dark transition-colors">
+                <h2 className="text-red-600 mb-4 text-4xl">Oportunidades - TEST</h2>
+                <a href="#" className="text-blue-600 flex items-center gap-5 leading-4 hover:text-blue-800 transition-colors">
                     Ver más oportunidades <i className="fas fa-circle-chevron-right"></i>
                 </a>
             </div>
 
             <div className="mb-10 grid grid-cols-1 gap-6 md:grid-cols-2">
-                {properties.map((p) => (
-                    <PropertyCard key={p.id} property={p} />
-                ))}
+                <div className="bg-blue-200 p-4 rounded border">
+                    <h3>Propiedad 1</h3>
+                    <p>Test de renderizado</p>
+                </div>
+                <div className="bg-green-200 p-4 rounded border">
+                    <h3>Propiedad 2</h3>
+                    <p>Test de renderizado</p>
+                </div>
             </div>
         </div>
     );

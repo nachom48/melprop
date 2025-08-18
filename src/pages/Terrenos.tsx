@@ -129,17 +129,39 @@ const Terrenos: React.FC = () => {
                             <PropertyCard
                                 key={terreno.id}
                                 property={{
+                                    url: `/terrenos/${terreno.id}`,
                                     id: parseInt(terreno.id),
-                                    title: terreno.title,
-                                    price: formatPrice(terreno.price, terreno.currency),
+                                    type: 'terreno',
+                                    subtype: 'terreno',
+                                    development_assigned: false,
+                                    operation_type: terreno.operation,
+                                    name: terreno.title,
+                                    slug: terreno.title.toLowerCase().replace(/\s+/g, '-'),
+                                    description: `Terreno en ${terreno.neighborhood}`,
                                     address: terreno.address,
+                                    address_floor: '',
+                                    neighborhood: terreno.neighborhood,
+                                    country: 'Argentina',
+                                    currency_symbol: terreno.currency,
+                                    city: terreno.neighborhood,
+                                    covered_m2: 0,
+                                    uncovered_m2: 0,
+                                    total_m2: 0,
                                     rooms: 0,
                                     bathrooms: 0,
-                                    parking: 0,
-                                    area: 0,
+                                    parking_lots: 0,
+                                    status: 'disponible',
+                                    substatus: 'activo',
                                     main_image: terreno.image,
-                                    operation_type: terreno.operation,
-                                    neighborhood: terreno.neighborhood
+                                    latitude: 0,
+                                    longitude: 0,
+                                    reference_code: `T${terreno.id}`,
+                                    add_to_homepage: false,
+                                    media: {
+                                        images: [{ url: terreno.image }]
+                                    },
+                                    updated: new Date().toISOString(),
+                                    price: terreno.price
                                 }}
                                 className="large"
                             />
@@ -156,17 +178,39 @@ const Terrenos: React.FC = () => {
                             <PropertyCard
                                 key={terreno.id}
                                 property={{
+                                    url: `/terrenos/${terreno.id}`,
                                     id: parseInt(terreno.id),
-                                    title: terreno.title,
-                                    price: formatPrice(terreno.price, terreno.currency),
+                                    type: 'terreno',
+                                    subtype: 'terreno',
+                                    development_assigned: false,
+                                    operation_type: terreno.operation,
+                                    name: terreno.title,
+                                    slug: terreno.title.toLowerCase().replace(/\s+/g, '-'),
+                                    description: `Terreno en ${terreno.neighborhood}`,
                                     address: terreno.address,
+                                    address_floor: '',
+                                    neighborhood: terreno.neighborhood,
+                                    country: 'Argentina',
+                                    currency_symbol: terreno.currency,
+                                    city: terreno.neighborhood,
+                                    covered_m2: 0,
+                                    uncovered_m2: 0,
+                                    total_m2: 0,
                                     rooms: 0,
                                     bathrooms: 0,
-                                    parking: 0,
-                                    area: 0,
+                                    parking_lots: 0,
+                                    status: 'disponible',
+                                    substatus: 'activo',
                                     main_image: terreno.image,
-                                    operation_type: terreno.operation,
-                                    neighborhood: terreno.neighborhood
+                                    latitude: 0,
+                                    longitude: 0,
+                                    reference_code: `T${terreno.id}`,
+                                    add_to_homepage: false,
+                                    media: {
+                                        images: [{ url: terreno.image }]
+                                    },
+                                    updated: new Date().toISOString(),
+                                    price: terreno.price
                                 }}
                             />
                         ))}
