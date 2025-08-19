@@ -86,16 +86,57 @@ const Resultados: React.FC = () => {
             }
         }
 
+        // Nuevos campos de filtros avanzados
+        if (filters.priceFrom) {
+            converted.min_price = filters.priceFrom;
+        }
+
+        if (filters.priceTo) {
+            converted.max_price = filters.priceTo;
+        }
+
+        if (filters.currency) {
+            converted.currency = filters.currency;
+        }
+
+        if (filters.characteristics && filters.characteristics.length > 0) {
+            converted.characteristics = filters.characteristics.join(',');
+        }
+
+        if (filters.status && filters.status.length > 0) {
+            converted.status = filters.status.join(',');
+        }
+
+        if (filters.sortOrder && filters.sortOrder !== 'relevantes') {
+            console.log('🔄 Aplicando ordenamiento:', filters.sortOrder);
+            if (filters.sortOrder === 'menorPrecio') {
+                converted.order_by = 'menorPrecio';
+                console.log('✅ Ordenamiento: menorPrecio');
+            } else if (filters.sortOrder === 'mayorPrecio') {
+                converted.order_by = 'mayorPrecio';
+                console.log('✅ Ordenamiento: mayorPrecio');
+            } else if (filters.sortOrder === 'masAmplio') {
+                converted.order_by = 'masAmplio';
+                console.log('✅ Ordenamiento: masAmplio');
+            }
+            // Los otros valores no están implementados en el backend
+        } else {
+            console.log('🔄 Sin ordenamiento específico, usando relevantes por defecto');
+        }
+
         return converted;
     };
 
     // Manejador de cambios de filtros
     const handleFiltersChange = (newFilters: FilterValues) => {
         console.log('🔍 Filtros actualizados:', newFilters);
+        console.log('🔍 Ordenamiento en filtros:', newFilters.sortOrder);
+        console.log('🔍 Tipo de ordenamiento:', typeof newFilters.sortOrder);
 
         // Convertir filtros y actualizar URL
         const convertedFilters = convertFilters(newFilters);
         console.log('🔄 Filtros convertidos para backend:', convertedFilters);
+        console.log('🔄 Ordenamiento convertido:', convertedFilters.order_by);
 
         const newSearchParams = new URLSearchParams();
 
@@ -138,6 +179,8 @@ const Resultados: React.FC = () => {
 
             const filters = getFiltersFromURL();
             console.log('🔍 Filtros extraídos de URL:', filters);
+            console.log('🔍 Ordenamiento en URL:', filters.order_by);
+            console.log('🔍 URL completa:', window.location.href);
 
             const response = await propertiesService.getAllProperties(filters);
             console.log('📡 Respuesta de la API:', response);
@@ -259,7 +302,13 @@ const Resultados: React.FC = () => {
             propertyType: propertyType,
             rooms: rooms,
             price: price,
-            additionalFilters: []
+            priceFrom: '',
+            priceTo: '',
+            currency: '',
+            characteristics: [],
+            status: [],
+            additionalFilters: [],
+            sortOrder: urlFilters.order_by || 'relevantes'
         };
     };
 
@@ -322,7 +371,7 @@ const Resultados: React.FC = () => {
                         {/* Grid de propiedades */}
                         {properties.length > 0 ? (
                             <>
-                                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 mb-8">
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
                                     {properties.map((property) => (
                                         <PropertyCard
                                             key={property.id}

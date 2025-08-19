@@ -45,4 +45,6 @@ class PropertiesService {
     }
 }
 
-export default new PropertiesService();
+const propertiesService = new PropertiesService();
+
+export default propertiesService;

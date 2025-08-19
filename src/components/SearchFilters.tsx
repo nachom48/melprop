@@ -8,7 +8,13 @@ export interface FilterValues {
     propertyType: string[];
     rooms: string[];
     price: string;
+    priceFrom: string;
+    priceTo: string;
+    currency: string;
+    characteristics: string[];
+    status: string[];
     additionalFilters: string[];
+    sortOrder: string;
 }
 
 interface SearchFiltersProps {
@@ -38,16 +44,26 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
         propertyType: [],
         rooms: [],
         price: '',
-        additionalFilters: []
+        priceFrom: '',
+        priceTo: '',
+        currency: '',
+        characteristics: [],
+        status: [],
+        additionalFilters: [],
+        sortOrder: 'relevantes' // Default sort order
     });
 
     // Estados para controlar los dropdowns
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const [showMoreFilters, setShowMoreFilters] = useState(false);
+    const [sortingLoading, setSortingLoading] = useState(false);
 
     // Sincronizar filtros locales con filtros activos
     useEffect(() => {
         if (activeFilters) {
             setFilters(activeFilters);
+            // Resetear estado de carga cuando se reciban nuevos filtros
+            setSortingLoading(false);
         }
     }, [activeFilters]);
 
@@ -57,30 +73,92 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
             if (openDropdown && !(event.target as Element).closest('.dropdown-container')) {
                 setOpenDropdown(null);
             }
+            if (showMoreFilters && !(event.target as Element).closest('.more-filters-container')) {
+                setShowMoreFilters(false);
+            }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [openDropdown]);
+    }, [openDropdown, showMoreFilters]);
 
-    const handleFilterChange = (key: keyof FilterValues, value: string | string[]) => {
+    // Función para actualizar filtros locales (sin aplicar)
+    const updateLocalFilters = (key: keyof FilterValues, value: string | string[]) => {
         const newFilters = { ...filters, [key]: value };
         setFilters(newFilters);
+    };
+
+    // Función para aplicar filtros (llama a onFiltersChange)
+    const applyFilters = () => {
+        console.log('🔍 Aplicando filtros:', filters);
+        console.log('🔍 Ordenamiento seleccionado:', filters.sortOrder);
+        console.log('🔍 Precio actual:', filters.price);
+
+        // Si es un cambio de ordenamiento, mostrar estado de carga
+        if (filters.sortOrder && filters.sortOrder !== 'relevantes') {
+            setSortingLoading(true);
+        }
+
+        onFiltersChange(filters);
+    };
+
+    // Función para aplicar ordenamiento específico
+    const applySorting = (sortValue: string) => {
+        console.log('🔄 Aplicando ordenamiento específico:', sortValue);
+        console.log('🔄 Estado actual de filters:', filters);
+
+        const newFilters = { ...filters, sortOrder: sortValue };
+        console.log('🔄 Nuevos filtros creados:', newFilters);
+
+        setFilters(newFilters);
+
+        // Si es un cambio de ordenamiento, mostrar estado de carga
+        if (sortValue !== 'relevantes') {
+            setSortingLoading(true);
+            console.log('🔄 Activando estado de carga para ordenamiento');
+        }
+
+        // Aplicar filtros inmediatamente
+        console.log('🔄 Llamando a onFiltersChange con:', newFilters);
         onFiltersChange(newFilters);
+        closeDropdown();
+    };
+
+    // Función para manejar cambios en filtros locales
+    const handleFilterChange = (key: keyof FilterValues, value: string | string[]) => {
+        updateLocalFilters(key, value);
+    };
+
+    // Función para mostrar todos los filtros seleccionados
+    const getFullFilterText = (filters: string[], defaultText: string): string => {
+        if (filters.length === 0) return defaultText;
+        return filters.map(filter => filter.charAt(0).toUpperCase() + filter.slice(1)).join(', ');
+    };
+
+    // Función para mostrar filtros truncados
+    const getTruncatedFilterText = (filters: string[], defaultText: string, maxVisible: number = 2): string => {
+        if (filters.length === 0) return defaultText;
+        if (filters.length <= maxVisible) {
+            return filters.map(filter => filter.charAt(0).toUpperCase() + filter.slice(1)).join(', ');
+        }
+        return `${filters.slice(0, maxVisible).map(filter => filter.charAt(0).toUpperCase() + filter.slice(1)).join(', ')}...`;
     };
 
     const clearLocation = () => {
-        handleFilterChange('location', '');
+        updateLocalFilters('location', '');
+        // Aplicar inmediatamente el cambio de ubicación
+        onFiltersChange({ ...filters, location: '' });
     };
 
     const clearFilter = (key: keyof FilterValues) => {
         if (key === 'propertyType' || key === 'rooms') {
-            handleFilterChange(key, []);
+            updateLocalFilters(key, []);
         } else {
-            handleFilterChange(key, '');
+            updateLocalFilters(key, '');
         }
+        // No aplicar automáticamente, solo actualizar localmente
     };
 
     const toggleDropdown = (dropdownName: string) => {
@@ -142,10 +220,31 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
     ];
 
     const priceOptions = [
-        { value: '50000', label: 'Mas de 50.000$' },
-        { value: '100000', label: 'Mas de 100.000$' },
-        { value: '200000', label: 'Mas de 200.000$' },
-        { value: '500000', label: 'Mas de 500.000$' }
+        { value: 'min_50000', label: 'Mas de 50.000$' },
+        { value: 'min_100000', label: 'Mas de 100.000$' },
+        { value: 'min_200000', label: 'Mas de 200.000$' },
+        { value: 'min_500000', label: 'Mas de 500.000$' }
+    ];
+
+    const characteristicsOptions = [
+        { value: 'cochera', label: 'Cochera' },
+        { value: 'vestidor', label: 'Vestidor' },
+        { value: 'terraza', label: 'Terraza' },
+        { value: 'piscina', label: 'Piscina' },
+        { value: 'parrilla', label: 'Parrilla' },
+        { value: 'toilette', label: 'Toilette' }
+    ];
+
+    const statusOptions = [
+        { value: 'estrenar', label: 'A estrenar' },
+        { value: 'hasta5', label: 'Hasta 5 años' },
+        { value: 'hasta10', label: 'Hasta 10 años' },
+        { value: 'masde10', label: '+ de 10 años' }
+    ];
+
+    const currencyOptions = [
+        { value: 'usd', label: 'Dólares' },
+        { value: 'ars', label: 'Pesos' }
     ];
 
     return (
@@ -207,7 +306,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
 
                         {/* Dropdown de operación */}
                         {openDropdown === 'operation' && (
-                            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-h-[200px] transition-all duration-200 ease-in-out transform origin-top">
                                 <div className="p-4">
                                     <h3 className="text-green-800 font-semibold mb-3 text-sm">Tipo de operación</h3>
                                     <div className="space-y-2">
@@ -221,7 +320,6 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                                     onChange={(e) => {
                                                         console.log('🎯 Operación seleccionada:', e.target.value, 'Label:', option.label);
                                                         handleFilterChange('operation', e.target.value);
-                                                        closeDropdown();
                                                     }}
                                                     className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
                                                 />
@@ -230,7 +328,10 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                         ))}
                                     </div>
                                     <button
-                                        onClick={closeDropdown}
+                                        onClick={() => {
+                                            applyFilters();
+                                            closeDropdown();
+                                        }}
                                         className="w-full mt-3 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -246,7 +347,10 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                     {/* Dropdown de tipo de propiedad */}
                     <div className="relative dropdown-container">
                         {filters.propertyType && filters.propertyType.length > 0 && (
-                            <div className="bg-green-menu text-white text-xs absolute top-[-8px] right-[-8px] z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white">
+                            <div
+                                className="bg-green-menu text-white text-xs absolute top-[-8px] right-[-8px] z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white cursor-help"
+                                title={`${filters.propertyType.length} tipo(s) seleccionado(s): ${getFullFilterText(filters.propertyType, '')}`}
+                            >
                                 <span>{filters.propertyType.length}</span>
                             </div>
                         )}
@@ -256,16 +360,19 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                 ? 'border-green-500 bg-green-50 text-green-700'
                                 : 'border-gray-300'
                                 }`}
+                            title={getFullFilterText(filters.propertyType, 'Seleccionar tipo de propiedad')}
                         >
-                            {filters.propertyType.length > 0 ? filters.propertyType.map(type => type.charAt(0).toUpperCase() + type.slice(1)).join(', ') : 'Propiedades'}
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span className="truncate max-w-[120px]">
+                                {getTruncatedFilterText(filters.propertyType, 'Propiedades')}
+                            </span>
+                            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
 
                         {/* Dropdown de tipo de propiedad */}
                         {openDropdown === 'propertyType' && (
-                            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-h-[280px] transition-all duration-200 ease-in-out transform origin-top">
                                 <div className="p-4">
                                     <div className="flex items-center justify-between mb-3">
                                         <h3 className="text-green-800 font-semibold text-sm">Tipo de propiedad</h3>
@@ -273,7 +380,6 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                             <button
                                                 onClick={() => {
                                                     handleFilterChange('propertyType', []);
-                                                    closeDropdown();
                                                 }}
                                                 className="text-xs text-red-500 hover:text-red-700"
                                             >
@@ -302,7 +408,10 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                         ))}
                                     </div>
                                     <button
-                                        onClick={closeDropdown}
+                                        onClick={() => {
+                                            applyFilters();
+                                            closeDropdown();
+                                        }}
                                         className="w-full mt-3 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -318,7 +427,10 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                     {/* Dropdown de ambientes */}
                     <div className="relative dropdown-container">
                         {filters.rooms && filters.rooms.length > 0 && (
-                            <div className="bg-green-menu text-white text-xs absolute top-[-8px] right-[-8px] z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white">
+                            <div
+                                className="bg-green-menu text-white text-xs absolute top-[-8px] right-[-8px] z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white cursor-help"
+                                title={`${filters.rooms.length} ambiente(s) seleccionado(s): ${getFullFilterText(filters.rooms, '')}`}
+                            >
                                 <span>{filters.rooms.length}</span>
                             </div>
                         )}
@@ -328,16 +440,19 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                 ? 'border-green-500 bg-green-50 text-green-700'
                                 : 'border-gray-300'
                                 }`}
+                            title={getFullFilterText(filters.rooms, 'Seleccionar ambientes')}
                         >
-                            {filters.rooms.length > 0 ? filters.rooms.map(room => room.charAt(0).toUpperCase() + room.slice(1)).join(', ') : 'Amb | Dorm'}
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span className="truncate max-w-[120px]">
+                                {getTruncatedFilterText(filters.rooms, 'Amb | Dorm')}
+                            </span>
+                            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
 
                         {/* Dropdown de ambientes */}
                         {openDropdown === 'rooms' && (
-                            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-h-[240px] transition-all duration-200 ease-in-out transform origin-top">
                                 <div className="p-4">
                                     <div className="flex items-center justify-between mb-3">
                                         <h3 className="text-green-800 font-semibold text-sm">Ambientes</h3>
@@ -345,7 +460,6 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                             <button
                                                 onClick={() => {
                                                     handleFilterChange('rooms', []);
-                                                    closeDropdown();
                                                 }}
                                                 className="text-xs text-red-500 hover:text-red-700"
                                             >
@@ -374,7 +488,10 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                         ))}
                                     </div>
                                     <button
-                                        onClick={closeDropdown}
+                                        onClick={() => {
+                                            applyFilters();
+                                            closeDropdown();
+                                        }}
                                         className="w-full mt-3 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -401,7 +518,30 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                 : 'border-gray-300'
                                 }`}
                         >
-                            {filters.price ? priceOptions.find(opt => opt.value === filters.price)?.label : 'Precio'}
+                            {filters.price ? (
+                                <>
+                                    <span>{priceOptions.find(opt => opt.value === filters.price)?.label}</span>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            console.log('🔍 Limpiando filtro de precio desde icono X');
+                                            console.log('🔍 Estado actual de price:', filters.price);
+                                            // Limpiar el filtro y aplicar inmediatamente
+                                            const newFilters = { ...filters, price: '' };
+                                            setFilters(newFilters);
+                                            console.log('🔍 Nuevos filtros:', newFilters);
+                                            onFiltersChange(newFilters);
+                                        }}
+                                        className="ml-1 text-green-600 hover:text-green-800"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </>
+                            ) : (
+                                'Precio'
+                            )}
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
@@ -409,10 +549,55 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
 
                         {/* Dropdown de precio */}
                         {openDropdown === 'price' && (
-                            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-h-[220px] transition-all duration-200 ease-in-out transform origin-top">
                                 <div className="p-4">
-                                    <h3 className="text-green-800 font-semibold mb-3 text-sm">Rango de precio</h3>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-green-800 font-semibold text-sm">Rango de precio</h3>
+                                        {filters.price && (
+                                            <button
+                                                onClick={() => {
+                                                    console.log('🔍 Limpiando filtro de precio desde botón Limpiar');
+                                                    console.log('🔍 Estado actual de price:', filters.price);
+                                                    // Limpiar el filtro y aplicar inmediatamente
+                                                    const newFilters = { ...filters, price: '' };
+                                                    setFilters(newFilters);
+                                                    console.log('🔍 Nuevos filtros:', newFilters);
+                                                    onFiltersChange(newFilters);
+                                                    closeDropdown();
+                                                }}
+                                                className="text-xs text-red-600 hover:text-red-800 font-medium"
+                                            >
+                                                Limpiar
+                                            </button>
+                                        )}
+                                    </div>
                                     <div className="space-y-2">
+                                        {/* Opción para limpiar el filtro */}
+                                        <label className="flex items-center gap-3 cursor-pointer">
+                                            <input
+                                                type="radio"
+                                                name="price"
+                                                value=""
+                                                checked={!filters.price}
+                                                onChange={(e) => {
+                                                    console.log('🔍 Seleccionando "Sin filtro"');
+                                                    console.log('🔍 Estado actual de price:', filters.price);
+                                                    // Limpiar el filtro y aplicar inmediatamente
+                                                    const newFilters = { ...filters, price: '' };
+                                                    setFilters(newFilters);
+                                                    console.log('🔍 Nuevos filtros:', newFilters);
+                                                    onFiltersChange(newFilters);
+                                                    closeDropdown();
+                                                }}
+                                                className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                            />
+                                            <span className="text-gray-700 text-sm font-medium">Sin filtro</span>
+                                        </label>
+
+                                        {/* Separador */}
+                                        <div className="border-t border-gray-200 my-2"></div>
+
+                                        {/* Opciones de precio */}
                                         {priceOptions.map((option) => (
                                             <label key={option.value} className="flex items-center gap-3 cursor-pointer">
                                                 <input
@@ -422,7 +607,6 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                                     checked={filters.price === option.value}
                                                     onChange={(e) => {
                                                         handleFilterChange('price', e.target.value);
-                                                        closeDropdown();
                                                     }}
                                                     className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
                                                 />
@@ -431,7 +615,10 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                         ))}
                                     </div>
                                     <button
-                                        onClick={closeDropdown}
+                                        onClick={() => {
+                                            applyFilters();
+                                            closeDropdown();
+                                        }}
                                         className="w-full mt-3 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -445,14 +632,184 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                     </div>
 
                     {/* Botón de más filtros */}
+                    <div className="relative more-filters-container">
+                        {(filters.characteristics.length > 0 || filters.status.length > 0 || filters.currency || filters.priceFrom || filters.priceTo) && (
+                            <div className="bg-green-menu text-white text-xs absolute top-[-8px] right-[-8px] z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white">
+                                <span>{[filters.characteristics.length, filters.status.length, filters.currency, filters.priceFrom, filters.priceTo].filter(Boolean).length}</span>
+                            </div>
+                        )}
+                        <button
+                            onClick={() => setShowMoreFilters(!showMoreFilters)}
+                            className="btn btn-white rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50"
+                        >
+                            Más filtros
+                        </button>
+
+                        {/* Dropdown de más filtros */}
+                        {showMoreFilters && (
+                            <div className="absolute top-full left-0 mt-1 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 transform -translate-x-1/2 left-1/2">
+                                <div className="p-4">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-green-800 font-semibold text-lg">Filtros Avanzados</h3>
+                                        <button
+                                            onClick={() => setShowMoreFilters(false)}
+                                            className="text-gray-500 hover:text-gray-700"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    {/* Moneda */}
+                                    <div className="mb-4">
+                                        <h4 className="text-green-700 font-semibold mb-2">Moneda</h4>
+                                        <div className="flex gap-4">
+                                            {currencyOptions.map((option) => (
+                                                <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name="currency"
+                                                        value={option.value}
+                                                        checked={filters.currency === option.value}
+                                                        onChange={(e) => handleFilterChange('currency', e.target.value)}
+                                                        className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                                    />
+                                                    <span className="text-gray-700 text-sm">{option.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Rango de precio */}
+                                    <div className="mb-4">
+                                        <h4 className="text-green-700 font-semibold mb-2">Rango de Precio</h4>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm text-gray-600 mb-1">Desde</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="USD"
+                                                    value={filters.priceFrom}
+                                                    onChange={(e) => handleFilterChange('priceFrom', e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm text-gray-600 mb-1">Hasta</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="USD"
+                                                    value={filters.priceTo}
+                                                    onChange={(e) => handleFilterChange('priceTo', e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Características */}
+                                    <div className="mb-4">
+                                        <h4 className="text-green-700 font-semibold mb-2">Características</h4>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {characteristicsOptions.map((option) => (
+                                                <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        value={option.value}
+                                                        checked={filters.characteristics.includes(option.value)}
+                                                        onChange={(e) => {
+                                                            const newCharacteristics = e.target.checked
+                                                                ? [...filters.characteristics, option.value]
+                                                                : filters.characteristics.filter(char => char !== option.value);
+                                                            handleFilterChange('characteristics', newCharacteristics);
+                                                        }}
+                                                        className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                                    />
+                                                    <span className="text-gray-700 text-sm">{option.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Estado */}
+                                    <div className="mb-4">
+                                        <h4 className="text-green-700 font-semibold mb-2">Estado</h4>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {statusOptions.map((option) => (
+                                                <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        value={option.value}
+                                                        checked={filters.status.includes(option.value)}
+                                                        onChange={(e) => {
+                                                            const newStatus = e.target.checked
+                                                                ? [...filters.status, option.value]
+                                                                : filters.status.filter(status => status !== option.value);
+                                                            handleFilterChange('status', newStatus);
+                                                        }}
+                                                        className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                                    />
+                                                    <span className="text-gray-700 text-sm">{option.label}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Botones de acción */}
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => {
+                                                setFilters({
+                                                    location: filters.location,
+                                                    operation: filters.operation,
+                                                    propertyType: filters.propertyType,
+                                                    rooms: filters.rooms,
+                                                    price: '',
+                                                    priceFrom: '',
+                                                    priceTo: '',
+                                                    currency: '',
+                                                    characteristics: [],
+                                                    status: [],
+                                                    additionalFilters: [],
+                                                    sortOrder: 'relevantes' // Reset sort order
+                                                });
+                                            }}
+                                            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                                        >
+                                            Limpiar Filtros
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                applyFilters();
+                                                setShowMoreFilters(false);
+                                            }}
+                                            className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors"
+                                        >
+                                            Aplicar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Botón de aplicar filtros */}
                     <div className="relative">
                         {activeFiltersCount > 0 && (
                             <div className="bg-green-menu text-white text-xs absolute top-[-8px] right-[-8px] z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white">
                                 <span>{activeFiltersCount}</span>
                             </div>
                         )}
-                        <button className="btn btn-white rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50">
-                            Más filtros
+                        <button
+                            onClick={applyFilters}
+                            className={`btn btn-primary px-6 py-2 rounded-md transition-colors font-semibold ${activeFiltersCount > 0
+                                ? 'bg-green-menu text-white hover:bg-green-700'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                }`}
+                            disabled={activeFiltersCount === 0}
+                        >
+                            Aplicar Filtros
                         </button>
                     </div>
                 </div>
@@ -513,12 +870,85 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                 </button>
                             </li>
                             <li>
-                                <select className="select rounded-md border border-gray-300 px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-green-500">
-                                    <option value="">Bajaron de precio</option>
-                                    <option value="precio">Por precio</option>
-                                    <option value="fecha">Por fecha</option>
-                                    <option value="ubicación">Por ubicación</option>
-                                </select>
+                                <div className="relative dropdown-container">
+                                    <button
+                                        onClick={() => toggleDropdown('sort')}
+                                        className="flex items-center gap-2 rounded-md border border-gray-300 px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-green-500 hover:bg-gray-50"
+                                        disabled={sortingLoading}
+                                    >
+                                        {sortingLoading ? (
+                                            <>
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
+                                                <span>Ordenando...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span>{filters.sortOrder === 'relevantes' ? 'Ordenar' :
+                                                    filters.sortOrder === 'menorPrecio' ? 'Menor precio' :
+                                                        filters.sortOrder === 'mayorPrecio' ? 'Mayor precio' :
+                                                            filters.sortOrder === 'masAmplio' ? 'Más amplio' : 'Ordenar'}</span>
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </>
+                                        )}
+                                    </button>
+
+                                    {/* Dropdown de ordenamiento */}
+                                    {openDropdown === 'sort' && (
+                                        <div className="absolute top-full right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-h-[200px] transition-all duration-200 ease-in-out transform origin-top">
+                                            <div className="p-4">
+                                                <h3 className="text-green-800 font-semibold mb-3 text-sm">Ordenar por</h3>
+                                                <div className="space-y-2">
+                                                    <label className="flex items-center gap-3 cursor-pointer">
+                                                        <input
+                                                            type="radio"
+                                                            name="sort"
+                                                            value="relevantes"
+                                                            checked={filters.sortOrder === 'relevantes'}
+                                                            onChange={(e) => applySorting(e.target.value)}
+                                                            className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                                        />
+                                                        <span className="text-gray-700 text-sm">Relevantes</span>
+                                                    </label>
+                                                    <label className="flex items-center gap-3 cursor-pointer">
+                                                        <input
+                                                            type="radio"
+                                                            name="sort"
+                                                            value="menorPrecio"
+                                                            checked={filters.sortOrder === 'menorPrecio'}
+                                                            onChange={(e) => applySorting(e.target.value)}
+                                                            className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                                        />
+                                                        <span className="text-gray-700 text-sm">Menor precio</span>
+                                                    </label>
+                                                    <label className="flex items-center gap-3 cursor-pointer">
+                                                        <input
+                                                            type="radio"
+                                                            name="sort"
+                                                            value="mayorPrecio"
+                                                            checked={filters.sortOrder === 'mayorPrecio'}
+                                                            onChange={(e) => applySorting(e.target.value)}
+                                                            className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                                        />
+                                                        <span className="text-gray-700 text-sm">Mayor precio</span>
+                                                    </label>
+                                                    <label className="flex items-center gap-3 cursor-pointer">
+                                                        <input
+                                                            type="radio"
+                                                            name="sort"
+                                                            value="masAmplio"
+                                                            checked={filters.sortOrder === 'masAmplio'}
+                                                            onChange={(e) => applySorting(e.target.value)}
+                                                            className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                                        />
+                                                        <span className="text-gray-700 text-sm">Más amplio (por m²)</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </li>
                         </ul>
                     </div>

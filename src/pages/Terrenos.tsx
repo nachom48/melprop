@@ -12,7 +12,13 @@ const Terrenos: React.FC = () => {
         propertyType: [],
         rooms: [],
         price: '',
-        additionalFilters: []
+        priceFrom: '',
+        priceTo: '',
+        currency: '',
+        characteristics: [],
+        status: [],
+        additionalFilters: [],
+        sortOrder: 'relevantes'
     });
 
     const formatPrice = (price: number, currency: string) => {
@@ -23,11 +29,6 @@ const Terrenos: React.FC = () => {
         setFilters(newFilters);
         console.log('Filtros actualizados:', newFilters);
         // Aquí puedes implementar la lógica de filtrado
-    };
-
-    const toggleFavorite = (id: string) => {
-        // Aquí se implementaría la lógica para marcar/desmarcar favoritos
-        console.log('Toggle favorite:', id);
     };
 
     return (

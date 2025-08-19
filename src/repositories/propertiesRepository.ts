@@ -80,6 +80,15 @@ export interface SearchFilters {
     operation?: string;
     properties?: string;
     page?: number;
+    locations?: string;
+    rooms?: string;
+    min_price?: string;
+    max_price?: string;
+    currency?: string;
+    characteristics?: string;
+    status?: string;
+    sort?: string;
+    order_by?: string;
     [key: string]: any;
 }
 
@@ -92,9 +101,15 @@ export interface PropertiesResponse {
 class PropertiesRepository {
     async getAllProperties(filters: SearchFilters): Promise<PropertiesResponse> {
         try {
+            console.log('📡 Repository - Filtros enviados al backend:', filters);
+            console.log('📡 Repository - Ordenamiento:', filters.order_by);
+
             const response = await axios.get(buildApiUrl('/properties/'), {
                 params: filters
             });
+
+            console.log('📡 Repository - URL de la petición:', response.config.url);
+            console.log('📡 Repository - Parámetros de la petición:', response.config.params);
 
             return response.data;
         } catch (error) {
@@ -114,4 +129,6 @@ class PropertiesRepository {
     }
 }
 
-export default new PropertiesRepository();
+const propertiesRepository = new PropertiesRepository();
+
+export default propertiesRepository;

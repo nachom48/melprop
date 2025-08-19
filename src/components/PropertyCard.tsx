@@ -137,7 +137,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                     {property.operation_type} - {property.neighborhood}
                 </div>
                 <div className="price text-green-menu text-2xl font-bold mb-3">
-                    {property.currency_symbol} {property.price.toLocaleString()}
+                    {property.currency_symbol} {property.price ? property.price.toLocaleString() : 'Consultar'}
                 </div>
                 <div className="address mb-3">
                     <strong className="block text-sm font-semibold mb-1">
