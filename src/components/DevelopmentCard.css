@@ -1,150 +1,90 @@
-/* Estilos para las tarjetas de emprendimientos - Usando el mismo estilo que la maqueta */
-
-/* Clase base para todas las tarjetas */
+/* Estilos para DevelopmentCard */
 .slide {
-    position: relative;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    height: 100%;
 }
 
-.slide:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-/* Estilos para la imagen */
 .slide .image {
     position: relative;
     overflow: hidden;
     border-radius: 0.5rem;
+    height: 100%;
 }
 
 .slide .image img {
-    transition: transform 0.3s ease;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
 }
 
 .slide:hover .image img {
     transform: scale(1.05);
 }
 
-/* Estilos para el precio y "VENTA" en la parte superior */
-.slide .image .absolute.top-4.left-4 {
-    z-index: 10;
+/* Overlay oscuro para mejor contraste */
+.slide .image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+    pointer-events: none;
 }
 
-.slide .image .absolute.top-4.left-4 p:first-child {
-    color: white;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    margin-bottom: 0.25rem;
-    font-weight: 500;
-}
-
-.slide .image .absolute.top-4.left-4 p:nth-child(2) {
-    color: #059669; /* Verde para el precio */
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.slide .image .absolute.top-4.left-4 div {
-    background-color: #fbbf24; /* Amarillo para la línea */
-    height: 4px;
-    border-radius: 2px;
-}
-
-/* Estilos para el marcador/título */
+/* Marcador de texto */
 .marker {
     position: relative;
     left: -3px;
 }
 
-.marker::before {
-    content: "";
-    background-color: var(--color-theme-yellow, #fbbf24);
-    border-radius: 4px;
-    width: 40px;
-    height: 4px;
-    margin-top: 5px;
+.marker span {
     display: block;
+    padding: 0 1.25rem 0.5rem;
+    font-size: 1.5rem;
+    line-height: 1.75rem;
+    color: white;
+    font-weight: bold;
+    font-family: 'Larken', serif;
 }
 
-/* Estilos para el texto del barrio */
-.text-green-fluo {
-    color: var(--color-green-fluo, #10b981);
+/* Contenido del marcador */
+.marker + div {
+    padding: 1rem;
+}
+
+.marker + div p:first-child {
+    color: #b2f252; /* text-green-fluo */
     font-weight: bold;
     text-transform: uppercase;
     font-size: 0.875rem;
-    font-family: 'Jakarta', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    margin-bottom: 0.25rem;
 }
 
-/* Estilos para el texto blanco */
-.text-white {
+.marker + div p:last-child {
     color: white;
     font-size: 0.875rem;
-    font-family: 'Jakarta', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Estilos específicos para las variantes */
-.development-card-xl {
-    /* La versión XL mantiene la altura completa */
+/* Variantes de tamaño */
+.slide.h-[400px] {
+    height: 400px;
 }
 
-.development-card-l {
-    /* La versión L tiene altura fija para la imagen */
+.slide.h-[500px] {
+    height: 500px;
 }
 
-.development-card-l .image img {
-    height: 12rem; /* h-48 */
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .slide {
-        margin-bottom: 1rem;
+/* Responsive */
+@media (min-width: 1024px) {
+    .slide.h-[400px] {
+        width: 100%;
+        max-width: none;
     }
     
-    .marker span {
-        font-size: 1.25rem; /* text-xl en móvil */
-        line-height: 1.5rem; /* leading-6 en móvil */
-    }
-    
-    .slide .image .absolute.top-4.left-4 p:nth-child(2) {
-        font-size: 1.25rem; /* Precio más pequeño en móvil */
-    }
-}
-
-/* Animaciones de entrada */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.slide {
-    animation: fadeInUp 0.6s ease-out;
-}
-
-/* Estilos para el estado de carga */
-.loading-skeleton {
-    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
+    .slide.h-[500px] {
+        width: 100%;
+        max-width: none;
     }
 }

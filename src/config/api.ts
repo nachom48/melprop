@@ -11,6 +11,9 @@ export const API_CONFIG = {
     ENDPOINTS: {
         PROPERTIES: '/properties/',
         PROPERTY_BY_ID: (id: number) => `/properties/${id}/`,
+        DEVELOPMENTS: '/developments/',
+        DEVELOPMENT_BY_ID: (id: number) => `/developments/${id}/`,
+        DEVELOPMENT_BY_SLUG: (slug: string) => `/developments/by-slug/${slug}/`,
     }
 };
 

@@ -1,102 +1,48 @@
 import React from 'react';
+import { Development } from '../repositories/developmentRepository';
 import './DevelopmentCard.css';
-
-export interface Development {
-    id: number;
-    name: string;
-    slug: string;
-    neighborhood: string;
-    address: string;
-    main_image: string;
-    rooms: any[];
-    amenities: any[];
-    external_url?: string;
-    possession_date?: string;
-    price_from?: string;
-    stage?: string;
-}
 
 export interface DevelopmentCardProps {
     development: Development;
-    variant: 'XL' | 'L';
+    variant?: 'L' | 'XL';
+    showAdditionalInfo?: boolean;
     className?: string;
 }
 
 const DevelopmentCard: React.FC<DevelopmentCardProps> = ({
     development,
-    variant,
+    variant = 'L',
+    showAdditionalInfo = false,
     className = ""
 }) => {
-    const formatRooms = (rooms: any[]) => {
+    const formatRooms = (rooms: number[]) => {
         if (!rooms || rooms.length === 0) return '';
-        const roomTypes = rooms.map(room => room.type).join(', ');
-        return `${roomTypes} ambientes`;
+        if (rooms.length > 1) {
+            const lastRoom = rooms[rooms.length - 1];
+            const otherRooms = rooms.slice(0, -1);
+            return `${otherRooms.join(', ')} y ${lastRoom} ambientes`;
+        }
+        return `${rooms[0]} ambiente${rooms[0] !== 1 ? 's' : ''}`;
     };
 
-    if (variant === 'XL') {
-        // Versión XL: Imagen completa como card con precio arriba y info abajo (como en la maqueta)
-        return (
-            <div className={`slide development-card-xl ${className}`.trim()}>
-                <div className="image relative overflow-hidden rounded-lg">
-                    <img
-                        src={development.main_image}
-                        alt={development.name}
-                        className="w-full h-full object-cover"
-                    />
+    const getCardHeight = () => {
+        return variant === 'XL' ? 'h-[500px]' : 'h-[400px]';
+    };
 
-                    {/* Precio y "VENTA" en la parte superior izquierda */}
-                    <div className="absolute top-4 left-4 text-white">
-                        <p className="text-sm uppercase mb-1">VENTA -</p>
-                        <p className="text-2xl font-bold text-green-600 mb-2">
-                            {development.price_from || 'Consultar'}
-                        </p>
-                        <div className="w-16 h-1 bg-yellow-400"></div>
-                    </div>
-
-                    {/* Información del desarrollo en la parte inferior */}
-                    <div className="absolute bottom-0 z-2 w-full">
-                        <h3 className="marker relative left-[-3px]">
-                            <span className="block px-5 pb-2 text-2xl leading-7 text-white font-bold font-larken">
-                                {development.name}
-                            </span>
-                        </h3>
-                        <div className="p-4">
-                            <p className="text-green-fluo font-bold uppercase text-sm font-jakarta">
-                                {development.neighborhood}
-                            </p>
-                            <p className="text-white text-sm font-jakarta">
-                                {formatRooms(development.rooms)}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    // Versión L: Imagen arriba, información abajo (estilo similar pero más compacto)
     return (
-        <div className={`slide development-card-l ${className}`.trim()}>
-            <div className="image relative overflow-hidden rounded-lg">
+        <div className={`slide ${getCardHeight()} ${className}`.trim()}>
+            <div className="image relative overflow-hidden rounded-lg h-full">
                 <img
                     src={development.main_image}
                     alt={development.name}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-full object-cover"
                 />
+                {/* Overlay oscuro para mejor contraste */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
 
-                {/* Precio y "VENTA" en la parte superior izquierda */}
-                <div className="absolute top-4 left-4 text-white">
-                    <p className="text-sm uppercase mb-1">VENTA -</p>
-                    <p className="text-xl font-bold text-green-600 mb-2">
-                        {development.price_from || 'Consultar'}
-                    </p>
-                    <div className="w-12 h-1 bg-yellow-400"></div>
-                </div>
-
-                {/* Información del desarrollo en la parte inferior */}
-                <div className="absolute bottom-0 z-2 w-full">
+                <div className="absolute bottom-0 z-2">
                     <h3 className="marker relative left-[-3px]">
-                        <span className="block px-5 pb-2 text-xl leading-6 text-white font-bold font-larken">
+                        <span className="block px-5 pb-2 text-2xl leading-7 text-white font-bold font-larken">
                             {development.name}
                         </span>
                     </h3>
@@ -110,6 +56,23 @@ const DevelopmentCard: React.FC<DevelopmentCardProps> = ({
                     </div>
                 </div>
             </div>
+
+            {showAdditionalInfo && (
+                <div className="mt-4 flex items-center justify-between">
+                    <div>
+                        <p className="text-sm tracking-wide text-gray-600 font-jakarta">Posesión</p>
+                        <p className="font-larken text-green-menu font-bold">
+                            {development.posesion || 'Consultar'}
+                        </p>
+                    </div>
+                    <div className="bg-green-highcontrast rounded-md p-2">
+                        <p className="text-sm tracking-wide text-gray-600 font-jakarta">Desde</p>
+                        <p className="font-larken text-green-text-dark font-bold">
+                            {development.min_price ? `U$S ${development.min_price.toLocaleString()}` : 'Consultar'}
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

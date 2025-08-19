@@ -839,6 +839,27 @@ ul.nav.show .user-menu span {
     font-weight: 700;
   }
   
+  /* Clases CSS para usar en componentes */
+  .bg-green-highcontrast {
+    background-color: var(--color-green-highcontrast);
+  }
+  
+  .text-green-menu {
+    color: var(--color-green-menu);
+  }
+  
+  .text-green-text {
+    color: var(--color-green-text);
+  }
+  
+  .font-jakarta {
+    font-family: var(--font-jakarta);
+  }
+  
+  .font-larken {
+    font-family: var(--font-larken);
+  }
+  
   /* Color de fondo para cards */
   .bg-medium-grey {
     background-color: var(--color-medium-grey);

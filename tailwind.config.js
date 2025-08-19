@@ -16,16 +16,26 @@ module.exports = {
         'black': '#332E29',
         'white': '#FCFCFC',
         'light-green': '#89ce48',
-        'green-fluo': '#E8E215',
+        'green-fluo': '#b2f252',
+        'theme-yellow': '#ffc239',
       },
       fontFamily: {
         'raleway': ['Raleway', 'sans-serif'],
+        'jakarta': ['Plus Jakarta Sans', 'sans-serif'],
+        'larken': ['Larken', 'sans-serif'],
       },
       fontSize: {
         'xxs': '0.625rem',
+        '2xl': '1.5rem',
+        'xl': '1.25rem',
       },
       lineHeight: {
         'xxs': '0.75rem',
+        '7': '1.75rem',
+        '6': '1.5rem',
+      },
+      zIndex: {
+        '2': '2',
       },
     },
   },
