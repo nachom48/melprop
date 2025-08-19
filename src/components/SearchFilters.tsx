@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 
 export interface FilterValues {
     location: string;
     operation: string;
-    propertyType: string;
-    rooms: string;
+    propertyType: string[];
+    rooms: string[];
     price: string;
     additionalFilters: string[];
 }
@@ -18,6 +18,7 @@ interface SearchFiltersProps {
     className?: string;
     isMapView?: boolean;
     onToggleView?: () => void;
+    activeFilters?: FilterValues;
 }
 
 const SearchFilters: React.FC<SearchFiltersProps> = ({
@@ -26,18 +27,43 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
     resultsText = "Casas, Departamentos y PH en Oportunidad",
     className = "",
     isMapView = false,
-    onToggleView
+    onToggleView,
+    activeFilters
 }) => {
     const navigate = useNavigate();
     const { isLoggedIn } = useUser();
     const [filters, setFilters] = useState<FilterValues>({
         location: '',
         operation: '',
-        propertyType: '',
-        rooms: '',
+        propertyType: [],
+        rooms: [],
         price: '',
         additionalFilters: []
     });
+
+    // Estados para controlar los dropdowns
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+    // Sincronizar filtros locales con filtros activos
+    useEffect(() => {
+        if (activeFilters) {
+            setFilters(activeFilters);
+        }
+    }, [activeFilters]);
+
+    // Cerrar dropdowns al hacer click fuera
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (openDropdown && !(event.target as Element).closest('.dropdown-container')) {
+                setOpenDropdown(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [openDropdown]);
 
     const handleFilterChange = (key: keyof FilterValues, value: string | string[]) => {
         const newFilters = { ...filters, [key]: value };
@@ -47,6 +73,22 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
 
     const clearLocation = () => {
         handleFilterChange('location', '');
+    };
+
+    const clearFilter = (key: keyof FilterValues) => {
+        if (key === 'propertyType' || key === 'rooms') {
+            handleFilterChange(key, []);
+        } else {
+            handleFilterChange(key, '');
+        }
+    };
+
+    const toggleDropdown = (dropdownName: string) => {
+        setOpenDropdown(openDropdown === dropdownName ? null : dropdownName);
+    };
+
+    const closeDropdown = () => {
+        setOpenDropdown(null);
     };
 
     const handleViewFavorites = () => {
@@ -67,6 +109,44 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
             onToggleView();
         }
     };
+
+    // Contar filtros activos
+    const activeFiltersCount = Object.values(filters).filter(value =>
+        value && (
+            Array.isArray(value) ? value.length > 0 :
+                typeof value === 'string' ? value.trim() !== '' :
+                    value.length > 0
+        )
+    ).length;
+
+    // Opciones para los dropdowns
+    const operationOptions = [
+        { value: 'venta', label: 'Comprar' },
+        { value: 'venta', label: 'Vender' },
+        { value: 'alquiler', label: 'Alquilar' }
+    ];
+
+    const propertyTypeOptions = [
+        { value: 'casa', label: 'Casa' },
+        { value: 'departamento', label: 'Departamento' },
+        { value: 'ph', label: 'PH' },
+        { value: 'terreno', label: 'Terreno' },
+        { value: 'local-comercial', label: 'Local comercial' }
+    ];
+
+    const roomsOptions = [
+        { value: '1', label: '1 ambiente' },
+        { value: '2', label: '2 ambientes' },
+        { value: '3', label: '3 ambientes' },
+        { value: '4+', label: '4+ ambientes' }
+    ];
+
+    const priceOptions = [
+        { value: '50000', label: 'Mas de 50.000$' },
+        { value: '100000', label: 'Mas de 100.000$' },
+        { value: '200000', label: 'Mas de 200.000$' },
+        { value: '500000', label: 'Mas de 500.000$' }
+    ];
 
     return (
         <div className={`my-10 ${className}`}>
@@ -105,69 +185,272 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                         </div>
                     </div>
 
-                    {/* Select de operación */}
-                    <div>
-                        <select
-                            className="select rounded-md border border-gray-300 px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            value={filters.operation}
-                            onChange={(e) => handleFilterChange('operation', e.target.value)}
+                    {/* Dropdown de operación */}
+                    <div className="relative dropdown-container">
+                        {filters.operation && (
+                            <div className="bg-green-menu text-white text-xs absolute top-[-8px] right-[-8px] z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white">
+                                <span>1</span>
+                            </div>
+                        )}
+                        <button
+                            onClick={() => toggleDropdown('operation')}
+                            className={`flex items-center gap-2 rounded-md border px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-green-500 ${filters.operation
+                                ? 'border-green-500 bg-green-50 text-green-700'
+                                : 'border-gray-300'
+                                }`}
                         >
-                            <option value="">Comprar</option>
-                            <option value="vender">Vender</option>
-                            <option value="alquilar">Alquilar</option>
-                        </select>
+                            {filters.operation ? (filters.operation === 'venta' ? 'Comprar' : 'Alquilar') : 'Comprar'}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        {/* Dropdown de operación */}
+                        {openDropdown === 'operation' && (
+                            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                                <div className="p-4">
+                                    <h3 className="text-green-800 font-semibold mb-3 text-sm">Tipo de operación</h3>
+                                    <div className="space-y-2">
+                                        {operationOptions.map((option) => (
+                                            <label key={option.value} className="flex items-center gap-3 cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="operation"
+                                                    value={option.value}
+                                                    checked={filters.operation === option.value}
+                                                    onChange={(e) => {
+                                                        console.log('🎯 Operación seleccionada:', e.target.value, 'Label:', option.label);
+                                                        handleFilterChange('operation', e.target.value);
+                                                        closeDropdown();
+                                                    }}
+                                                    className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                                />
+                                                <span className="text-gray-700 text-sm">{option.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={closeDropdown}
+                                        className="w-full mt-3 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Aplicar
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Select de tipo de propiedad */}
-                    <div>
-                        <select
-                            className="select rounded-md border border-gray-300 px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            value={filters.propertyType}
-                            onChange={(e) => handleFilterChange('propertyType', e.target.value)}
+                    {/* Dropdown de tipo de propiedad */}
+                    <div className="relative dropdown-container">
+                        {filters.propertyType && filters.propertyType.length > 0 && (
+                            <div className="bg-green-menu text-white text-xs absolute top-[-8px] right-[-8px] z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white">
+                                <span>{filters.propertyType.length}</span>
+                            </div>
+                        )}
+                        <button
+                            onClick={() => toggleDropdown('propertyType')}
+                            className={`flex items-center gap-2 rounded-md border px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-green-500 ${filters.propertyType.length > 0
+                                ? 'border-green-500 bg-green-50 text-green-700'
+                                : 'border-gray-300'
+                                }`}
                         >
-                            <option value="">Propiedades</option>
-                            <option value="casa">Casa</option>
-                            <option value="departamento">Departamento</option>
-                            <option value="ph">PH</option>
-                            <option value="terreno">Terreno</option>
-                        </select>
+                            {filters.propertyType.length > 0 ? filters.propertyType.map(type => type.charAt(0).toUpperCase() + type.slice(1)).join(', ') : 'Propiedades'}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        {/* Dropdown de tipo de propiedad */}
+                        {openDropdown === 'propertyType' && (
+                            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                                <div className="p-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h3 className="text-green-800 font-semibold text-sm">Tipo de propiedad</h3>
+                                        {filters.propertyType.length > 0 && (
+                                            <button
+                                                onClick={() => {
+                                                    handleFilterChange('propertyType', []);
+                                                    closeDropdown();
+                                                }}
+                                                className="text-xs text-red-500 hover:text-red-700"
+                                            >
+                                                Limpiar
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        {propertyTypeOptions.map((option) => (
+                                            <label key={option.value} className="flex items-center gap-3 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    name="propertyType"
+                                                    value={option.value}
+                                                    checked={filters.propertyType.includes(option.value)}
+                                                    onChange={(e) => {
+                                                        const newPropertyTypes = e.target.checked
+                                                            ? [...filters.propertyType, option.value]
+                                                            : filters.propertyType.filter(type => type !== option.value);
+                                                        handleFilterChange('propertyType', newPropertyTypes);
+                                                    }}
+                                                    className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                                />
+                                                <span className="text-gray-700 text-sm">{option.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={closeDropdown}
+                                        className="w-full mt-3 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Aplicar
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Select de ambientes */}
-                    <div>
-                        <select
-                            className="select rounded-md border border-gray-300 px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            value={filters.rooms}
-                            onChange={(e) => handleFilterChange('rooms', e.target.value)}
+                    {/* Dropdown de ambientes */}
+                    <div className="relative dropdown-container">
+                        {filters.rooms && filters.rooms.length > 0 && (
+                            <div className="bg-green-menu text-white text-xs absolute top-[-8px] right-[-8px] z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white">
+                                <span>{filters.rooms.length}</span>
+                            </div>
+                        )}
+                        <button
+                            onClick={() => toggleDropdown('rooms')}
+                            className={`flex items-center gap-2 rounded-md border px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-green-500 ${filters.rooms.length > 0
+                                ? 'border-green-500 bg-green-50 text-green-700'
+                                : 'border-gray-300'
+                                }`}
                         >
-                            <option value="">Amb | Dorm</option>
-                            <option value="1">1 ambiente</option>
-                            <option value="2">2 ambientes</option>
-                            <option value="3">3 ambientes</option>
-                            <option value="4+">4+ ambientes</option>
-                        </select>
+                            {filters.rooms.length > 0 ? filters.rooms.map(room => room.charAt(0).toUpperCase() + room.slice(1)).join(', ') : 'Amb | Dorm'}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        {/* Dropdown de ambientes */}
+                        {openDropdown === 'rooms' && (
+                            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                                <div className="p-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h3 className="text-green-800 font-semibold text-sm">Ambientes</h3>
+                                        {filters.rooms.length > 0 && (
+                                            <button
+                                                onClick={() => {
+                                                    handleFilterChange('rooms', []);
+                                                    closeDropdown();
+                                                }}
+                                                className="text-xs text-red-500 hover:text-red-700"
+                                            >
+                                                Limpiar
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        {roomsOptions.map((option) => (
+                                            <label key={option.value} className="flex items-center gap-3 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    name="rooms"
+                                                    value={option.value}
+                                                    checked={filters.rooms.includes(option.value)}
+                                                    onChange={(e) => {
+                                                        const newRooms = e.target.checked
+                                                            ? [...filters.rooms, option.value]
+                                                            : filters.rooms.filter(room => room !== option.value);
+                                                        handleFilterChange('rooms', newRooms);
+                                                    }}
+                                                    className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                                />
+                                                <span className="text-gray-700 text-sm">{option.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={closeDropdown}
+                                        className="w-full mt-3 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Aplicar
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Select de precio */}
-                    <div>
-                        <select
-                            className="select rounded-md border border-gray-300 px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            value={filters.price}
-                            onChange={(e) => handleFilterChange('price', e.target.value)}
+                    {/* Dropdown de precio */}
+                    <div className="relative dropdown-container">
+                        {filters.price && (
+                            <div className="bg-green-menu text-white text-xs absolute top-[-8px] right-[-8px] z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white">
+                                <span>1</span>
+                            </div>
+                        )}
+                        <button
+                            onClick={() => toggleDropdown('price')}
+                            className={`flex items-center gap-2 rounded-md border px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-green-500 ${filters.price
+                                ? 'border-green-500 bg-green-50 text-green-700'
+                                : 'border-gray-300'
+                                }`}
                         >
-                            <option value="">Precio</option>
-                            <option value="50000">Mas de 50.000$</option>
-                            <option value="100000">Mas de 100.000$</option>
-                            <option value="200000">Mas de 200.000$</option>
-                            <option value="500000">Mas de 500.000$</option>
-                        </select>
+                            {filters.price ? priceOptions.find(opt => opt.value === filters.price)?.label : 'Precio'}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        {/* Dropdown de precio */}
+                        {openDropdown === 'price' && (
+                            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                                <div className="p-4">
+                                    <h3 className="text-green-800 font-semibold mb-3 text-sm">Rango de precio</h3>
+                                    <div className="space-y-2">
+                                        {priceOptions.map((option) => (
+                                            <label key={option.value} className="flex items-center gap-3 cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="price"
+                                                    value={option.value}
+                                                    checked={filters.price === option.value}
+                                                    onChange={(e) => {
+                                                        handleFilterChange('price', e.target.value);
+                                                        closeDropdown();
+                                                    }}
+                                                    className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                                />
+                                                <span className="text-gray-700 text-sm">{option.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={closeDropdown}
+                                        className="w-full mt-3 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Aplicar
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Botón de más filtros */}
                     <div className="relative">
-                        <div className="bg-green-menu text-small absolute top-[-10px] right-[-10px] z-4 flex h-8 w-8 items-center justify-center rounded-full border-3 border-white text-sm font-bold text-white">
-                            <span>3</span>
-                        </div>
+                        {activeFiltersCount > 0 && (
+                            <div className="bg-green-menu text-white text-xs absolute top-[-8px] right-[-8px] z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white">
+                                <span>{activeFiltersCount}</span>
+                            </div>
+                        )}
                         <button className="btn btn-white rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 hover:bg-gray-50">
                             Más filtros
                         </button>

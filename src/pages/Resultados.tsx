@@ -5,83 +5,14 @@ import { Property, SearchFilters as PropertySearchFilters } from '../repositorie
 import PropertyCard from '../components/PropertyCard';
 import SearchFilters, { FilterValues } from '../components/SearchFilters';
 import PropertyMap from '../components/PropertyMap';
-import styled from 'styled-components';
-
-const ResultadosContainer = styled.div`
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-  }
-
-  .loading {
-    text-align: center;
-    padding: 3rem;
-    font-size: 1.125rem;
-    color: #666;
-  }
-
-  .error {
-    text-align: center;
-    padding: 3rem;
-    font-size: 1.125rem;
-    color: #DE1E1E;
-    background: #ffebee;
-    border-radius: 8px;
-    margin: 2rem 0;
-  }
-
-  .properties-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
-    margin: 2rem 0;
-  }
-
-  .no-results {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: #666;
-    font-size: 1.125rem;
-  }
-
-  .pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    margin: 3rem 0;
-  }
-
-  .pagination button {
-    padding: 0.5rem 1rem;
-    border: 1px solid #12782e;
-    background: white;
-    color: #12782e;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .pagination button:hover:not(:disabled) {
-    background: #12782e;
-    color: white;
-  }
-
-  .pagination button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .pagination .current-page {
-    background: #12782e;
-    color: white;
-  }
-`;
+import Pagination from '../components/Pagination';
+import { useUser } from '../context/UserContext';
+import LoginModal from '../components/LoginModal';
 
 const Resultados: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { user } = useUser();
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -89,6 +20,7 @@ const Resultados: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isMapView, setIsMapView] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false);
 
     // Extraer filtros de la URL
     const getFiltersFromURL = (): PropertySearchFilters => {
@@ -117,11 +49,42 @@ const Resultados: React.FC = () => {
     const convertFilters = (filters: FilterValues): PropertySearchFilters => {
         const converted: PropertySearchFilters = {};
 
-        if (filters.location) converted.location = filters.location;
-        if (filters.operation) converted.operation = filters.operation;
-        if (filters.propertyType) converted.properties = filters.propertyType;
-        if (filters.rooms) converted.rooms = filters.rooms;
-        if (filters.price) converted.price = filters.price;
+        if (filters.location) {
+            // Convertir ubicación a formato del backend (locations)
+            converted.locations = filters.location.toLowerCase().replace(/\s+/g, '-');
+        }
+
+        if (filters.operation) {
+            converted.operation = filters.operation;
+        }
+
+        if (filters.propertyType && filters.propertyType.length > 0) {
+            // Convertir tipos de propiedad a formato del backend (properties)
+            converted.properties = filters.propertyType.join(',');
+        }
+
+        if (filters.rooms && filters.rooms.length > 0) {
+            // Convertir ambientes a formato del backend (rooms)
+            if (filters.rooms.includes('4+')) {
+                // Si incluye 4+, agregar todos los ambientes de 4 en adelante
+                const roomsArray = filters.rooms.filter(room => room !== '4+');
+                if (roomsArray.length > 0) {
+                    converted.rooms = [...roomsArray, '4', '5', '6', '7', '8', '9', '10'].join(',');
+                } else {
+                    converted.rooms = '4,5,6,7,8,9,10';
+                }
+            } else {
+                converted.rooms = filters.rooms.join(',');
+            }
+        }
+
+        if (filters.price) {
+            // Convertir precio a formato del backend (min_price)
+            if (filters.price.startsWith('min_')) {
+                const priceValue = filters.price.replace('min_', '');
+                converted.min_price = priceValue;
+            }
+        }
 
         return converted;
     };
@@ -132,12 +95,15 @@ const Resultados: React.FC = () => {
 
         // Convertir filtros y actualizar URL
         const convertedFilters = convertFilters(newFilters);
+        console.log('🔄 Filtros convertidos para backend:', convertedFilters);
+
         const newSearchParams = new URLSearchParams();
 
         // Agregar filtros activos a la URL
         Object.entries(convertedFilters).forEach(([key, value]) => {
             if (value) {
                 newSearchParams.set(key, value.toString());
+                console.log(`📝 Agregando filtro a URL: ${key} = ${value}`);
             }
         });
 
@@ -148,12 +114,20 @@ const Resultados: React.FC = () => {
 
         // Actualizar URL
         setSearchParams(newSearchParams);
+        console.log('🌐 Nueva URL:', newSearchParams.toString());
     };
 
     // Toggle entre vista de listado y mapa
     const handleToggleView = () => {
+        console.log('🔄 ANTES del toggle - isMapView:', isMapView);
         setIsMapView(!isMapView);
+        console.log('🔄 DESPUÉS del toggle - isMapView:', !isMapView);
         console.log('🔄 Cambiando vista:', !isMapView ? 'Mapa' : 'Listado');
+    };
+
+    // Abrir modal de login
+    const handleOpenLoginModal = () => {
+        setShowLoginModal(true);
     };
 
     // Cargar propiedades
@@ -166,10 +140,11 @@ const Resultados: React.FC = () => {
             console.log('🔍 Filtros extraídos de URL:', filters);
 
             const response = await propertiesService.getAllProperties(filters);
+            console.log('📡 Respuesta de la API:', response);
 
             setProperties(response.objects);
             setTotal(response.count);
-            setCurrentPage(1); // La API no devuelve página actual
+            setCurrentPage(filters.page || 1);
             setTotalPages(Math.ceil(response.count / response.limit));
 
             console.log('✅ Propiedades cargadas:', response);
@@ -202,63 +177,144 @@ const Resultados: React.FC = () => {
         let text = "Propiedades";
 
         if (filters.operation) {
-            text += ` en ${filters.operation}`;
+            // Mapear los valores del backend a texto legible
+            let operationText = '';
+            if (filters.operation === 'venta') {
+                operationText = 'Venta';
+            } else if (filters.operation === 'alquiler') {
+                operationText = 'Alquiler';
+            } else {
+                operationText = filters.operation;
+            }
+            text += ` en ${operationText}`;
         }
-
         if (filters.properties) {
-            text += ` - ${filters.properties}`;
+            const propertyTypes = filters.properties.split(',').map((prop: string) =>
+                prop.charAt(0).toUpperCase() + prop.slice(1)
+            ).join(' y ');
+            text += ` - ${propertyTypes}`;
         }
-
-        if (filters.location) {
-            text += ` en ${filters.location}`;
+        if (filters.locations) {
+            text += ` en ${filters.locations}`;
         }
-
         return text;
+    };
+
+    // Convertir filtros de URL a FilterValues para SearchFilters
+    const getActiveFiltersForUI = (): FilterValues => {
+        const urlFilters = getFiltersFromURL();
+
+        // Convertir locations del backend a location para UI
+        let location = '';
+        if (urlFilters.locations) {
+            location = urlFilters.locations.split(',').map((loc: string) =>
+                loc.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())
+            ).join(', ');
+        }
+
+        // Convertir rooms del backend a rooms para UI
+        let rooms: string[] = [];
+        if (urlFilters.rooms) {
+            const roomsArray = urlFilters.rooms.split(',');
+            if (roomsArray.includes('4') && roomsArray.includes('5') && roomsArray.includes('6')) {
+                // Si hay múltiples ambientes incluyendo 4+, usar lógica especial
+                const basicRooms = roomsArray.filter((room: string) => !['4', '5', '6', '7', '8', '9', '10'].includes(room));
+                if (basicRooms.length > 0) {
+                    rooms = [...basicRooms, '4+'];
+                } else {
+                    rooms = ['4+'];
+                }
+            } else {
+                rooms = roomsArray;
+            }
+        }
+
+        // Convertir properties del backend a propertyType para UI
+        let propertyType: string[] = [];
+        if (urlFilters.properties) {
+            propertyType = urlFilters.properties.split(',');
+        }
+
+        // Convertir min_price del backend a price para UI
+        let price = '';
+        if (urlFilters.min_price) {
+            price = `min_${urlFilters.min_price}`;
+        }
+
+        // Mapear operation del backend a la UI
+        let operation = '';
+        if (urlFilters.operation) {
+            if (urlFilters.operation === 'venta') {
+                operation = 'venta'; // Mantener 'venta' para que se muestre como "Comprar" en la UI
+            } else if (urlFilters.operation === 'alquiler') {
+                operation = 'alquiler';
+            } else {
+                operation = urlFilters.operation;
+            }
+        }
+
+        return {
+            location: location,
+            operation: operation,
+            propertyType: propertyType,
+            rooms: rooms,
+            price: price,
+            additionalFilters: []
+        };
     };
 
     if (loading) {
         return (
-            <ResultadosContainer>
-                <div className="container">
-                    <div className="loading">
-                        <div>🔍 Buscando propiedades...</div>
-                    </div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="text-xl text-gray-600 mb-4">🔍 Buscando propiedades...</div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
                 </div>
-            </ResultadosContainer>
+            </div>
         );
     }
 
     if (error) {
         return (
-            <ResultadosContainer>
-                <div className="container">
-                    <div className="error">
-                        <div>❌ {error}</div>
-                        <button onClick={loadProperties} style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}>
-                            Reintentar
-                        </button>
-                    </div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center max-w-md mx-auto px-4">
+                    <div className="text-xl text-red-600 mb-4">❌ {error}</div>
+                    <button
+                        onClick={loadProperties}
+                        className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                        Reintentar
+                    </button>
                 </div>
-            </ResultadosContainer>
+            </div>
         );
     }
 
     return (
-        <ResultadosContainer>
-            {/* Componente de filtros reutilizable */}
-            <SearchFilters
-                onFiltersChange={handleFiltersChange}
-                resultsCount={total}
-                resultsText={getResultsText()}
-                isMapView={isMapView}
-                onToggleView={handleToggleView}
-            />
+        <div className="min-h-screen bg-gray-50">
+            {/* Header con filtros */}
+            <div className="bg-white shadow-sm border-b">
+                <div className="container mx-auto px-4 py-6">
+                    <SearchFilters
+                        onFiltersChange={handleFiltersChange}
+                        resultsCount={total}
+                        resultsText={getResultsText()}
+                        isMapView={isMapView}
+                        onToggleView={handleToggleView}
+                        activeFilters={getActiveFiltersForUI()}
+                    />
+                </div>
+            </div>
 
-            <div className="container">
+            {/* Contenido principal */}
+            <div className="container mx-auto px-4 py-8">
                 {/* Vista de Mapa */}
                 {isMapView ? (
                     <div className="my-6">
-                        <PropertyMap properties={properties} />
+                        <PropertyMap
+                            properties={properties}
+                            onOpenLoginModal={handleOpenLoginModal}
+                        />
                     </div>
                 ) : (
                     /* Vista de Listado */
@@ -266,7 +322,7 @@ const Resultados: React.FC = () => {
                         {/* Grid de propiedades */}
                         {properties.length > 0 ? (
                             <>
-                                <div className="properties-grid">
+                                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 mb-8">
                                     {properties.map((property) => (
                                         <PropertyCard
                                             key={property.id}
@@ -278,37 +334,19 @@ const Resultados: React.FC = () => {
 
                                 {/* Paginación */}
                                 {totalPages > 1 && (
-                                    <div className="pagination">
-                                        <button
-                                            onClick={() => handlePageChange(currentPage - 1)}
-                                            disabled={currentPage <= 1}
-                                        >
-                                            ← Anterior
-                                        </button>
-
-                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                            <button
-                                                key={page}
-                                                onClick={() => handlePageChange(page)}
-                                                className={page === currentPage ? 'current-page' : ''}
-                                            >
-                                                {page}
-                                            </button>
-                                        ))}
-
-                                        <button
-                                            onClick={() => handlePageChange(currentPage + 1)}
-                                            disabled={currentPage >= totalPages}
-                                        >
-                                            Siguiente →
-                                        </button>
+                                    <div className="flex justify-center">
+                                        <Pagination
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={handlePageChange}
+                                        />
                                     </div>
                                 )}
                             </>
                         ) : (
-                            <div className="no-results">
-                                <div>🏠 No se encontraron propiedades con los filtros seleccionados</div>
-                                <div style={{ marginTop: '1rem', fontSize: '0.875rem', color: '#888' }}>
+                            <div className="text-center py-12">
+                                <div className="text-xl text-gray-600 mb-4">🏠 No se encontraron propiedades con los filtros seleccionados</div>
+                                <div className="text-gray-500">
                                     Intenta ajustar los filtros de búsqueda
                                 </div>
                             </div>
@@ -316,7 +354,13 @@ const Resultados: React.FC = () => {
                     </>
                 )}
             </div>
-        </ResultadosContainer>
+
+            {/* Modal de Login */}
+            <LoginModal
+                isShown={showLoginModal}
+                onClose={() => setShowLoginModal(false)}
+            />
+        </div>
     );
 };
 

@@ -9,8 +9,8 @@ const Terrenos: React.FC = () => {
     const [filters, setFilters] = useState<FilterValues>({
         location: '',
         operation: '',
-        propertyType: '',
-        rooms: '',
+        propertyType: [],
+        rooms: [],
         price: '',
         additionalFilters: []
     });

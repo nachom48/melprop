@@ -14,9 +14,10 @@ L.Icon.Default.mergeOptions({
 interface PropertyMapProps {
     properties: Property[];
     className?: string;
+    onOpenLoginModal?: () => void;
 }
 
-const PropertyMap: React.FC<PropertyMapProps> = ({ properties, className = "" }) => {
+const PropertyMap: React.FC<PropertyMapProps> = ({ properties, className = "", onOpenLoginModal }) => {
     const mapRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<L.Map | null>(null);
 
@@ -42,6 +43,42 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ properties, className = "" })
             return lat && lng && !isNaN(lat) && !isNaN(lng);
         });
 
+        // Función para capitalizar primera letra
+        const capitalizeFirst = (str: string) => {
+            return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+        };
+
+        // Función para manejar el clic en el corazón
+        const handleHeartClick = (e: Event) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Verificar si el usuario está logueado (simulado)
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+            if (!isLoggedIn) {
+                // Abrir modal de login en lugar de redirigir
+                if (onOpenLoginModal) {
+                    onOpenLoginModal();
+                } else {
+                    // Fallback: mostrar alerta
+                    alert('Debes iniciar sesión para agregar favoritos');
+                }
+            } else {
+                // Toggle del corazón
+                const heartIcon = e.currentTarget as HTMLElement;
+                const isActive = heartIcon.classList.contains('active');
+
+                if (isActive) {
+                    heartIcon.classList.remove('active');
+                    heartIcon.innerHTML = '<i class="far fa-heart"></i>';
+                } else {
+                    heartIcon.classList.add('active');
+                    heartIcon.innerHTML = '<i class="fas fa-heart"></i>';
+                }
+            }
+        };
+
         // Crear marcadores personalizados para cada propiedad
         propertiesWithCoords.forEach((property) => {
             const lat = typeof property.latitude === 'number' ? property.latitude :
@@ -65,33 +102,77 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ properties, className = "" })
             // Crear marcador
             const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
 
-            // Crear contenido del popup
+            // Crear contenido del popup con EXACTAMENTE el mismo estilo que PropertyCard
             const popupContent = `
-                <div style="min-width: 250px;">
-                    <div style="margin-bottom: 12px;">
-                        <img src="${property.main_image || '/placeholder.jpg'}" alt="${property.name}" 
-                             style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px;">
+                <div style="min-width: 320px; max-width: 320px; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    <!-- Imagen con botón de corazón -->
+                    <div style="position: relative; overflow: hidden;">
+                        <img src="${property.main_image || '/placeholder.jpg'}" alt="${property.name || `Propiedad en ${property.address}`}" 
+                             style="width: 100%; height: 200px; object-fit: cover; display: block;">
+                        
+                        <!-- Botón de corazón -->
+                        <button class="heart-button" style="position: absolute; top: 12px; right: 12px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: all 0.2s;">
+                            <i class="far fa-heart" style="color: #12782e; font-size: 18px;"></i>
+                        </button>
                     </div>
-                    <div style="margin-bottom: 8px;">
-                        <span style="color: #12782e; font-weight: bold; font-size: 14px;">${property.operation_type} - ${property.type}</span>
-                    </div>
-                    <div style="margin-bottom: 8px;">
-                        <h3 style="font-size: 18px; font-weight: bold; color: #12782e; margin: 0;">U$S ${property.price?.toLocaleString() || 'N/A'}</h3>
-                    </div>
-                    <div style="margin-bottom: 8px;">
-                        <strong>${property.address}</strong>
-                        <p style="font-size: 14px; color: #666; margin: 4px 0 0 0;">${property.neighborhood}</p>
-                    </div>
-                    <div style="font-size: 12px; color: #888;">
-                        ${property.rooms ? `${property.rooms} amb.` : ''} 
-                        ${property.bathrooms ? `${property.bathrooms} baños` : ''} 
-                        ${property.total_m2 ? `${property.total_m2} m²` : ''}
+                    
+                    <!-- Contenido -->
+                    <div style="padding: 16px;">
+                        <!-- Badge de operación -->
+                        <div style="color: #12782e; font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+                            ${capitalizeFirst(property.operation_type || '')} - ${property.neighborhood || ''}
+                        </div>
+                        
+                        <!-- Precio -->
+                        <div style="color: #12782e; font-size: 24px; font-weight: 700; margin-bottom: 12px;">
+                            ${property.currency_symbol || 'U$S'} ${property.price?.toLocaleString() || 'N/A'}
+                        </div>
+                        
+                        <!-- Dirección -->
+                        <div style="margin-bottom: 12px;">
+                            <strong style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 4px; color: #333;">
+                                ${property.name || property.address}
+                            </strong>
+                            <p style="font-size: 14px; color: #666; margin: 0;">
+                                ${property.neighborhood}, ${property.city}
+                            </p>
+                        </div>
+                        
+                        <!-- Características -->
+                        <ul style="display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none;">
+                            ${property.total_m2 ? `<li style="background-color: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #666;">
+                                ${typeof property.total_m2 === 'number' ? property.total_m2 : property.total_m2.parsedValue} m²
+                            </li>` : ''}
+                            ${property.rooms ? `<li style="background-color: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #666;">
+                                ${property.rooms} Ambientes
+                            </li>` : ''}
+                            ${property.bathrooms ? `<li style="background-color: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #666;">
+                                ${property.bathrooms} Baños
+                            </li>` : ''}
+                            ${property.parking_lots > 0 ? `<li style="background-color: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 12px; color: #666;">
+                                ${property.parking_lots} Cochera
+                            </li>` : ''}
+                        </ul>
                     </div>
                 </div>
             `;
 
+            // Crear el popup
+            const popup = L.popup({
+                maxWidth: 320,
+                className: 'property-card-popup'
+            }).setContent(popupContent);
+
             // Agregar popup al marcador
-            marker.bindPopup(popupContent);
+            marker.bindPopup(popup);
+
+            // Agregar event listener al botón de corazón cuando se abra el popup
+            marker.on('popupopen', () => {
+                const heartButton = document.querySelector('.heart-button');
+                if (heartButton) {
+                    heartButton.addEventListener('click', handleHeartClick);
+                }
+            });
         });
 
         // Ajustar vista del mapa si hay propiedades
@@ -119,7 +200,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ properties, className = "" })
                 mapInstanceRef.current = null;
             }
         };
-    }, [properties]);
+    }, [properties, onOpenLoginModal]);
 
     return (
         <div className={`property-map ${className}`}>
