@@ -120,14 +120,15 @@ const Oportunidades: React.FC = () => {
             </div>
 
             {/* Componente de Paginación */}
-            <div className="my-8">
+            {/* Comenta este bloque de codigo para que no se muestre la paginacion */}
+            {/* <div className="my-8">
                 <Pagination
                     currentPage={currentPage}
                     totalPages={totalPages}
                     onPageChange={handlePageChange}
                     onHomeClick={handleHomeClick}
                 />
-            </div>
+            </div> */}
         </div>
     );
 };

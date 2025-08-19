@@ -5,12 +5,12 @@ import { Development } from '../repositories/developmentRepository';
 import DevelopmentCard from '../components/DevelopmentCard';
 import DevelopmentMap from '../components/DevelopmentMap';
 import ServiciosExclusivos from '../components/ServiciosExclusivos';
-import Oportunidades from '../components/Oportunidades';
 import BarriosSection from '../components/BarriosSection';
 import SearchFilters, { FilterValues } from '../components/SearchFilters';
 import Pagination from '../components/Pagination';
 import { useUser } from '../context/UserContext';
 import LoginModal from '../components/LoginModal';
+import OpportunitiesSlider from '../components/OpportunitiesSlider';
 
 const Emprendimientos: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -243,7 +243,7 @@ const Emprendimientos: React.FC = () => {
           </div>
 
           {/* Componente Oportunidades */}
-          <Oportunidades />
+          <OpportunitiesSlider />
 
           {/* Componente Barrios y lugares */}
           <BarriosSection />
