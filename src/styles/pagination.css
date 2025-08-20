@@ -1,0 +1,83 @@
+/* Estilos para el componente de paginación */
+.navButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navButton button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navButton button:hover:not(:disabled) {
+  background-color: #f3f4f6;
+}
+
+.navButton button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.navButton button:focus {
+  outline: 2px solid #12782e;
+  outline-offset: 2px;
+}
+
+/* SVG Inline */
+.SVGInline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.SVGInline-svg {
+  display: block;
+}
+
+/* Números de página */
+.screenNumbers {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  text-align: center;
+  padding: 8px 12px;
+  background-color: #f9fafb;
+  border-radius: 6px;
+  min-width: 60px;
+  white-space: nowrap;
+}
+
+/* Estados de los botones */
+.navButton button[disabled] .SVGInline-svg path {
+  fill: #B0B0B0 !important;
+}
+
+.navButton button:not([disabled]) .SVGInline-svg path {
+  fill: #707070;
+}
+
+/* Hover effects */
+.navButton button:hover:not(:disabled) .SVGInline-svg path {
+  fill: #12782e;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .screenNumbers {
+    font-size: 13px;
+    padding: 6px 10px;
+    min-width: 50px;
+  }
+  
+  .navButton button {
+    padding: 6px;
+  }
+}

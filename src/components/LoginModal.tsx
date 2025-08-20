@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
-import { googleSignIn, facebookSignIn, loginWithCredentials, registerUser } from '../services/auth';
+import { userService } from '../modules';
 import { useUser } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 interface LoginModalProps {
@@ -21,6 +22,11 @@ const ModalOverlay = styled.div<{ isShown: boolean }>`
   justify-content: center;
   align-items: center;
   z-index: 9999;
+  
+  /* Asegurar que el modal siempre sea visible */
+  @media (max-width: 1180px) {
+    display: ${props => props.isShown ? 'flex' : 'none'};
+  }
 `;
 
 const ModalContainer = styled.div`
@@ -33,6 +39,36 @@ const ModalContainer = styled.div`
   overflow-y: auto;
   position: relative;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    width: 85%;
+    max-width: 500px;
+    margin: 1rem;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    width: 90%;
+    max-width: none;
+    margin: 1rem;
+    border-radius: 10px;
+    max-height: 92vh;
+  }
+  
+  @media (max-width: 640px) {
+    width: 95%;
+    max-width: none;
+    margin: 1rem;
+    border-radius: 8px;
+    max-height: 95vh;
+  }
+  
+  @media (max-width: 480px) {
+    width: 98%;
+    margin: 0.5rem;
+    border-radius: 6px;
+  }
 `;
 
 const CloseButton = styled.button`
@@ -49,26 +85,124 @@ const CloseButton = styled.button`
   &:hover {
     color: #333;
   }
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    top: 15px;
+    right: 15px;
+    font-size: 22px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    top: 14px;
+    right: 14px;
+    font-size: 20px;
+  }
+  
+  @media (max-width: 640px) {
+    top: 14px;
+    right: 14px;
+    font-size: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    top: 12px;
+    right: 12px;
+    font-size: 18px;
+  }
 `;
 
 const ModalHeader = styled.div`
   text-align: center;
   padding: 24px 24px 0 24px;
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    padding: 22px 22px 0 22px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    padding: 20px 20px 0 20px;
+  }
+  
+  @media (max-width: 640px) {
+    padding: 20px 20px 0 20px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 16px 16px 0 16px;
+  }
 `;
 
 const Brand = styled.img`
   height: 40px;
   margin: 0 auto;
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    height: 38px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    height: 36px;
+  }
+  
+  @media (max-width: 640px) {
+    height: 36px;
+  }
+  
+  @media (max-width: 480px) {
+    height: 32px;
+  }
 `;
 
 const ModalBody = styled.div`
   padding: 24px;
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    padding: 22px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
+  
+  @media (max-width: 640px) {
+    padding: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 16px;
+  }
 `;
 
 const TabsWrapper = styled.div`
   display: flex;
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 24px;
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    margin-bottom: 22px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    margin-bottom: 20px;
+  }
+  
+  @media (max-width: 640px) {
+    margin-bottom: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 18px;
+  }
 `;
 
 const Tab = styled.button<{ active: boolean }>`
@@ -86,12 +220,52 @@ const Tab = styled.button<{ active: boolean }>`
   &:hover {
     color: #059669;
   }
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    padding: 11px;
+    font-size: 15px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    padding: 10px;
+    font-size: 15px;
+  }
+  
+  @media (max-width: 640px) {
+    padding: 10px;
+    font-size: 15px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+    font-size: 14px;
+  }
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    gap: 15px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    gap: 14px;
+  }
+  
+  @media (max-width: 640px) {
+    gap: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 12px;
+  }
 `;
 
 const Input = styled.input<{ error?: boolean }>`
@@ -111,12 +285,52 @@ const Input = styled.input<{ error?: boolean }>`
   &::placeholder {
     color: #9ca3af;
   }
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    padding: 11px 15px;
+    font-size: 15px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    padding: 10px 14px;
+    font-size: 16px; /* Evitar zoom en iOS */
+  }
+  
+  @media (max-width: 640px) {
+    padding: 10px 14px;
+    font-size: 16px; /* Evitar zoom en iOS */
+  }
+  
+  @media (max-width: 480px) {
+    padding: 8px 12px;
+    font-size: 16px;
+  }
 `;
 
 const ErrorText = styled.span`
   color: #ef4444;
   font-size: 12px;
   margin-top: 4px;
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    font-size: 12px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    font-size: 11px;
+  }
+  
+  @media (max-width: 640px) {
+    font-size: 11px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 10px;
+  }
 `;
 
 const Button = styled.button`
@@ -141,6 +355,28 @@ const Button = styled.button`
     cursor: not-allowed;
     transform: none;
   }
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    padding: 11px 15px;
+    font-size: 15px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    padding: 10px 14px;
+    font-size: 16px;
+  }
+  
+  @media (max-width: 640px) {
+    padding: 10px 14px;
+    font-size: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 8px 12px;
+    font-size: 16px;
+  }
 `;
 
 const SessionWrapper = styled.div`
@@ -149,6 +385,31 @@ const SessionWrapper = styled.div`
   align-items: center;
   margin: 16px 0;
   font-size: 14px;
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    margin: 15px 0;
+    font-size: 14px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    margin: 14px 0;
+    font-size: 13px;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  @media (max-width: 640px) {
+    margin: 14px 0;
+    font-size: 13px;
+  }
+  
+  @media (max-width: 480px) {
+    margin: 12px 0;
+    font-size: 12px;
+  }
 `;
 
 const CheckboxWrapper = styled.label`
@@ -157,6 +418,26 @@ const CheckboxWrapper = styled.label`
   gap: 8px;
   cursor: pointer;
   color: #6b7280;
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    font-size: 14px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    font-size: 13px;
+    gap: 6px;
+  }
+  
+  @media (max-width: 640px) {
+    font-size: 13px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 12px;
+    gap: 5px;
+  }
 `;
 
 const ForgotPassword = styled.a`
@@ -167,11 +448,47 @@ const ForgotPassword = styled.a`
   &:hover {
     text-decoration: underline;
   }
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    font-size: 14px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    font-size: 13px;
+  }
+  
+  @media (max-width: 640px) {
+    font-size: 13px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 12px;
+  }
 `;
 
 const SocialSection = styled.div`
   margin-top: 24px;
   text-align: center;
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    margin-top: 22px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    margin-top: 20px;
+  }
+  
+  @media (max-width: 640px) {
+    margin-top: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    margin-top: 18px;
+  }
 `;
 
 const SocialTitle = styled.p`
@@ -197,6 +514,28 @@ const SocialTitle = styled.p`
   &::after {
     right: 0;
   }
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  
+  @media (max-width: 640px) {
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
 `;
 
 const SocialButton = styled.button<{ variant: 'google' | 'facebook' }>`
@@ -220,11 +559,55 @@ const SocialButton = styled.button<{ variant: 'google' | 'facebook' }>`
     background: ${props => props.variant === 'google' ? '#f9fafb' : '#166fe5'};
     transform: translateY(-1px);
   }
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    padding: 11px 15px;
+    font-size: 14px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 640px) {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
 `;
 
 const SocialIcon = styled.img`
   width: 20px;
   height: 20px;
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    width: 19px;
+    height: 19px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    width: 18px;
+    height: 18px;
+  }
+  
+  @media (max-width: 640px) {
+    width: 18px;
+    height: 18px;
+  }
+  
+  @media (max-width: 480px) {
+    width: 16px;
+    height: 16px;
+  }
 `;
 
 const FeedbackMessage = styled.div<{ type: 'error' | 'success' }>`
@@ -235,6 +618,32 @@ const FeedbackMessage = styled.div<{ type: 'error' | 'success' }>`
   background: ${props => props.type === 'error' ? '#fef2f2' : '#f0fdf4'};
   color: ${props => props.type === 'error' ? '#dc2626' : '#059669'};
   border: 1px solid ${props => props.type === 'error' ? '#fecaca' : '#bbf7d0'};
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    padding: 11px;
+    margin: 15px 0;
+    font-size: 14px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    padding: 10px;
+    margin: 14px 0;
+    font-size: 13px;
+  }
+  
+  @media (max-width: 640px) {
+    padding: 10px;
+    margin: 14px 0;
+    font-size: 13px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 8px;
+    margin: 12px 0;
+    font-size: 12px;
+  }
 `;
 
 const FooterText = styled.p`
@@ -243,6 +652,28 @@ const FooterText = styled.p`
   text-align: center;
   margin-top: 16px;
   line-height: 1.5;
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    font-size: 12px;
+    margin-top: 15px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    font-size: 11px;
+    margin-top: 14px;
+  }
+  
+  @media (max-width: 640px) {
+    font-size: 11px;
+    margin-top: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 10px;
+    margin-top: 12px;
+  }
 `;
 
 const FooterLink = styled.a`
@@ -252,6 +683,24 @@ const FooterLink = styled.a`
   &:hover {
     text-decoration: underline;
   }
+  
+  /* Responsive para tablets */
+  @media (max-width: 1180px) {
+    font-size: 12px;
+  }
+  
+  /* Responsive para móvil */
+  @media (max-width: 768px) {
+    font-size: 11px;
+  }
+  
+  @media (max-width: 640px) {
+    font-size: 11px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 10px;
+  }
 `;
 
 const LoginModal: React.FC<LoginModalProps> = ({
@@ -259,7 +708,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
     onClose,
     logOrReg = 'login'
 }) => {
-    const { login } = useUser();
+    const { login, register, googleLogin } = useUser();
+    const navigate = useNavigate();
     const [content, setContent] = useState<'login' | 'register'>(logOrReg as 'login' | 'register');
     const [formData, setFormData] = useState({
         email: '',
@@ -317,6 +767,27 @@ const LoginModal: React.FC<LoginModalProps> = ({
         return Object.keys(newErrors).length === 0;
     };
 
+    // Función para normalizar el usuario del backend al formato esperado por el contexto
+    const normalizeUser = (rawUser: any) => {
+        console.log('Usuario raw del backend:', rawUser); // Debug log
+
+        return {
+            id: rawUser.id || rawUser.pk || rawUser.user_id || 0,
+            full_name: rawUser.full_name || rawUser.fullName || rawUser.name || '',
+            first_name: rawUser.first_name || rawUser.firstName || '',
+            last_name: rawUser.last_name || rawUser.lastName || '',
+            username: rawUser.username || rawUser.email || '',
+            email: rawUser.email || '',
+            type_id: rawUser.type_id || rawUser.typeId || '0000',
+            gender: rawUser.gender || 'masculino',
+            location: rawUser.location || '',
+            phone: rawUser.phone || rawUser.mobile || '',
+            dni: rawUser.dni || '',
+            birth_date: rawUser.birth_date || rawUser.birthDate || '',
+            subscription: rawUser.subscription || rawUser.acceptPromotional || false
+        };
+    };
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateForm()) return;
@@ -325,13 +796,19 @@ const LoginModal: React.FC<LoginModalProps> = ({
         setFeedbackMessage(null);
 
         try {
-            const response = await loginWithCredentials(formData.email, formData.password);
-            if (response.data.user) {
-                setFeedbackMessage({ type: 'success', message: 'Login exitoso!' });
-                // Guardar el usuario en el contexto y redirigir
-                login(response.data.user);
-                setTimeout(() => onClose(), 1000);
-            }
+            console.log('🔐 Iniciando login con:', formData.email);
+
+            // Usar solo la función del contexto, que ya maneja la llamada al backend
+            await login(formData.email, formData.password);
+
+            console.log('✅ Login exitoso, redirigiendo a página principal...');
+            setFeedbackMessage({ type: 'success', message: 'Login exitoso! Redirigiendo...' });
+
+            // Solo cerrar el modal después del login exitoso
+            setTimeout(() => {
+                console.log('🚀 Login exitoso, cerrando modal...');
+                onClose(); // Solo cerrar el modal, no navegar
+            }, 1500);
         } catch (error: any) {
             setFeedbackMessage({
                 type: 'error',
@@ -350,18 +827,24 @@ const LoginModal: React.FC<LoginModalProps> = ({
         setFeedbackMessage(null);
 
         try {
-            const response = await registerUser(
-                formData.fullName,
-                formData.email,
-                formData.password,
-                formData.password
-            );
-            if (response.user) {
-                setFeedbackMessage({ type: 'success', message: 'Registro exitoso!' });
-                // Guardar el usuario en el contexto y redirigir
-                login(response.user);
-                setTimeout(() => onClose(), 1000);
-            }
+            console.log('📝 Iniciando registro con:', formData.email);
+
+            // Usar solo la función del contexto, que ya maneja la llamada al backend
+            await register({
+                fullName: formData.fullName,
+                username: formData.email,
+                password: formData.password,
+                passwordB: formData.password
+            });
+
+            console.log('✅ Registro exitoso, redirigiendo a página principal...');
+            setFeedbackMessage({ type: 'success', message: 'Registro exitoso! Redirigiendo...' });
+
+            // Solo cerrar el modal después del registro exitoso
+            setTimeout(() => {
+                console.log('🚀 Registro exitoso, cerrando modal...');
+                onClose(); // Solo cerrar el modal, no navegar
+            }, 1500);
         } catch (error: any) {
             setFeedbackMessage({
                 type: 'error',
@@ -372,26 +855,23 @@ const LoginModal: React.FC<LoginModalProps> = ({
         }
     };
 
-    const googleLogin = useGoogleLogin({
+    const googleOAuthLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
-                const response = await googleSignIn({ token: tokenResponse.access_token });
-                const rawUser = response.user || response.data?.user;
-                if (rawUser) {
-                    const normalizedUser = {
-                        id: rawUser.id ?? rawUser.pk ?? rawUser.user_id,
-                        fullName: rawUser.fullName ?? rawUser.full_name ?? rawUser.name ?? '',
-                        email: rawUser.email ?? rawUser.username ?? '',
-                        phone: rawUser.phone ?? rawUser.mobile ?? undefined,
-                        birthDate: rawUser.birthDate ?? rawUser.birth_date ?? undefined,
-                        acceptPromotional: rawUser.acceptPromotional ?? rawUser.accept_promotional ?? undefined,
-                    } as any;
-                    setFeedbackMessage({ type: 'success', message: 'Login con Google exitoso!' });
-                    // Guardar el usuario en el contexto y redirigir
-                    login(normalizedUser);
-                    // Redirigir a datos personales (perfil)
-                    setTimeout(() => onClose(), 300);
-                }
+                console.log('🔐 Iniciando login con Google...');
+
+                // Usar solo la función del contexto
+                await googleLogin({ token: tokenResponse.access_token });
+
+                console.log('✅ Login con Google exitoso, redirigiendo a página principal...');
+                setFeedbackMessage({ type: 'success', message: 'Login con Google exitoso! Redirigiendo...' });
+
+                // Redirigir a la página principal después del login exitoso
+                setTimeout(() => {
+                    console.log('🚀 Redirigiendo a página principal...');
+                    onClose(); // Cerrar el modal primero
+                    navigate('/'); // Usar React Router para navegar
+                }, 1500);
             } catch (error: any) {
                 setFeedbackMessage({
                     type: 'error',
@@ -549,7 +1029,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
                         <SocialButton
                             variant="google"
-                            onClick={() => googleLogin()}
+                            onClick={() => googleOAuthLogin()}
                             type="button"
                         >
                             <SocialIcon src="/google_logo.png" alt="Google" />

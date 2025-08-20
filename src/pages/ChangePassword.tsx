@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { changePassword } from '../services/auth';
+import { userService } from '../modules';
 import ProfileLayout from '../components/ProfileLayout';
 import styled from 'styled-components';
 
@@ -77,7 +77,7 @@ const Button = styled.button`
 
 const ChangePassword: React.FC = () => {
     const navigate = useNavigate();
-    const { user, isLoggedIn } = useUser();
+    const { user, isLoggedIn, favorites, savedSearches } = useUser();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         currentPassword: '',
@@ -99,10 +99,10 @@ const ChangePassword: React.FC = () => {
         setIsLoading(true);
 
         try {
-            await changePassword({
-                old_password: formData.currentPassword,
+            await userService.changePassword({
+                current_password: formData.currentPassword,
                 new_password: formData.newPassword,
-                confirm_password: formData.confirmPassword
+                new_password_b: formData.confirmPassword
             });
 
             // Limpiar formulario
@@ -122,7 +122,11 @@ const ChangePassword: React.FC = () => {
     };
 
     return (
-        <ProfileLayout title="Cambio de contraseña">
+        <ProfileLayout
+            title="Cambio de contraseña"
+            favoritesCount={favorites.length}
+            searchesCount={savedSearches.length}
+        >
             <FormContainer>
                 <form onSubmit={handleSubmit}>
                     <FormGroup>

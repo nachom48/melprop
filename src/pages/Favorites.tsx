@@ -1,98 +1,143 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useUser } from '../context/UserContext';
-import { useNavigate } from 'react-router-dom';
-import { removeFavorite, removeAllFavorites } from '../services/auth';
-import PropertyCard from '../components/PropertyCard';
+import ProfileLayout from '../components/ProfileLayout';
+import styled from 'styled-components';
+
+const FavoritesContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
+
+const EmptyState = styled.div`
+  text-align: center;
+  padding: 48px 24px;
+  color: #6b7280;
+`;
+
+const EmptyIcon = styled.div`
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: #d1d5db;
+`;
+
+const EmptyTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #374151;
+`;
+
+const EmptyText = styled.p`
+  font-size: 14px;
+  color: #6b7280;
+`;
+
+const FavoritesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const FavoriteCard = styled.div`
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  background: white;
+  transition: all 0.2s;
+  
+  &:hover {
+    border-color: #059669;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+const PropertyTitle = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+`;
+
+const PropertyDetails = styled.p`
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 8px;
+`;
+
+const RemoveButton = styled.button`
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background: #dc2626;
+  }
+`;
 
 const Favorites: React.FC = () => {
-  const { user, isLoggedIn, favorites, loadFavorites } = useUser();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/');
-      return;
-    }
-    loadFavorites();
-  }, [isLoggedIn, navigate, loadFavorites]);
+  const { favorites, removeFromFavorites } = useUser();
 
   const handleRemoveFavorite = async (id: number) => {
-    try {
-      await removeFavorite(id);
-      await loadFavorites();
-    } catch (error) {
-      console.error('Error removing favorite:', error);
+    if (window.confirm('¿Estás seguro de que quieres quitar esta propiedad de favoritos?')) {
+      await removeFromFavorites(id);
     }
   };
-
-  const handleRemoveAllFavorites = async () => {
-    if (window.confirm('¿Estás seguro que deseas eliminar todos los favoritos?')) {
-      try {
-        await removeAllFavorites();
-        await loadFavorites();
-      } catch (error) {
-        console.error('Error removing all favorites:', error);
-      }
-    }
-  };
-
-  if (!isLoggedIn) {
-    return null;
-  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-green-text">Favoritos</h1>
-          {favorites.length > 0 && (
-            <button
-              onClick={handleRemoveAllFavorites}
-              className="btn btn-white text-red-600 hover:bg-red-50"
-            >
-              Eliminar todos
-            </button>
-          )}
-        </div>
-
+    <ProfileLayout
+      title="Mis favoritos"
+      favoritesCount={favorites.length}
+      searchesCount={0}
+    >
+      <FavoritesContainer>
         {favorites.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <i className="fas fa-heart text-6xl"></i>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">
-              No hay favoritos agregados
-            </h3>
-            <p className="text-gray-500">
-              Cuando agregues propiedades a favoritos, aparecerán aquí
-            </p>
-          </div>
+          <EmptyState>
+            <EmptyIcon>❤️</EmptyIcon>
+            <EmptyTitle>No tienes favoritos</EmptyTitle>
+            <EmptyText>
+              Aún no has agregado ninguna propiedad a tus favoritos.
+              <br />
+              Explora las propiedades disponibles y agrega las que más te gusten.
+            </EmptyText>
+          </EmptyState>
         ) : (
-          <div>
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-green-text mb-2">
-                Propiedades <span className="text-gray-500">({favorites.length})</span>
-              </h2>
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#374151' }}>
+                Propiedades favoritas ({favorites.length})
+              </h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {favorites.map((property) => (
-                <div key={property.id} className="relative">
-                  <PropertyCard property={property} />
-                  <button
-                    onClick={() => handleRemoveFavorite(property.id)}
-                    className="absolute top-2 right-2 bg-white rounded-full p-2 shadow-md hover:bg-red-50 transition-colors"
-                    title="Eliminar de favoritos"
-                  >
-                    <i className="fas fa-times text-red-500"></i>
-                  </button>
-                </div>
+            <FavoritesList>
+              {favorites.map((favorite: any) => (
+                <FavoriteCard key={favorite.id}>
+                  <PropertyTitle>{favorite.title || favorite.name || 'Propiedad'}</PropertyTitle>
+                  <PropertyDetails>
+                    {favorite.location && `${favorite.location} • `}
+                    {favorite.price && `$${favorite.price.toLocaleString()}`}
+                  </PropertyDetails>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px', color: '#9ca3af' }}>
+                      Agregado recientemente
+                    </span>
+                    <RemoveButton onClick={() => handleRemoveFavorite(favorite.id)}>
+                      Quitar de favoritos
+                    </RemoveButton>
+                  </div>
+                </FavoriteCard>
               ))}
-            </div>
-          </div>
+            </FavoritesList>
+          </>
         )}
-      </div>
-    </div>
+      </FavoritesContainer>
+    </ProfileLayout>
   );
 };
 

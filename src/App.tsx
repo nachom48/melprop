@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { UserProvider } from './context/UserContext';
 import Home from './pages/Home';
-import NavbarNextUI from './components/NavbarNextUI';
+import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Terrenos from './pages/Terrenos';
 import TasacionesPage from './pages/TasacionesPage';
@@ -21,6 +21,9 @@ import Alquileres from './pages/Alquileres';
 import LoginPage from './pages/Login';
 import Asesoramiento from './pages/Asesoramiento';
 import VentaAlquiler from './pages/VentaAlquiler';
+import Resultados from './pages/Resultados';
+import AdministracionAlquileres from './pages/AdministracionAlquileres';
+import Barrios from './pages/Barrios';
 import './index.css';
 
 function App() {
@@ -29,7 +32,7 @@ function App() {
       <BrowserRouter>
         <UserProvider>
           <div className="min-h-screen bg-white text-black">
-            <NavbarNextUI />
+            <Navbar />
             <main>
               <Routes>
                 <Route path="/" element={<Home />} />
@@ -52,10 +55,13 @@ function App() {
                 <Route path="/resultados/alquileres.html" element={<Emprendimientos />} />
                 <Route path="/compra" element={<Compra />} />
                 <Route path="/alquileres" element={<Alquileres />} />
+                <Route path="/resultados" element={<Resultados />} />
                 <Route path="/asesoramiento-juridico" element={<Asesoramiento />} />
                 <Route path="/servicios/venta_alquiler" element={<VentaAlquiler />} />
                 <Route path="/venta-alquiler" element={<VentaAlquiler />} />
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/adm-alquileres" element={<AdministracionAlquileres />} />
+                <Route path="/barrios" element={<Barrios />} />
               </Routes>
             </main>
             <Footer />

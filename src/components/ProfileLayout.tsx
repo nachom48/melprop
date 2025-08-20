@@ -80,8 +80,8 @@ interface ProfileLayoutProps {
 const ProfileLayout: React.FC<ProfileLayoutProps> = ({
     children,
     title,
-    favoritesCount = 5,
-    searchesCount = 5
+    favoritesCount = 0,
+    searchesCount = 0
 }) => {
     const location = useLocation();
 

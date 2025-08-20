@@ -4,6 +4,18 @@ const API_URI = process.env.REACT_APP_API_URI || 'http://backend-dev-melpropieda
 
 axios.defaults.withCredentials = true;
 
+// Configurar interceptor para incluir cookies en todas las requests
+axios.interceptors.request.use(
+    (config) => {
+        // Asegurar que withCredentials esté habilitado para todas las requests
+        config.withCredentials = true;
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 // Funciones de autenticación existentes
 export const loginWithCredentials = async (username: string, password: string) => {
     const response = await axios.post(`${API_URI}/login/`, { username, password });
@@ -26,6 +38,8 @@ export const logoutUser = async () => {
 };
 
 export const editProfileData = async (data: any) => {
+    console.log('Llamando a endpoint:', `${API_URI}/me/`); // Debug log
+    console.log('Método HTTP: PATCH'); // Debug log
     const response = await axios.patch(`${API_URI}/me/`, data);
     return response.data;
 };
@@ -56,20 +70,47 @@ export const facebookSignIn = async (data: { email: string; name: string; id: st
     return response.data;
 };
 
-// Funciones de favoritos
+// Funciones de favoritos (implementadas como en el repositorio original)
 export const setFavorite = async (id: number | string) => {
-    const response = await axios.post(`${API_URI}/favorites/`, { id });
-    return response.data;
+    try {
+        const response = await axios.post(`${API_URI}/favorites/`, { id });
+        return response.data;
+    } catch (error: any) {
+        console.error('Error al agregar favorito:', error);
+        // Si hay error de autenticación, intentar recargar el usuario
+        if (error.response?.status === 400 && error.response?.data?.message === 'No hay usuario logueado') {
+            throw new Error('Sesión expirada. Por favor, vuelve a iniciar sesión.');
+        }
+        throw error;
+    }
 };
 
 export const getFavorites = async () => {
-    const response = await axios.get(`${API_URI}/favorites/`);
-    return response.data;
+    try {
+        const response = await axios.get(`${API_URI}/favorites/`);
+        return response.data;
+    } catch (error: any) {
+        console.error('Error al obtener favoritos:', error);
+        // Si hay error de autenticación, retornar array vacío
+        if (error.response?.status === 400 && error.response?.data?.message === 'No hay usuario logueado') {
+            return { properties: [] };
+        }
+        throw error;
+    }
 };
 
 export const removeFavorite = async (id: number | string) => {
-    const response = await axios.get(`${API_URI}/favorites/delete/${id}/`);
-    return response.data;
+    try {
+        const response = await axios.get(`${API_URI}/favorites/delete/${id}/`);
+        return response.data;
+    } catch (error: any) {
+        console.error('Error al remover favorito:', error);
+        // Si hay error de autenticación, intentar recargar el usuario
+        if (error.response?.status === 400 && error.response?.data?.message === 'No hay usuario logueado') {
+            throw new Error('Sesión expirada. Por favor, vuelve a iniciar sesión.');
+        }
+        throw error;
+    }
 };
 
 export const removeAllFavorites = async () => {

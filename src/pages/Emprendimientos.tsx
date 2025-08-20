@@ -1,796 +1,387 @@
-import React, { useState, useEffect } from 'react';
-import { getDevelopments, getDevelopmentBanners } from '../services/auth';
-import PropertyCard from '../components/PropertyCard';
-import styled from 'styled-components';
-
-const EmprendimientosContainer = styled.div`
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-  }
-
-  .search-filters {
-    margin-top: 2.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  @media (min-width: 768px) {
-    .search-filters {
-      flex-direction: row;
-    }
-  }
-
-  .wrapper-input-search {
-    flex: 1;
-  }
-
-  .input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 14px;
-  }
-
-  .select {
-    padding: 12px 16px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 14px;
-    background: white;
-  }
-
-  .btn {
-    padding: 12px 24px;
-    background: linear-gradient(to right, #ACA81F, #E8E215);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn:hover {
-    background: linear-gradient(to right, #E8E215, #F5F3B5);
-  }
-
-  .btn-white {
-    background: white;
-    color: #013921;
-    border: 1px solid #013921;
-  }
-
-  .btn-white:hover {
-    background: #f5f5f5;
-  }
-
-  .results-summary {
-    margin-top: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    border-radius: 8px;
-    background: #f5f5f5;
-    padding: 1rem;
-  }
-
-  @media (min-width: 768px) {
-    .results-summary {
-      flex-direction: row;
-    }
-  }
-
-  .text-green-menu {
-    color: #12782e;
-  }
-
-  .text-sm {
-    font-size: 14px;
-  }
-
-  .font-bold {
-    font-weight: 700;
-  }
-
-  .results-actions {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  @media (min-width: 768px) {
-    .results-actions {
-      flex-direction: row;
-    }
-  }
-
-  .results-actions ul {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  @media (min-width: 768px) {
-    .results-actions ul {
-      flex-direction: row;
-    }
-  }
-
-  .results-actions li {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .results-actions a {
-    font-size: 14px;
-    color: #013921;
-    text-decoration: none;
-  }
-
-  .results-actions img {
-    width: 16px;
-    height: 16px;
-  }
-
-  .properties-grid {
-    margin: 2.5rem 0;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-  }
-
-  @media (min-width: 768px) {
-    .grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
-  .property-card {
-    border: 1px solid #b7b7b7;
-    border-radius: 24px;
-    overflow: hidden;
-    transition: transform 0.2s;
-  }
-
-  .property-card:hover {
-    transform: translateY(-2px);
-  }
-
-  .property-image {
-    position: relative;
-    overflow: hidden;
-    border-radius: 24px 24px 0 0;
-  }
-
-  .property-image img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-  }
-
-  .favorite-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: white;
-    border: none;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .favorite-btn:hover {
-    background: #f0f0f0;
-  }
-
-  .favorite-btn.active {
-    color: #ff6b6b;
-  }
-
-  .property-content {
-    padding: 1rem;
-  }
-
-  .operation-badge {
-    color: #003b1f;
-    font-size: 14px;
-  }
-
-  .property-price {
-    color: #013921;
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0.75rem 0;
-  }
-
-  .property-address {
-    margin-bottom: 0.75rem;
-  }
-
-  .property-address strong {
-    display: block;
-    margin-bottom: 0.25rem;
-  }
-
-  .property-address p {
-    font-size: 14px;
-    color: #666;
-  }
-
-  .property-features {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 11px;
-  }
-
-  .property-features li {
-    background: #f5f5f5;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-
-  .opportunities-section {
-    background: #f5f5f5;
-    border-radius: 16px;
-    padding: 1rem;
-    margin: 2.5rem 0;
-  }
-
-  @media (min-width: 768px) {
-    .opportunities-section {
-      padding: 2.5rem;
-    }
-  }
-
-  .opportunities-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2.5rem;
-  }
-
-  @media (min-width: 768px) {
-    .opportunities-content {
-      flex-direction: row;
-    }
-  }
-
-  .opportunities-text {
-    flex: 1;
-  }
-
-  .opportunities-title {
-    color: #003b1f;
-    font-size: 36px;
-    margin-bottom: 0.75rem;
-  }
-
-  .opportunities-description {
-    color: #12782e;
-    font-size: 14px;
-    line-height: 1.5;
-    max-width: 400px;
-  }
-
-  .banner-container {
-    position: relative;
-    flex: 1;
-  }
-
-  .banner-swiper {
-    border: 2px solid #ccc;
-    border-radius: 24px;
-    height: 210px;
-    width: 320px;
-  }
-
-  @media (min-width: 768px) {
-    .banner-swiper {
-      height: 300px;
-      width: 528px;
-    }
-  }
-
-  .banner-slide {
-    display: flex;
-    overflow: hidden;
-    border-radius: 16px;
-  }
-
-  .banner-content {
-    background: white;
-    padding: 1rem;
-  }
-
-  @media (min-width: 768px) {
-    .banner-content {
-      padding: 1.5rem 2rem;
-    }
-  }
-
-  .banner-info {
-    border-bottom: 1px solid #d4f2ac;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1.5rem;
-  }
-
-  .banner-price {
-    color: #013921;
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0.75rem 0;
-  }
-
-  @media (min-width: 768px) {
-    .banner-price {
-      font-size: 24px;
-    }
-  }
-
-  .banner-address {
-    margin-bottom: 0.75rem;
-  }
-
-  .banner-address strong {
-    display: block;
-    margin-bottom: 0.25rem;
-  }
-
-  .banner-address p {
-    font-size: 14px;
-    color: #666;
-  }
-
-  .banner-features {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 11px;
-  }
-
-  .banner-features li {
-    background: #f5f5f5;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-
-  .banner-btn {
-    background: linear-gradient(to right, #ACA81F, #E8E215);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  @media (min-width: 768px) {
-    .banner-btn {
-      padding: 12px 40px;
-    }
-  }
-
-  .banner-image {
-    flex: 1;
-  }
-
-  .banner-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .recommendations-section {
-    margin: 2.5rem 0;
-  }
-
-  .recommendations-header {
-    margin-bottom: 1.5rem;
-  }
-
-  .recommendations-title {
-    font-size: 24px;
-    margin-bottom: 0.5rem;
-  }
-
-  .recommendations-subtitle {
-    font-size: 14px;
-    color: #666;
-  }
-
-  .banner-section {
-    margin: 2.5rem 0;
-  }
-
-  .banner-full {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  @media (min-width: 768px) {
-    .banner-full {
-      flex-direction: row;
-      height: 250px;
-    }
-  }
-
-  .banner-image-full {
-    height: 100%;
-    flex: 1;
-  }
-
-  @media (min-width: 768px) {
-    .banner-image-full {
-      flex: 0 0 498px;
-    }
-  }
-
-  .banner-image-full img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .banner-content-full {
-    background: #8acc36;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 1.5rem 2rem;
-  }
-
-  @media (min-width: 768px) {
-    .banner-content-full {
-      padding: 2.5rem;
-    }
-  }
-
-  .banner-title-full {
-    color: #003b1f;
-    font-size: 30px;
-    margin-bottom: 1rem;
-  }
-
-  .banner-description-full {
-    color: white;
-    margin-bottom: 1rem;
-  }
-
-  .btn-plain {
-    background: transparent;
-    color: white;
-    border: 1px solid white;
-    border-radius: 8px;
-    padding: 12px 40px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    text-align: center;
-  }
-
-  .btn-plain:hover {
-    background: white;
-    color: #8acc36;
-  }
-
-  .relative {
-    position: relative;
-  }
-
-  .absolute {
-    position: absolute;
-  }
-
-  .top-[-10px] {
-    top: -10px;
-  }
-
-  .right-[-10px] {
-    right: -10px;
-  }
-
-  .z-4 {
-    z-index: 4;
-  }
-
-  .flex {
-    display: flex;
-  }
-
-  .h-8 {
-    height: 32px;
-  }
-
-  .w-8 {
-    width: 32px;
-  }
-
-  .items-center {
-    align-items: center;
-  }
-
-  .justify-center {
-    justify-content: center;
-  }
-
-  .rounded-full {
-    border-radius: 50%;
-  }
-
-  .border-3 {
-    border-width: 3px;
-  }
-
-  .border-white {
-    border-color: white;
-  }
-
-  .text-sm {
-    font-size: 14px;
-  }
-
-  .font-bold {
-    font-weight: 700;
-  }
-
-  .text-white {
-    color: white;
-  }
-
-  .bg-green-menu {
-    background-color: #12782e;
-  }
-`;
+import React, { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import developmentService from '../services/developmentService';
+import { Development } from '../repositories/developmentRepository';
+import DevelopmentCard from '../components/DevelopmentCard';
+import DevelopmentMap from '../components/DevelopmentMap';
+import ServiciosExclusivos from '../components/ServiciosExclusivos';
+import BarriosSection from '../components/BarriosSection';
+import SearchFilters, { FilterValues } from '../components/SearchFilters';
+import Pagination from '../components/Pagination';
+import { useUser } from '../context/UserContext';
+import LoginModal from '../components/LoginModal';
+import OpportunitiesSlider from '../components/OpportunitiesSlider';
 
 const Emprendimientos: React.FC = () => {
-  const [properties, setProperties] = useState<any[]>([]);
-  const [banners, setBanners] = useState<any[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { user } = useUser();
+  const [developments, setDevelopments] = useState<Development[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isMapView, setIsMapView] = useState(false);
+
+  // Obtener texto de resultados personalizado para emprendimientos
+  const getResultsText = () => {
+    const filters = getActiveFiltersFromURL();
+    let text = "Emprendimientos";
+
+    if (filters.operation) {
+      // Mapear los valores del backend a texto legible
+      let operationText = '';
+      if (filters.operation === 'venta') {
+        operationText = 'Venta';
+      } else if (filters.operation === 'alquiler') {
+        operationText = 'Alquiler';
+      } else {
+        operationText = filters.operation;
+      }
+      text += ` en ${operationText}`;
+    }
+    if (filters.propertyType && filters.propertyType.length > 0) {
+      const propertyTypes = filters.propertyType.map((prop: string) =>
+        prop.charAt(0).toUpperCase() + prop.slice(1)
+      ).join(' y ');
+      text += ` - ${propertyTypes}`;
+    }
+    if (filters.location) {
+      text += ` en ${filters.location}`;
+    }
+    return text;
+  };
+
+  const getActiveFiltersFromURL = (): FilterValues => {
+    return {
+      location: searchParams.get('location') || '',
+      operation: searchParams.get('operation') || '',
+      propertyType: searchParams.getAll('propertyType'),
+      rooms: searchParams.getAll('rooms'),
+      price: searchParams.get('price') || '',
+      priceFrom: searchParams.get('priceFrom') || '',
+      priceTo: searchParams.get('priceTo') || '',
+      currency: searchParams.get('currency') || '',
+      characteristics: searchParams.getAll('characteristics'),
+      status: searchParams.getAll('status'),
+      additionalFilters: [],
+      sortOrder: searchParams.get('sort') || 'relevantes'
+    };
+  };
+
+  const convertFiltersForBackend = (filters: any): any => {
+    const backendFilters: any = {};
+
+    // Para desarrollos, respetar el orden de producción: rooms, location, stage
+    // rooms: enviar "Todos" si está vacío
+    if (filters.rooms && filters.rooms.length > 0) {
+      backendFilters.rooms = filters.rooms.join(',');
+    } else {
+      backendFilters.rooms = 'Todos';
+    }
+
+    // location: enviar "Todas" si está vacío
+    if (filters.location && filters.location.trim() !== '') {
+      backendFilters.location = filters.location;
+    } else {
+      backendFilters.location = 'Todas';
+    }
+
+    // stage: enviar "Todas" si está vacío
+    if (filters.propertyType && filters.propertyType.length > 0) {
+      backendFilters.stage = filters.propertyType.join(',');
+    } else {
+      backendFilters.stage = 'Todas';
+    }
+
+    // Otros filtros
+    if (filters.operation) backendFilters.operation = filters.operation;
+    if (filters.priceFrom) backendFilters.min_price = filters.priceFrom;
+    if (filters.priceTo) backendFilters.max_price = filters.priceTo;
+    if (filters.currency) backendFilters.currency = filters.currency;
+    if (filters.characteristics && filters.characteristics.length > 0) backendFilters.characteristics = filters.characteristics.join(',');
+    if (filters.status && filters.status.length > 0) backendFilters.status = filters.status.join(',');
+    if (filters.sortOrder && filters.sortOrder !== 'relevantes') backendFilters.order_by = filters.sortOrder;
+
+    // Siempre enviar page, incluso cuando es 1
+    backendFilters.page = filters.page || currentPage;
+
+    return backendFilters;
+  };
+
+  const loadDevelopments = async (filters: any = {}) => {
+    try {
+      setLoading(true);
+      const backendFilters = convertFiltersForBackend(filters);
+      console.log('🔍 Emprendimientos - Filtros originales:', filters);
+      console.log('🔍 Emprendimientos - Filtros convertidos para backend:', backendFilters);
+      console.log('🔍 Emprendimientos - Página actual:', currentPage);
+
+      const response = await developmentService.getAllDevelopments(backendFilters);
+      console.log('✅ Emprendimientos - Respuesta del servicio:', response);
+      console.log('📊 Emprendimientos - Total de resultados:', response.total);
+
+      setDevelopments(response.objects);
+      setTotalPages(response.pages);
+      setTotalResults(response.total);
+
+      console.log('📊 Emprendimientos - totalResults actualizado a:', response.total);
+    } catch (error) {
+      console.error('❌ Error al cargar emprendimientos:', error);
+      setDevelopments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFiltersChange = (newFilters: any) => {
+    console.log('🔄 Emprendimientos - Filtros cambiados:', newFilters);
+
+    // Actualizar URL con nuevos filtros
+    const params = new URLSearchParams();
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        if (Array.isArray(value)) {
+          value.forEach(v => params.append(key, v));
+        } else {
+          params.set(key, value.toString());
+        }
+      }
+    });
+
+    // Resetear a página 1 cuando cambian los filtros
+    params.delete('page');
+    setCurrentPage(1);
+
+    setSearchParams(params);
+    loadDevelopments(newFilters);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    const activeFilters = getActiveFiltersFromURL();
+    loadDevelopments({ ...activeFilters, page });
+
+    // Actualizar URL con la nueva página
+    const params = new URLSearchParams(searchParams);
+    params.set('page', page.toString());
+    setSearchParams(params);
+  };
+
+  // Toggle entre vista de listado y mapa
+  const handleToggleView = () => {
+    console.log('🔄 Cambiando vista:', !isMapView ? 'Mapa' : 'Listado');
+    setIsMapView(!isMapView);
+  };
+
+  // Abrir modal de login
+  const handleOpenLoginModal = () => {
+    setShowLoginModal(true);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [propertiesData, bannersData] = await Promise.all([
-          getDevelopments(),
-          getDevelopmentBanners()
-        ]);
-
-        setProperties(propertiesData?.objects || []);
-        setBanners(bannersData || []);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    const activeFilters = getActiveFiltersFromURL();
+    loadDevelopments(activeFilters);
   }, []);
+
+  // Debug: mostrar totalResults
+  console.log('🔍 Emprendimientos - totalResults en render:', totalResults);
+  console.log('🔍 Emprendimientos - developments.length:', developments.length);
 
   if (loading) {
     return (
-      <EmprendimientosContainer>
-        <div className="container">
-          <div style={{ textAlign: 'center', padding: '2rem' }}>
-            Cargando emprendimientos...
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Cargando emprendimientos...</p>
         </div>
-      </EmprendimientosContainer>
+      </div>
     );
   }
 
   return (
-    <EmprendimientosContainer>
-      <div className="container">
-        {/* Barra de búsqueda y filtros */}
-        <div className="search-filters">
-          <div className="wrapper-input-search">
-            <input type="text" placeholder="Ingresá ciudades o barrios" className="input" />
-          </div>
-          <div>
-            <select className="select">
-              <option value="">Comprar</option>
-              <option value="">Vender</option>
-            </select>
-          </div>
-          <div>
-            <select className="select">
-              <option value="">Propiedades</option>
-            </select>
-          </div>
-          <div>
-            <select className="select">
-              <option value="">Amb | Dorm</option>
-            </select>
-          </div>
-          <div>
-            <select className="select">
-              <option value="">Precio</option>
-              <option value="">Mas de 50.000$</option>
-              <option value="">Mas de 100.000$</option>
-            </select>
-          </div>
-          <div className="relative">
-            <div className="bg-green-menu text-small absolute top-[-10px] right-[-10px] z-4 flex h-8 w-8 items-center justify-center rounded-full border-3 border-white text-sm font-bold text-white">
-              <span>3</span>
-            </div>
-            <button className="btn btn-white">Más filtros</button>
-          </div>
-        </div>
-
-        {/* Resumen de resultados */}
-        <div className="results-summary">
-          <div>
-            <div className="text-green-menu text-sm font-bold">Emprendimientos en Oportunidad</div>
-            <div className="text-sm">{properties.length} resultados</div>
-          </div>
-          <div className="results-actions">
-            <ul>
-              <li><a href="">Ver mapa</a><img src="/map.svg" alt="" /></li>
-              <li><a href="">Ver favoritos</a><img src="/heart.svg" alt="" /></li>
-              <li><a href="">Guardar búsqueda</a><img src="/save.svg" alt="" /></li>
-              <li>
-                <select className="select">
-                  <option value="">En oportunidad</option>
-                </select>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Grid de propiedades con el mismo estilo de Home (PropertyCard) */}
-        <div className="properties-grid">
-          <div className="grid">
-            {properties.slice(0, 6).map((dev: any, index: number) => {
-              const mapped = {
-                id: dev.id || index,
-                main_image: dev.main_image,
-                price: dev.min_price ? `U$S ${dev.min_price}` : dev.price,
-                address: dev.address?.split(',')[0] || dev.title,
-                location: dev.neighborhood || dev.address,
-                area: dev.area,
-                rooms: dev.rooms,
-                bathrooms: dev.bathrooms,
-                parking: dev.parking,
-                operation_type: dev.property_type ? `Venta - ${dev.property_type}` : 'Venta',
-                title: dev.title,
-              } as any;
-              return (
-                <PropertyCard key={mapped.id} property={mapped} />
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Sección de oportunidades */}
-        <div className="opportunities-section">
-          <div className="opportunities-content">
-            <div className="opportunities-text">
-              <h3 className="opportunities-title">Oportunidades</h3>
-              <p className="opportunities-description">
-                Descubrí las mejores propiedades en oportunidad con Mel ¡No te pierdas lo que tenemos para ofrecerte!
-              </p>
-            </div>
-            <div className="banner-container">
-              {banners.length > 0 && (
-                <div className="banner-swiper">
-                  <div className="banner-slide">
-                    <div className="banner-content">
-                      <div className="banner-info">
-                        <span className="operation-badge">Venta - Casa</span>
-                        <h3 className="banner-price">U$S {properties[0]?.min_price || '265.000'}</h3>
-                        <div className="banner-address">
-                          <strong>{properties[0]?.address?.split(',')[0] || 'Bucarelli 2989'}</strong>
-                          <p>{properties[0]?.neighborhood || 'Villa Úrquiza, Capital Federal'}</p>
-                        </div>
-                        <ul className="banner-features">
-                          <li>110 m²</li>
-                          <li>4 Ambientes</li>
-                          <li>2 Baños</li>
-                        </ul>
-                      </div>
-                      <a href="" className="banner-btn">Ver propiedad</a>
-                    </div>
-                    <div className="banner-image">
-                      <img src={banners[0]?.image_desktop?.url || "/banner_img.png"} alt="Banner" />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Segunda grid de propiedades con PropertyCard */}
-        <div className="properties-grid">
-          <div className="grid">
-            {properties.slice(6, 9).map((dev: any, index: number) => {
-              const mapped = {
-                id: dev.id || index + 6,
-                main_image: dev.main_image,
-                price: dev.min_price ? `U$S ${dev.min_price}` : dev.price,
-                address: dev.address?.split(',')[0] || dev.title,
-                location: dev.neighborhood || dev.address,
-                area: dev.area,
-                rooms: dev.rooms,
-                bathrooms: dev.bathrooms,
-                parking: dev.parking,
-                operation_type: dev.property_type ? `Venta - ${dev.property_type}` : 'Venta',
-                title: dev.title,
-              } as any;
-              return (
-                <PropertyCard key={mapped.id} property={mapped} />
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Sección de recomendaciones */}
-        <div className="recommendations-section">
-          <div className="recommendations-header">
-            <h3 className="recommendations-title">Te puede interesar</h3>
-            <p className="recommendations-subtitle">En base a tus búsquedas mas recientes</p>
-          </div>
-          <div className="grid">
-            {properties.slice(9, 12).map((dev: any, index: number) => {
-              const mapped = {
-                id: dev.id || index + 9,
-                main_image: dev.main_image,
-                price: dev.min_price ? `U$S ${dev.min_price}` : dev.price,
-                address: dev.address?.split(',')[0] || dev.title,
-                location: dev.neighborhood || dev.address,
-                area: dev.area,
-                rooms: dev.rooms,
-                bathrooms: dev.bathrooms,
-                parking: dev.parking,
-                operation_type: dev.property_type ? `Venta - ${dev.property_type}` : 'Venta',
-                title: dev.title,
-              } as any;
-              return (
-                <PropertyCard key={mapped.id} property={mapped} />
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Banner final */}
-        <div className="banner-section">
-          <div className="banner-full">
-            <div className="banner-image-full">
-              <img src="/banner_img_2.png" alt="Banner" />
-            </div>
-            <div className="banner-content-full">
-              <h3 className="banner-title-full">¡Encontrá tu hogar ideal en Villa Urquiza!</h3>
-              <p className="banner-description-full">
-                Conocé nuestras exclusivas unidades de 3 ambientes con cochera listas para comenzar a vivir!
-              </p>
-              <a href="" className="btn-plain">Ver más</a>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header con título */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="container mx-auto px-4 py-6">
+          <h1 className="text-3xl font-bold text-green-text">Emprendimientos</h1>
+          <p className="text-gray-600 mt-2">
+            Descubrí los mejores emprendimientos inmobiliarios
+          </p>
         </div>
       </div>
-    </EmprendimientosContainer>
+
+      {/* Filtros arriba */}
+      <div className="bg-white border-b">
+        <div className="container mx-auto px-4 py-4">
+          <SearchFilters
+            onFiltersChange={handleFiltersChange}
+            resultsCount={totalResults}
+            resultsText={getResultsText()}
+            isMapView={isMapView}
+            onToggleView={handleToggleView}
+            activeFilters={getActiveFiltersFromURL()}
+            filterType="developments"
+          />
+        </div>
+      </div>
+
+      {/* Vista de Listado */}
+      {!isMapView && (
+        <div className="container mx-auto px-4 py-8">
+          {/* Mensaje cuando no hay desarrollos */}
+          {developments.length === 0 && !loading && (
+            <div className="text-center py-16">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                No se encontraron emprendimientos
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Intenta ajustar los filtros de búsqueda para encontrar más resultados.
+              </p>
+              <button
+                onClick={() => {
+                  // Limpiar todos los filtros
+                  const params = new URLSearchParams();
+                  setSearchParams(params);
+                  loadDevelopments({});
+                }}
+                className="btn btn-primary px-6 py-2 rounded-md"
+              >
+                Limpiar filtros
+              </button>
+            </div>
+          )}
+
+          {/* Mensaje de carga */}
+          {loading && (
+            <div className="text-center py-16">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Cargando emprendimientos...</p>
+            </div>
+          )}
+
+          {/* Primera fila: 1 XL + 1 L */}
+          {developments.length >= 2 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 items-stretch">
+              <div className="md:col-span-2 h-[500px]">
+                <DevelopmentCard
+                  development={developments[0]}
+                  variant="XL"
+                  showAdditionalInfo={false}
+                  className="h-full"
+                />
+              </div>
+              <div className="h-[500px]">
+                <DevelopmentCard
+                  development={developments[1]}
+                  variant="L"
+                  showAdditionalInfo={false}
+                  className="h-full"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Componente Conocé nuestros servicios */}
+          <ServiciosExclusivos />
+
+          {/* Segunda fila: 3 L (L L L) */}
+          {developments.length >= 5 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 items-stretch">
+              {developments.slice(2, 5).map((development) => (
+                <div key={development.id} className="h-[500px]">
+                  <DevelopmentCard
+                    development={development}
+                    variant="L"
+                    showAdditionalInfo={false}
+                    className="h-full"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Tercera fila: 1 L + 1 XL */}
+          {developments.length >= 7 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 items-stretch">
+              <div className="h-[500px]">
+                <DevelopmentCard
+                  development={developments[5]}
+                  variant="L"
+                  showAdditionalInfo={false}
+                  className="h-full"
+                />
+              </div>
+              <div className="md:col-span-2 h-[500px]">
+                <DevelopmentCard
+                  development={developments[6]}
+                  variant="XL"
+                  showAdditionalInfo={false}
+                  className="h-full"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Cuarta fila: 3 L (L L L) */}
+          {developments.length >= 10 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 items-stretch">
+              {developments.slice(7, 10).map((development) => (
+                <div key={development.id} className="h-[500px]">
+                  <DevelopmentCard
+                    development={development}
+                    variant="L"
+                    showAdditionalInfo={false}
+                    className="h-full"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Componente Oportunidades */}
+          <OpportunitiesSlider />
+
+          {/* Componente Barrios y lugares */}
+          <BarriosSection />
+        </div>
+      )}
+
+      {/* Vista de Mapa */}
+      {isMapView && (
+        <div className="container mx-auto px-4 py-8">
+          <div className="my-6">
+            <DevelopmentMap
+              developments={developments}
+              onOpenLoginModal={handleOpenLoginModal}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Resultados filtrados - SOLO cuando NO está en vista de mapa */}
+      {!isMapView && developments.length > 0 && (
+        <div className="container mx-auto px-4 py-8">
+
+          {/* Paginación */}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
+        </div>
+      )}
+
+      {showLoginModal && (
+        <LoginModal
+          isShown={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+        />
+      )}
+    </div>
   );
 };
 

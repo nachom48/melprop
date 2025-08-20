@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { editProfileData } from '../services/auth';
+import { userService } from '../modules';
 import ProfileLayout from '../components/ProfileLayout';
 import styled from 'styled-components';
 
@@ -109,7 +109,7 @@ const Button = styled.button`
 
 const Profile: React.FC = () => {
     const navigate = useNavigate();
-    const { user, isLoggedIn } = useUser();
+    const { user, isLoggedIn, updateUser, favorites, savedSearches } = useUser();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         firstName: '',
@@ -120,6 +120,9 @@ const Profile: React.FC = () => {
         email: '',
         newEmail: '',
         confirmEmail: '',
+        dni: '',
+        gender: '',
+        location: '',
         acceptPromotional: false
     });
 
@@ -130,20 +133,37 @@ const Profile: React.FC = () => {
             return;
         }
 
-        // Cargar datos del usuario del contexto
+        // Cargar datos del usuario del contexto y autocompletar el formulario
         if (user) {
-            const [firstName, ...lastNameParts] = (user.fullName || '').split(' ');
-            setFormData({
+            console.log('Usuario en Profile:', user); // Debug log
+
+            // Separar el full_name en firstName y lastName si están vacíos
+            let firstName = user.first_name;
+            let lastName = user.last_name;
+
+            if (!firstName && !lastName && user.full_name) {
+                const nameParts = user.full_name.split(' ');
+                firstName = nameParts[0] || '';
+                lastName = nameParts.slice(1).join(' ') || '';
+            }
+
+            const newFormData = {
                 firstName: firstName || '',
-                lastName: lastNameParts.join(' ') || '',
+                lastName: lastName || '',
                 phone: user.phone || '',
-                mobile: user.mobile || '',
-                birthDate: user.birthDate || '',
+                mobile: user.phone || '', // Usar phone como mobile si no hay mobile específico
+                birthDate: user.birth_date || '',
                 email: user.email || '',
                 newEmail: '',
                 confirmEmail: '',
-                acceptPromotional: user.acceptPromotional || false
-            });
+                dni: user.dni || '',
+                gender: user.gender || '',
+                location: user.location || '',
+                acceptPromotional: user.subscription || false
+            };
+
+            console.log('FormData a establecer:', newFormData); // Debug log
+            setFormData(newFormData);
         }
     }, [user, isLoggedIn, navigate]);
 
@@ -156,39 +176,70 @@ const Profile: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const response = await editProfileData({
+            // Preparar datos para enviar al backend
+            const updateData: any = {
                 first_name: formData.firstName,
                 last_name: formData.lastName,
                 phone: formData.phone,
-                mobile: formData.mobile,
                 birth_date: formData.birthDate,
-                email: formData.newEmail || formData.email,
-                accept_promotional: formData.acceptPromotional
-            });
+                dni: formData.dni,
+                gender: formData.gender,
+                location: formData.location,
+                subscription: formData.acceptPromotional
+            };
 
-            if (response.data.user) {
-                // Actualizar el contexto del usuario
-                const updatedUser = { ...user, ...response.data.user };
-                // Aquí actualizarías el contexto
-                console.log('Datos guardados exitosamente');
+            // Si hay nuevo email, validar que coincidan
+            if (formData.newEmail && formData.newEmail !== formData.confirmEmail) {
+                alert('Los emails no coinciden');
+                setIsLoading(false);
+                return;
             }
-        } catch (error) {
-            console.error('Error:', error);
+
+            // Agregar email si hay uno nuevo
+            if (formData.newEmail) {
+                updateData.email = formData.newEmail;
+            }
+
+            console.log('Datos a enviar al backend:', updateData); // Debug log
+
+            const response = await userService.updateProfile(updateData);
+
+            if (response.success) {
+                // Actualizar el contexto del usuario
+                updateUser(updateData);
+                alert('Perfil actualizado correctamente');
+            } else {
+                alert('Error al actualizar el perfil');
+            }
+        } catch (error: any) {
+            console.error('Error updating profile:', error);
+            console.error('Response data:', error.response?.data); // Debug log
+            console.error('Response status:', error.response?.status); // Debug log
+
+            if (error.response?.data?.message) {
+                alert(`Error: ${error.response.data.message}`);
+            } else {
+                alert('Error al actualizar el perfil');
+            }
         } finally {
             setIsLoading(false);
         }
     };
 
-    if (!isLoggedIn || !user) {
+    if (!isLoggedIn) {
         return (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
+            <div style={{ padding: '20px', textAlign: 'center' }}>
                 <p>Redirigiendo...</p>
             </div>
         );
     }
 
     return (
-        <ProfileLayout title="Datos personales">
+        <ProfileLayout
+            title="Datos personales"
+            favoritesCount={favorites.length}
+            searchesCount={savedSearches.length}
+        >
             <form onSubmit={handleSave}>
                 <FormGrid>
                     <FormHalf>
@@ -229,7 +280,6 @@ const Profile: React.FC = () => {
                                 placeholder="Ingresar..."
                                 value={formData.mobile}
                                 onChange={(e) => handleInputChange('mobile', e.target.value)}
-                                required
                             />
                         </InputWrapper>
                     </FormHalf>
@@ -242,7 +292,6 @@ const Profile: React.FC = () => {
                                 placeholder="Ingresar..."
                                 value={formData.phone}
                                 onChange={(e) => handleInputChange('phone', e.target.value)}
-                                required
                             />
                         </InputWrapper>
                     </FormHalf>
@@ -255,14 +304,54 @@ const Profile: React.FC = () => {
                             <Input
                                 type="date"
                                 id="birthDate"
-                                placeholder="Ingresar..."
+                                placeholder="dd / mm / aaaa"
                                 value={formData.birthDate}
                                 onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                                required
+                            />
+                        </InputWrapper>
+                    </FormHalf>
+                    <FormHalf>
+                        <Label htmlFor="dni">D.N.I</Label>
+                        <InputWrapper>
+                            <Input
+                                type="text"
+                                id="dni"
+                                placeholder="Ingresar DNI"
+                                value={formData.dni}
+                                onChange={(e) => handleInputChange('dni', e.target.value)}
                             />
                         </InputWrapper>
                     </FormHalf>
                 </FormGrid>
+
+                <FormGrid>
+                    <FormHalf>
+                        <Label htmlFor="gender">Sexo</Label>
+                        <InputWrapper>
+                            <Input
+                                type="text"
+                                id="gender"
+                                placeholder="Ingresar sexo"
+                                value={formData.gender}
+                                onChange={(e) => handleInputChange('gender', e.target.value)}
+                            />
+                        </InputWrapper>
+                    </FormHalf>
+                    <FormHalf>
+                        <Label htmlFor="location">Localidad</Label>
+                        <InputWrapper>
+                            <Input
+                                type="text"
+                                id="location"
+                                placeholder="Ingresar localidad"
+                                value={formData.location}
+                                onChange={(e) => handleInputChange('location', e.target.value)}
+                            />
+                        </InputWrapper>
+                    </FormHalf>
+                </FormGrid>
+
+                <Divider />
 
                 <FormFull>
                     <Label htmlFor="email">Dirección de email</Label>
@@ -270,28 +359,26 @@ const Profile: React.FC = () => {
                         <Input
                             type="email"
                             id="email"
-                            placeholder="Ingresar..."
                             value={formData.email}
                             disabled
                         />
                     </InputWrapper>
                 </FormFull>
 
-                <FormFull>
-                    <Label htmlFor="newEmail">Nuevo email</Label>
-                    <InputWrapper>
-                        <Input
-                            type="email"
-                            id="newEmail"
-                            placeholder="Ingresar..."
-                            value={formData.newEmail}
-                            onChange={(e) => handleInputChange('newEmail', e.target.value)}
-                        />
-                    </InputWrapper>
-                </FormFull>
-
-                <Divider>
-                    <FormFull>
+                <FormGrid>
+                    <FormHalf>
+                        <Label htmlFor="newEmail">Nuevo email</Label>
+                        <InputWrapper>
+                            <Input
+                                type="email"
+                                id="newEmail"
+                                placeholder="Ingresar..."
+                                value={formData.newEmail}
+                                onChange={(e) => handleInputChange('newEmail', e.target.value)}
+                            />
+                        </InputWrapper>
+                    </FormHalf>
+                    <FormHalf>
                         <Label htmlFor="confirmEmail">Repetir nuevo email</Label>
                         <InputWrapper>
                             <Input
@@ -302,8 +389,10 @@ const Profile: React.FC = () => {
                                 onChange={(e) => handleInputChange('confirmEmail', e.target.value)}
                             />
                         </InputWrapper>
-                    </FormFull>
-                </Divider>
+                    </FormHalf>
+                </FormGrid>
+
+                <Divider />
 
                 <FormFull>
                     <CheckboxWrapper>

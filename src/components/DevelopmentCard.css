@@ -1,0 +1,86 @@
+/* Estilos para DevelopmentCard */
+.slide {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Asegurar que ambas variantes tengan la misma altura */
+.slide > div {
+    height: 100%;
+    min-height: 100%;
+    flex: 1;
+}
+
+/* Forzar que las imágenes ocupen toda la altura */
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Marcador de texto */
+.marker {
+    position: relative;
+    left: -3px;
+}
+
+.marker::after {
+    content: "";
+    background-color: var(--color-theme-yellow);
+    border-radius: 4px;
+    width: 40px;
+    height: 4px;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Línea naranja para el precio (sin efectos de marker) */
+.price-underline::after {
+    content: "";
+    background-color: var(--color-theme-yellow);
+    border-radius: 4px;
+    width: 40px;
+    height: 4px;
+    margin-top: 5px;
+    display: block;
+}
+
+.marker span {
+    display: block;
+    padding: 0 1.25rem 0.5rem;
+    font-size: 1.5rem;
+    line-height: 1.75rem;
+    color: white;
+    font-weight: bold;
+    font-family: 'Larken', serif;
+}
+
+/* Contenido del marcador */
+.marker + div {
+    padding: 1rem;
+}
+
+.marker + div p:first-child {
+    color: #b2f252; /* text-green-fluo */
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    margin-bottom: 0.25rem;
+}
+
+.marker + div p:last-child {
+    color: white;
+    font-size: 0.875rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Responsive */
+@media (min-width: 1024px) {
+    .slide {
+        width: 100%;
+        max-width: none;
+    }
+}

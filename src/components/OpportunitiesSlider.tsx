@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface Opportunity {
   id: number;
@@ -24,7 +24,7 @@ const opportunities: Opportunity[] = [
     area: '110 m²',
     rooms: '4 Ambientes',
     bathrooms: '2 Baños',
-    image: '/banner_img.png'
+    image: '/oportunidades_1.jpg'
   },
   {
     id: 2,
@@ -36,7 +36,7 @@ const opportunities: Opportunity[] = [
     area: '110 m²',
     rooms: '4 Ambientes',
     bathrooms: '2 Baños',
-    image: '/banner_img.png'
+    image: '/oportunidades_2.jpg'
   },
   {
     id: 3,
@@ -48,12 +48,12 @@ const opportunities: Opportunity[] = [
     area: '110 m²',
     rooms: '4 Ambientes',
     bathrooms: '2 Baños',
-    image: '/banner_img.png'
+    image: '/best_3.png'
   }
 ];
 
 const OpportunitiesSlider: React.FC = () => {
-  const [currentSlide, setCurrentSlide] = React.useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % opportunities.length);
@@ -67,129 +67,69 @@ const OpportunitiesSlider: React.FC = () => {
     <div className="my-10">
       <div className="container mx-auto px-4">
         <div className="bg-medium-grey rounded-2xl p-4 md:p-10">
-          <div className="flex flex-col items-center gap-10 md:flex-row">
-            <div className="flex-1">
-              <h3 className="text-green-text-dark mb-3 text-4xl">Oportunidades</h3>
-              <p className="text-green-menu max-w-[400px] text-sm leading-6">
+          <div className="flex flex-col items-center gap-6 md:gap-10 md:flex-row">
+            <div className="flex-1 text-center md:text-left">
+              <h3 className="!text-green-text-dark mb-3 text-3xl md:text-4xl">Oportunidades</h3>
+              <p className="text-green-menu max-w-[400px] text-sm leading-6 mx-auto md:mx-0">
                 Descubrí las mejores propiedades en oportunidad con Mel ¡No te pierdas lo que tenemos para ofrecerte!
               </p>
             </div>
             <div className="relative flex-1 flex justify-center">
-              <div className="relative">
-                {/* Card horizontal con estilos de PropertyCard */}
-                <div className="border-grey-border-light rounded-3xl border-1 overflow-hidden bg-white w-[320px] md:w-[528px]">
-                  <div className="flex h-full">
-                    {/* Panel izquierdo - Texto */}
-                    <div className="flex-1 p-4 md:px-8 md:py-6">
-                      <span className="text-green-text-dark text-sm">
-                        {opportunities[currentSlide].type} - {opportunities[currentSlide].propertyType}
-                      </span>
-                      <h3 className="text-2xl marker mb-3" style={{
-                        fontFamily: 'var(--font-larken)',
-                        color: 'var(--color-green-menu)',
-                        fontStyle: 'normal',
-                        fontWeight: 700
-                      }}>
-                        {opportunities[currentSlide].price}
-                      </h3>
-                      <div className="mb-3">
-                        <strong style={{
-                          fontFamily: 'var(--font-jakarta)',
-                          fontOpticalSizing: 'auto',
-                          color: 'var(--color-green-text)',
-                          fontStyle: 'normal',
-                          fontWeight: 400
-                        }}>
-                          {opportunities[currentSlide].address}
-                        </strong>
-                        <p className="text-sm" style={{
-                          fontFamily: 'var(--font-jakarta)',
-                          fontOpticalSizing: 'auto',
-                          color: 'var(--color-green-text)',
-                          fontStyle: 'normal',
-                          fontWeight: 400
-                        }}>
-                          {opportunities[currentSlide].location}
-                        </p>
+              <div className="border-gray-300 h-[280px] w-[320px] rounded-3xl border-2 md:h-[300px] md:w-[528px] overflow-hidden mb-4 md:mb-0">
+                <div
+                  className="flex transition-transform duration-500 ease-in-out h-full"
+                  style={{
+                    transform: `translateX(-${currentSlide * (100 / opportunities.length)}%)`,
+                    width: `${opportunities.length * 100}%`
+                  }}
+                >
+                  {opportunities.map((opportunity) => (
+                    <div
+                      key={opportunity.id}
+                      className="w-full h-full flex-shrink-0 pb-8 md:pb-0"
+                      style={{ width: `${100 / opportunities.length}%` }}
+                    >
+                      <div className="flex h-full">
+                        <div className="bg-white p-4 md:px-8 md:py-6 w-1/2 flex flex-col justify-between">
+                          <div className="border-b border-gray-200 pb-4 md:pb-6">
+                            <span className="text-green-text-dark text-sm font-semibold">
+                              {opportunity.type} - {opportunity.propertyType}
+                            </span>
+                            <h3 className="text-green-text-dark price-underline mb-3 text-xl md:text-2xl font-bold">
+                              {opportunity.price}
+                            </h3>
+                            <div className="mb-3">
+                              <strong className="text-gray-800">{opportunity.address}</strong>
+                              <p className="hidden text-sm md:flex text-gray-600">{opportunity.location}</p>
+                            </div>
+                            <ul className="text-xxs hidden flex-wrap gap-2 md:flex text-gray-600">
+                              <li>{opportunity.area}</li>
+                              <li>{opportunity.rooms}</li>
+                              <li>{opportunity.bathrooms}</li>
+                            </ul>
+                          </div>
+                          <div className="pt-2">
+                            <a href="" className="btn btn-green !text-xs md:!px-10 w-full md:w-auto text-center">
+                              Ver propiedad
+                            </a>
+                          </div>
+                        </div>
+                        <div className="w-1/2 h-full">
+                          <img
+                            className="w-full h-full object-cover"
+                            src={opportunity.image}
+                            alt=""
+                          />
+                        </div>
                       </div>
-                      <ul className="text-xxs flex flex-wrap gap-2">
-                        <li style={{
-                          fontFamily: 'var(--font-jakarta)',
-                          fontOpticalSizing: 'auto',
-                          color: 'var(--color-green-text)',
-                          fontStyle: 'normal',
-                          fontWeight: 400
-                        }}>
-                          {opportunities[currentSlide].area}
-                        </li>
-                        <li style={{
-                          fontFamily: 'var(--font-jakarta)',
-                          fontOpticalSizing: 'auto',
-                          color: 'var(--color-green-text)',
-                          fontStyle: 'normal',
-                          fontWeight: 400
-                        }}>
-                          {opportunities[currentSlide].rooms}
-                        </li>
-                        <li style={{
-                          fontFamily: 'var(--font-jakarta)',
-                          fontOpticalSizing: 'auto',
-                          color: 'var(--color-green-text)',
-                          fontStyle: 'normal',
-                          fontWeight: 400
-                        }}>
-                          {opportunities[currentSlide].bathrooms}
-                        </li>
-                      </ul>
-                      <button className="btn btn-green !text-xs md:!px-10 mt-4">Ver propiedad</button>
                     </div>
-
-                    {/* Panel derecho - Imagen */}
-                    <div className="image flex-1">
-                      <img
-                        className="h-full w-full object-cover"
-                        src={opportunities[currentSlide].image}
-                        alt=""
-                      />
-                    </div>
-                  </div>
+                  ))}
                 </div>
-
-                {/* Botones de navegación */}
-                <button
-                  onClick={prevSlide}
-                  className="absolute -left-5 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center"
-                  style={{
-                    backgroundColor: 'var(--color-green-menu)',
-                    border: '3px solid #fff',
-                    borderRadius: '50%',
-                    width: '40px',
-                    height: '40px'
-                  }}
-                  aria-label="Anterior"
-                >
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-
-                <button
-                  onClick={nextSlide}
-                  className="absolute -right-5 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center"
-                  style={{
-                    backgroundColor: 'var(--color-green-menu)',
-                    border: '3px solid #fff',
-                    borderRadius: '50%',
-                    width: '40px',
-                    height: '40px'
-                  }}
-                  aria-label="Siguiente"
-                >
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
               </div>
+
+              {/* Botones de navegación con las clases CSS de la maqueta */}
+              <div className="swiper-button-prev" onClick={prevSlide}></div>
+              <div className="swiper-button-next" onClick={prevSlide}></div>
             </div>
           </div>
         </div>
