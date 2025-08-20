@@ -25,6 +25,7 @@ interface SearchFiltersProps {
     isMapView?: boolean;
     onToggleView?: () => void;
     activeFilters?: FilterValues;
+    filterType?: 'properties' | 'developments'; // Nueva prop para adaptar el componente
 }
 
 const SearchFilters: React.FC<SearchFiltersProps> = ({
@@ -34,15 +35,24 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
     className = "",
     isMapView = false,
     onToggleView,
-    activeFilters
+    activeFilters,
+    filterType = 'properties' // Default a propiedades
 }) => {
+    // Debug: mostrar props recibidas
+    console.log('🔍 SearchFilters - Props recibidas:', {
+        resultsCount,
+        resultsText,
+        filterType,
+        activeFilters
+    });
+
     const navigate = useNavigate();
     const { isLoggedIn } = useUser();
     const [filters, setFilters] = useState<FilterValues>({
         location: '',
         operation: '',
-        propertyType: [],
-        rooms: [],
+        propertyType: filterType === 'developments' ? [] : [], // Para desarrollos, vacío por defecto
+        rooms: filterType === 'developments' ? [] : [], // Para desarrollos, vacío por defecto
         price: '',
         priceFrom: '',
         priceTo: '',
@@ -57,6 +67,31 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [showMoreFilters, setShowMoreFilters] = useState(false);
     const [sortingLoading, setSortingLoading] = useState(false);
+
+    // Opciones para propiedades
+    const propertyTypeOptions = [
+        { value: 'departamento', label: 'Departamento' },
+        { value: 'casa', label: 'Casa' },
+        { value: 'ph', label: 'PH' },
+        { value: 'deposito', label: 'Depósito' },
+        { value: 'oficina', label: 'Oficina' },
+        { value: 'terreno', label: 'Terreno' },
+        { value: 'local', label: 'Local' },
+        { value: 'edificio', label: 'Edificio' }
+    ];
+
+    // Opciones para etapas de desarrollo
+    const developmentStageOptions = [
+        { value: 'En Pozo', label: 'En Pozo' },
+        { value: 'En Demolicion', label: 'En Demolición' },
+        { value: 'En Construccion', label: 'En Construcción' },
+        { value: 'Finalizado', label: 'Finalizado' }
+    ];
+
+    // Determinar qué opciones usar según el tipo de filtro
+    const currentOptions = filterType === 'developments' ? developmentStageOptions : propertyTypeOptions;
+    const filterTitle = filterType === 'developments' ? 'Etapa de Emprendimiento' : 'Tipo de Propiedad';
+    const filterPlaceholder = filterType === 'developments' ? 'Etapas' : 'Propiedades';
 
     // Sincronizar filtros locales con filtros activos
     useEffect(() => {
@@ -202,14 +237,6 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
         { value: 'venta', label: 'Comprar' },
         { value: 'venta', label: 'Vender' },
         { value: 'alquiler', label: 'Alquilar' }
-    ];
-
-    const propertyTypeOptions = [
-        { value: 'casa', label: 'Casa' },
-        { value: 'departamento', label: 'Departamento' },
-        { value: 'ph', label: 'PH' },
-        { value: 'terreno', label: 'Terreno' },
-        { value: 'local-comercial', label: 'Local comercial' }
     ];
 
     const roomsOptions = [
@@ -360,22 +387,22 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                 ? 'border-green-500 bg-green-50 text-green-700'
                                 : 'border-gray-300'
                                 }`}
-                            title={getFullFilterText(filters.propertyType, 'Seleccionar tipo de propiedad')}
+                            title={getFullFilterText(filters.propertyType, `Seleccionar ${filterTitle.toLowerCase()}`)}
                         >
                             <span className="truncate max-w-[120px]">
-                                {getTruncatedFilterText(filters.propertyType, 'Propiedades')}
+                                {getTruncatedFilterText(filters.propertyType, filterPlaceholder)}
                             </span>
                             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
 
-                        {/* Dropdown de tipo de propiedad */}
+                        {/* Dropdown de tipo de propiedad/etapa */}
                         {openDropdown === 'propertyType' && (
                             <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-h-[280px] transition-all duration-200 ease-in-out transform origin-top">
                                 <div className="p-4">
                                     <div className="flex items-center justify-between mb-3">
-                                        <h3 className="text-green-800 font-semibold text-sm">Tipo de propiedad</h3>
+                                        <h3 className="text-green-800 font-semibold text-sm">{filterTitle}</h3>
                                         {filters.propertyType.length > 0 && (
                                             <button
                                                 onClick={() => {
@@ -388,7 +415,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                         )}
                                     </div>
                                     <div className="space-y-2">
-                                        {propertyTypeOptions.map((option) => (
+                                        {currentOptions.map((option) => (
                                             <label key={option.value} className="flex items-center gap-3 cursor-pointer">
                                                 <input
                                                     type="checkbox"
@@ -818,7 +845,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                 <div className="mt-4 flex flex-col items-center justify-between rounded-lg bg-gray-100 p-4 md:flex-row">
                     <div>
                         <div className="text-green-menu text-sm font-bold">{resultsText}</div>
-                        <div className="text-sm">{resultsCount.toLocaleString()} propiedades encontradas</div>
+                        <div className="text-sm">{resultsCount.toLocaleString()} {filterType === 'developments' ? 'emprendimientos' : 'propiedades'} encontrados</div>
                     </div>
                     <div>
                         <ul className="flex flex-col items-center gap-6 md:flex-row">

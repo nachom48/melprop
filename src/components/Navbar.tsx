@@ -474,29 +474,12 @@ const Navbar: React.FC = () => {
                                 </div>
                             ) : (
                                 <div className="auth-buttons-desktop">
-                                    <div className="user-menu">
-                                        {!isLoggedIn ? (
-                                            <button
-                                                onClick={() => handleLoginClick('login')}
-                                                className="btn-login"
-                                            >
-                                                Iniciar sesión
-                                            </button>
-                                        ) : (
-                                            <span className="user-greeting">
-                                                Hola {user?.full_name ? user.full_name.split(' ')[0] : 'Usuario'} <i className="fa-solid fa-chevron-down"></i>
-                                            </span>
-                                        )}
-                                        <div className="user-dropdown">
-                                            <a href="/perfil/datos.html">Mi cuenta</a>
-                                            <a href="/perfil/cambio_contrasena.html">Cambiar contraseña</a>
-                                            <a href="/perfil/notificaciones.html">Notificaciones</a>
-                                            <a href="/perfil/favoritos.html">Favoritos</a>
-                                            <a href="/perfil/busquedas_guardadas.html">Búsquedas guardadas</a>
-                                            <a href="/faqs/index.html">Preguntas Frecuentes</a>
-                                            <a href="#" onClick={logout}>Cerrar Sesión</a>
-                                        </div>
-                                    </div>
+                                    <button
+                                        onClick={() => handleLoginClick('login')}
+                                        className="btn-login"
+                                    >
+                                        Iniciar sesión
+                                    </button>
                                 </div>
                             )}
                         </div>

@@ -2,7 +2,7 @@
 // PROPERTIES MODULE - REPOSITORY LAYER
 // =====================================================
 
-import axios from 'axios';
+import { apiClient } from '../../config/axios.config';
 import {
     PropertySearchParamsDTO,
     PropertyFilterDTO,
@@ -10,14 +10,9 @@ import {
     DevelopmentDTO,
     PropertiesResponseDTO,
     PropertyDetailResponseDTO
-} from './Properties.dto';
+} from './interfaces';
 
-const API_URI = process.env.REACT_APP_API_URI || 'http://backend-dev-melpropiedades.pre-produccion.com/api';
-
-// Configurar Axios para enviar cookies automáticamente
-axios.defaults.withCredentials = true;
-
-export class PropertiesRepository {
+export namespace PropertiesRepository {
 
     // =====================================================
     // PROPERTIES METHODS
@@ -26,9 +21,9 @@ export class PropertiesRepository {
     /**
      * Obtener lista de propiedades con filtros
      */
-    async getProperties(params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
+    export async function getProperties(params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
         try {
-            const response = await axios.get(`${API_URI}/properties/`, { params });
+            const response = await apiClient.get('/properties/', { params });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo propiedades');
@@ -38,9 +33,9 @@ export class PropertiesRepository {
     /**
      * Obtener propiedad específica por slug
      */
-    async getProperty(slug: string): Promise<PropertyDetailResponseDTO> {
+    export async function getProperty(slug: string): Promise<PropertyDetailResponseDTO> {
         try {
-            const response = await axios.get(`${API_URI}/properties/${slug}`);
+            const response = await apiClient.get(`/properties/${slug}`);
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo propiedad');
@@ -50,13 +45,13 @@ export class PropertiesRepository {
     /**
      * Obtener propiedades destacadas para home
      */
-    async getFeaturedProperties(limit: number = 6): Promise<PropertiesResponseDTO> {
+    export async function getFeaturedProperties(limit: number = 6): Promise<PropertiesResponseDTO> {
         try {
             const params: PropertySearchParamsDTO = {
                 home: true,
                 limit
             };
-            const response = await axios.get(`${API_URI}/properties/`, { params });
+            const response = await apiClient.get('/properties/', { params });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo propiedades destacadas');
@@ -66,13 +61,13 @@ export class PropertiesRepository {
     /**
      * Obtener propiedades por tipo
      */
-    async getPropertiesByType(type: string, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
+    export async function getPropertiesByType(type: string, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
         try {
             const searchParams: PropertySearchParamsDTO = {
                 ...params,
                 properties: [type]
             };
-            const response = await axios.get(`${API_URI}/properties/`, { params: searchParams });
+            const response = await apiClient.get('/properties/', { params: searchParams });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo propiedades por tipo');
@@ -82,13 +77,13 @@ export class PropertiesRepository {
     /**
      * Obtener propiedades por operación
      */
-    async getPropertiesByOperation(operation: string, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
+    export async function getPropertiesByOperation(operation: string, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
         try {
             const searchParams: PropertySearchParamsDTO = {
                 ...params,
                 operation: [operation]
             };
-            const response = await axios.get(`${API_URI}/properties/`, { params: searchParams });
+            const response = await apiClient.get('/properties/', { params: searchParams });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo propiedades por operación');
@@ -98,13 +93,13 @@ export class PropertiesRepository {
     /**
      * Obtener propiedades por barrio
      */
-    async getPropertiesByNeighborhood(neighborhood: string, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
+    export async function getPropertiesByNeighborhood(neighborhood: string, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
         try {
             const searchParams: PropertySearchParamsDTO = {
                 ...params,
                 locations: [neighborhood]
             };
-            const response = await axios.get(`${API_URI}/properties/`, { params: searchParams });
+            const response = await apiClient.get('/properties/', { params: searchParams });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo propiedades por barrio');
@@ -114,14 +109,14 @@ export class PropertiesRepository {
     /**
      * Obtener propiedades por rango de precio
      */
-    async getPropertiesByPriceRange(minPrice: number, maxPrice: number, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
+    export async function getPropertiesByPriceRange(minPrice: number, maxPrice: number, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
         try {
             const searchParams: PropertySearchParamsDTO = {
                 ...params,
                 min_price: minPrice,
                 max_price: maxPrice
             };
-            const response = await axios.get(`${API_URI}/properties/`, { params: searchParams });
+            const response = await apiClient.get('/properties/', { params: searchParams });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo propiedades por rango de precio');
@@ -131,13 +126,13 @@ export class PropertiesRepository {
     /**
      * Obtener propiedades por cantidad de habitaciones
      */
-    async getPropertiesByRooms(rooms: number, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
+    export async function getPropertiesByRooms(rooms: number, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
         try {
             const searchParams: PropertySearchParamsDTO = {
                 ...params,
                 rooms: [rooms.toString()]
             };
-            const response = await axios.get(`${API_URI}/properties/`, { params: searchParams });
+            const response = await apiClient.get('/properties/', { params: searchParams });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo propiedades por habitaciones');
@@ -147,13 +142,13 @@ export class PropertiesRepository {
     /**
      * Obtener propiedades por metros cuadrados
      */
-    async getPropertiesByM2(m2: string, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
+    export async function getPropertiesByM2(m2: string, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
         try {
             const searchParams: PropertySearchParamsDTO = {
                 ...params,
                 m2
             };
-            const response = await axios.get(`${API_URI}/properties/`, { params: searchParams });
+            const response = await apiClient.get('/properties/', { params: searchParams });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo propiedades por metros cuadrados');
@@ -163,11 +158,11 @@ export class PropertiesRepository {
     /**
      * Buscar propiedades por texto
      */
-    async searchProperties(searchTerm: string, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
+    export async function searchProperties(searchTerm: string, params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
         try {
             // Implementar búsqueda por texto si el backend lo soporta
             // Por ahora, usamos los filtros existentes
-            const response = await axios.get(`${API_URI}/properties/`, { params });
+            const response = await apiClient.get('/properties/', { params });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error buscando propiedades');
@@ -177,11 +172,11 @@ export class PropertiesRepository {
     /**
      * Obtener propiedades relacionadas
      */
-    async getRelatedProperties(propertyId: number, limit: number = 4): Promise<PropertyDTO[]> {
+    export async function getRelatedProperties(propertyId: number, limit: number = 4): Promise<PropertyDTO[]> {
         try {
             // Implementar lógica para obtener propiedades relacionadas
             // Por ahora, retornamos propiedades del mismo tipo
-            const response = await axios.get(`${API_URI}/properties/`, {
+            const response = await apiClient.get('/properties/', {
                 params: { limit, exclude: propertyId }
             });
             return response.data.properties || [];
@@ -198,9 +193,9 @@ export class PropertiesRepository {
     /**
      * Obtener lista de desarrollos
      */
-    async getDevelopments(params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
+    export async function getDevelopments(params: PropertySearchParamsDTO = {}): Promise<PropertiesResponseDTO> {
         try {
-            const response = await axios.get(`${API_URI}/developments/`, { params });
+            const response = await apiClient.get('/developments/', { params });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo desarrollos');
@@ -210,9 +205,9 @@ export class PropertiesRepository {
     /**
      * Obtener desarrollo específico por slug
      */
-    async getDevelopment(slug: string): Promise<PropertyDetailResponseDTO> {
+    export async function getDevelopment(slug: string): Promise<PropertyDetailResponseDTO> {
         try {
-            const response = await axios.get(`${API_URI}/developments/${slug}`);
+            const response = await apiClient.get(`/developments/${slug}`);
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo desarrollo');
@@ -222,9 +217,9 @@ export class PropertiesRepository {
     /**
      * Obtener banners de desarrollo
      */
-    async getDevelopmentBanners(params: PropertySearchParamsDTO = {}): Promise<any> {
+    export async function getDevelopmentBanners(params: PropertySearchParamsDTO = {}): Promise<any> {
         try {
-            const response = await axios.get(`${API_URI}/banners_development/`, { params });
+            const response = await apiClient.get('/banners_development/', { params });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo banners de desarrollo');
@@ -234,9 +229,9 @@ export class PropertiesRepository {
     /**
      * Obtener barrios de desarrollo
      */
-    async getDevelopmentNeighborhoods(params: PropertySearchParamsDTO = {}): Promise<any> {
+    export async function getDevelopmentNeighborhoods(params: PropertySearchParamsDTO = {}): Promise<any> {
         try {
-            const response = await axios.get(`${API_URI}/developments/neighborhoods/`, { params });
+            const response = await apiClient.get('/developments/neighborhoods/', { params });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo barrios de desarrollo');
@@ -246,9 +241,9 @@ export class PropertiesRepository {
     /**
      * Obtener etapas de desarrollo
      */
-    async getDevelopmentStages(params: PropertySearchParamsDTO = {}): Promise<any> {
+    export async function getDevelopmentStages(params: PropertySearchParamsDTO = {}): Promise<any> {
         try {
-            const response = await axios.get(`${API_URI}/developments/stages/`, { params });
+            const response = await apiClient.get('/developments/stages/', { params });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo etapas de desarrollo');
@@ -262,14 +257,23 @@ export class PropertiesRepository {
     /**
      * Obtener propiedades con paginación
      */
-    async getPropertiesPaginated(page: number = 1, limit: number = 12, filters: PropertyFilterDTO = {}): Promise<PropertiesResponseDTO> {
+    export async function getPropertiesPaginated(page: number = 1, limit: number = 12, filters: PropertyFilterDTO = {}): Promise<PropertiesResponseDTO> {
         try {
             const params: PropertySearchParamsDTO = {
-                ...filters,
                 page,
-                limit
+                limit,
+                // Convertir tipos para que coincidan con PropertySearchParamsDTO
+                ...(filters.type && { properties: filters.type }),
+                ...(filters.operation && { operation: filters.operation }),
+                ...(filters.location && { locations: filters.location }),
+                ...(filters.priceFrom && { min_price: filters.priceFrom }),
+                ...(filters.priceTo && { max_price: filters.priceTo }),
+                ...(filters.rooms && { rooms: filters.rooms.map(r => r.toString()) }),
+                ...(filters.m2 && { m2: filters.m2 }),
+                ...(filters.characteristics && { characteristics: filters.characteristics }),
+                ...(filters.status && { status: filters.status })
             };
-            const response = await axios.get(`${API_URI}/properties/`, { params });
+            const response = await apiClient.get('/properties/', { params });
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo propiedades paginadas');
@@ -279,7 +283,7 @@ export class PropertiesRepository {
     /**
      * Obtener estadísticas de propiedades
      */
-    async getPropertiesStats(): Promise<{
+    export async function getPropertiesStats(): Promise<{
         total: number;
         byType: Record<string, number>;
         byOperation: Record<string, number>;
@@ -287,7 +291,7 @@ export class PropertiesRepository {
         byPriceRange: Record<string, number>;
     }> {
         try {
-            const allProperties = await this.getProperties({ limit: 1000 });
+            const allProperties = await getProperties({ limit: 1000 });
             const properties = allProperties.properties;
 
             const byType: Record<string, number> = {};
@@ -332,6 +336,3 @@ export class PropertiesRepository {
         }
     }
 }
-
-// Exportar instancia singleton
-export const propertiesRepository = new PropertiesRepository();

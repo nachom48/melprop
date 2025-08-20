@@ -2,7 +2,7 @@ import React from 'react'
 
 const ServiciosExclusivos = () => {
     return (
-        <div className="my-10">
+        <div className="my-6">
             <div className="container">
                 <div className="border-b-green-fluo border-b-1 pb-10">
                     <h4 className="text-green-text-dark mb-12 text-center text-3xl">

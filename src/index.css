@@ -288,10 +288,10 @@
   }
   
   .swiper-best .swiper-slide {
-    max-width: 286px;
-  flex-shrink: 0;
-    width: 286px;
-    min-width: 286px;
+    max-width: 282px; /* Ajustado para coincidir con el HTML generado */
+    flex-shrink: 0;
+    width: 282px; /* Ajustado para coincidir con el HTML generado */
+    min-width: 282px; /* Ajustado para coincidir con el HTML generado */
   }
   
   .swiper-best-nav {
@@ -1714,6 +1714,59 @@ ul.nav.show .user-menu span {
       background-color: #7bb83f;
       transform: translateY(-1px);
     }
+  }
+
+  /* Estilos para los botones de navegación del slider */
+  .swiper-button-next,
+  .swiper-button-prev {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background-color: var(--color-green-menu);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .swiper-button-next {
+    right: -5px;
+  }
+
+  .swiper-button-prev {
+    left: -5px;
+  }
+
+  .swiper-button-next::after,
+  .swiper-button-prev::after {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-style: solid;
+    border-width: 2px 2px 0 0;
+    border-color: #fff;
+  }
+
+  .swiper-button-next::after {
+    transform: rotate(45deg);
+    margin-left: 2px;
+  }
+
+  .swiper-button-prev::after {
+    transform: rotate(-135deg);
+    margin-right: 2px;
+  }
+
+  .swiper-button-next:hover,
+  .swiper-button-prev:hover {
+    background-color: #7bb83f;
+    transform: translateY(-50%) scale(1.1);
   }
 }
 

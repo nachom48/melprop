@@ -25,13 +25,89 @@ const DevelopmentCard: React.FC<DevelopmentCardProps> = ({
         return `${rooms[0]} ambiente${rooms[0] !== 1 ? 's' : ''}`;
     };
 
-    const getCardHeight = () => {
-        return variant === 'XL' ? 'h-[500px]' : 'h-[400px]';
+    const renderAmenitiesIcons = () => {
+        if (variant !== 'XL' || !development.amenities || development.amenities.length === 0) {
+            return null;
+        }
+
+        return (
+            <div className="absolute top-4 right-4 flex flex-wrap gap-2 max-w-[120px] justify-end">
+                {development.amenities.slice(0, 6).map((amenity) => (
+                    <div
+                        key={amenity.id}
+                        className="w-10 h-10 bg-green-text-dark rounded-md flex items-center justify-center shadow-lg"
+                        title={amenity.name}
+                    >
+                        <img
+                            src={amenity.image.url}
+                            alt={amenity.name}
+                            className="w-8 h-8 object-contain filter brightness-0 invert"
+                        />
+                    </div>
+                ))}
+            </div>
+        );
     };
 
+    if (variant === 'XL') {
+        return (
+            <div className={`slide ${className}`.trim()}>
+                <div className="relative overflow-hidden rounded-lg h-full">
+                    <img
+                        className="w-full h-full object-cover"
+                        src={development.main_image}
+                        alt={development.name}
+                    />
+
+                    {/* Overlay oscuro para mejor contraste */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
+                    {/* Iconos de amenities en la esquina superior derecha */}
+                    {renderAmenitiesIcons()}
+
+                    {/* Contenido superior */}
+                    <div className="absolute top-0 p-8">
+                        <h3 className="marker marker-offset-left mb-5 text-3xl !text-white font-larken">
+                            {development.name}
+                        </h3>
+                        <h4 className="text-green-fluo font-bold uppercase font-jakarta">
+                            {development.neighborhood}
+                        </h4>
+                        <div className="text-white font-jakarta">
+                            {formatRooms(development.rooms)}
+                        </div>
+                    </div>
+
+                    {/* Contenido inferior */}
+                    <div className="absolute bottom-0 p-8">
+                        <div className="text-white font-jakarta">Desde</div>
+                        <h3 className="!text-green-fluo text-4xl font-larken font-bold">
+                            {development.min_price ? `U$S ${development.min_price.toLocaleString()}` : 'Consultar'}
+                        </h3>
+                        <div className="mt-4 flex gap-4">
+                            <div>
+                                <div className="text-white font-jakarta">Estado</div>
+                                <h4 className="text-warning uppercase font-jakarta font-bold">
+                                    {development.status || 'Consultar'}
+                                </h4>
+                            </div>
+                            <div>
+                                <div className="text-white font-jakarta">Posesión</div>
+                                <h4 className="text-warning uppercase font-jakarta font-bold">
+                                    {development.posesion || 'Consultar'}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Variante L (mantiene el diseño original pero con estructura unificada)
     return (
-        <div className={`slide ${getCardHeight()} ${className}`.trim()}>
-            <div className="image relative overflow-hidden rounded-lg h-full">
+        <div className={`slide ${className}`.trim()}>
+            <div className="relative overflow-hidden rounded-lg h-full">
                 <img
                     src={development.main_image}
                     alt={development.name}
@@ -55,24 +131,27 @@ const DevelopmentCard: React.FC<DevelopmentCardProps> = ({
                         </p>
                     </div>
                 </div>
-            </div>
 
-            {showAdditionalInfo && (
-                <div className="mt-4 flex items-center justify-between">
-                    <div>
-                        <p className="text-sm tracking-wide text-gray-600 font-jakarta">Posesión</p>
-                        <p className="font-larken text-green-menu font-bold">
-                            {development.posesion || 'Consultar'}
-                        </p>
+                {/* Información adicional integrada en la imagen para L */}
+                {showAdditionalInfo && (
+                    <div className="absolute top-0 right-0 p-4">
+                        <div className="bg-green-highcontrast/90 rounded-md p-3 backdrop-blur-sm">
+                            <div className="text-right">
+                                <p className="text-xs text-gray-600 font-jakarta">Posesión</p>
+                                <p className="font-larken text-green-menu font-bold text-sm">
+                                    {development.posesion || 'Consultar'}
+                                </p>
+                            </div>
+                            <div className="mt-2 text-right">
+                                <p className="text-xs text-gray-600 font-jakarta">Desde</p>
+                                <p className="font-larken text-green-text-dark font-bold text-sm">
+                                    {development.min_price ? `U$S ${development.min_price.toLocaleString()}` : 'Consultar'}
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <div className="bg-green-highcontrast rounded-md p-2">
-                        <p className="text-sm tracking-wide text-gray-600 font-jakarta">Desde</p>
-                        <p className="font-larken text-green-text-dark font-bold">
-                            {development.min_price ? `U$S ${development.min_price.toLocaleString()}` : 'Consultar'}
-                        </p>
-                    </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };

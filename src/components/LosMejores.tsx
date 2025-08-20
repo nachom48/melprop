@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import BestPropertyCard, { BestProperty } from './BestPropertyCard';
 
-const LosMejores: React.FC = () => {
+interface LosMejoresProps {
+    variant?: 'default' | 'reversed'; // Nueva prop para variantes
+}
+
+const LosMejores: React.FC<LosMejoresProps> = ({ variant = 'default' }) => {
     const [activeTab, setActiveTab] = useState(0);
 
     const bestProperties: BestProperty[] = [
@@ -34,22 +38,28 @@ const LosMejores: React.FC = () => {
         }
     ];
 
+    // Determinar el layout según la variante
+    const isReversed = variant === 'reversed';
+
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="my-2 flex flex-col justify-between md:my-20 md:flex-row md:gap-20">
-                <div className="flex basis-full flex-col justify-center md:basis-[250px]">
-                    <h2 className="!text-green-text mb-8 text-4xl font-larken">Los mejores</h2>
-                    <div className="mb-8">
-                        <a href="#" className="text-light-green flex justify-between leading-4 font-jakarta hover:text-green-text-dark transition-colors">
+            <div className={`my-2 flex flex-col justify-between md:my-20 md:flex-row md:gap-20 ${isReversed ? 'md:flex-row-reverse' : ''}`}>
+                {/* Panel izquierdo - Controles */}
+                <div className={`flex basis-full flex-col justify-center md:basis-[250px] ${isReversed ? 'md:order-2' : 'md:order-1'}`}>
+                    <h2 className="!text-green-text mb-6 md:mb-8 text-2xl md:text-4xl font-larken">
+                        {isReversed ? 'Los mejores emprendimientos' : 'Los mejores'}
+                    </h2>
+                    <div className="mb-6 md:mb-8">
+                        <a href="#" className="text-light-green flex justify-between leading-4 font-jakarta hover:text-green-text-dark transition-colors text-sm md:text-base">
                             Encontralos en Mel <i className="fas fa-circle-chevron-right"></i>
                         </a>
                     </div>
-                    <div className="mb-6">
+                    <div className="mb-4 md:mb-6">
                         <div className="swiper-best-nav">
-                            <div className="swiper-wrapper flex flex-row gap-4 md:flex-col">
+                            <div className="swiper-wrapper flex flex-row gap-2 md:gap-4 md:flex-col">
                                 <div className="swiper-slide">
                                     <button
-                                        className={`btn btn-long ${activeTab === 0
+                                        className={`btn btn-long text-xs md:text-sm ${activeTab === 0
                                             ? 'btn-green'
                                             : 'btn-white'
                                             }`}
@@ -60,7 +70,7 @@ const LosMejores: React.FC = () => {
                                 </div>
                                 <div className="swiper-slide">
                                     <button
-                                        className={`btn btn-long ${activeTab === 1
+                                        className={`btn btn-long text-xs md:text-sm ${activeTab === 1
                                             ? 'btn-green'
                                             : 'btn-white'
                                             }`}
@@ -71,7 +81,7 @@ const LosMejores: React.FC = () => {
                                 </div>
                                 <div className="swiper-slide">
                                     <button
-                                        className={`btn btn-long ${activeTab === 2
+                                        className={`btn btn-long text-xs md:text-sm ${activeTab === 2
                                             ? 'btn-green'
                                             : 'btn-white'
                                             }`}
@@ -85,12 +95,18 @@ const LosMejores: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="flex-1">
+                {/* Panel derecho - Tarjetas */}
+                <div className={`flex-1 ${isReversed ? 'md:order-1' : 'md:order-2'}`}>
                     <div className="swiper-best !m-0">
-                        <div className="swiper-wrapper flex flex-row gap-4 md:gap-8 overflow-x-auto md:overflow-visible">
-                            {bestProperties.map((property) => (
-                                <div key={property.id} className="swiper-slide flex-shrink-0 min-w-[280px] md:min-w-0">
-                                    <BestPropertyCard property={property} />
+                        <div className="swiper-wrapper flex flex-row gap-3 md:gap-8 overflow-x-auto md:overflow-visible">
+                            {bestProperties.map((property, index) => (
+                                <div key={property.id} className="swiper-slide flex-shrink-0 min-w-[282px] md:min-w-0">
+                                    {/* Tarjeta de imagen con recuadros de Posesión y Desde */}
+                                    <BestPropertyCard
+                                        property={property}
+                                        withBoxes={true}
+                                        boxesOnTop={isReversed && index === 1} // Solo la tarjeta del medio (índice 1) cuando es reversed
+                                    />
                                 </div>
                             ))}
                         </div>
