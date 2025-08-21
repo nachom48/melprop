@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { userService } from '../modules';
+import { UserService } from '../modules/User/UserService';
 import ProfileLayout from '../components/ProfileLayout';
 import styled from 'styled-components';
 
@@ -99,7 +99,7 @@ const ChangePassword: React.FC = () => {
         setIsLoading(true);
 
         try {
-            await userService.changePassword({
+            await UserService.changePassword({
                 current_password: formData.currentPassword,
                 new_password: formData.newPassword,
                 new_password_b: formData.confirmPassword

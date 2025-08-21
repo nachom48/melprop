@@ -2,7 +2,7 @@
 // SAVED SEARCHES MODULE - SERVICE LAYER
 // =====================================================
 
-import { savedSearchesRepository } from './SavedSearchesRepository';
+import { SavedSearchesRepository } from './SavedSearchesRepository';
 import {
     CreateSavedSearchDTO,
     UpdateSavedSearchDTO,
@@ -15,7 +15,7 @@ import {
     AlertType
 } from './SavedSearches.dto';
 
-export class SavedSearchesService {
+export namespace SavedSearchesService {
 
     // =====================================================
     // SAVED SEARCHES METHODS
@@ -24,9 +24,9 @@ export class SavedSearchesService {
     /**
      * Crear nueva búsqueda guardada
      */
-    async createSavedSearch(searchData: CreateSavedSearchDTO): Promise<CreateSavedSearchResponseDTO> {
+    export async function createSavedSearch(searchData: CreateSavedSearchDTO): Promise<CreateSavedSearchResponseDTO> {
         try {
-            const response = await savedSearchesRepository.createSavedSearch(searchData);
+            const response = await SavedSearchesRepository.createSavedSearch(searchData);
             return response;
         } catch (error: any) {
             throw new Error(`Error en el servicio de búsquedas guardadas - crear: ${error.message}`);
@@ -36,9 +36,9 @@ export class SavedSearchesService {
     /**
      * Obtener lista de búsquedas guardadas del usuario
      */
-    async getSavedSearches(): Promise<SavedSearchesResponseDTO> {
+    export async function getSavedSearches(): Promise<SavedSearchesResponseDTO> {
         try {
-            const response = await savedSearchesRepository.getSavedSearches();
+            const response = await SavedSearchesRepository.getSavedSearches();
             return response;
         } catch (error: any) {
             throw new Error(`Error en el servicio de búsquedas guardadas - obtener: ${error.message}`);
@@ -48,9 +48,9 @@ export class SavedSearchesService {
     /**
      * Actualizar búsqueda guardada existente
      */
-    async updateSavedSearch(searchData: UpdateSavedSearchDTO): Promise<UpdateSavedSearchResponseDTO> {
+    export async function updateSavedSearch(searchData: UpdateSavedSearchDTO): Promise<UpdateSavedSearchResponseDTO> {
         try {
-            const response = await savedSearchesRepository.updateSavedSearch(searchData);
+            const response = await SavedSearchesRepository.updateSavedSearch(searchData);
             return response;
         } catch (error: any) {
             throw new Error(`Error en el servicio de búsquedas guardadas - actualizar: ${error.message}`);
@@ -60,9 +60,9 @@ export class SavedSearchesService {
     /**
      * Remover búsqueda guardada específica
      */
-    async removeSavedSearch(searchData: RemoveSavedSearchDTO): Promise<RemoveSavedSearchResponseDTO> {
+    export async function removeSavedSearch(searchData: RemoveSavedSearchDTO): Promise<RemoveSavedSearchResponseDTO> {
         try {
-            const response = await savedSearchesRepository.removeSavedSearch(searchData);
+            const response = await SavedSearchesRepository.removeSavedSearch(searchData);
             return response;
         } catch (error: any) {
             throw new Error(`Error en el servicio de búsquedas guardadas - remover: ${error.message}`);
@@ -72,9 +72,9 @@ export class SavedSearchesService {
     /**
      * Obtener búsquedas guardadas por tipo de alerta
      */
-    async getSavedSearchesByAlertType(alertType: AlertType): Promise<SavedSearchesResponseDTO> {
+    export async function getSavedSearchesByAlertType(alertType: AlertType): Promise<SavedSearchesResponseDTO> {
         try {
-            const response = await savedSearchesRepository.getSavedSearchesByAlertType(alertType);
+            const response = await SavedSearchesRepository.getSavedSearchesByAlertType(alertType);
             return response;
         } catch (error: any) {
             throw new Error(`Error en el servicio de búsquedas guardadas - filtrar por tipo: ${error.message}`);
@@ -84,9 +84,9 @@ export class SavedSearchesService {
     /**
      * Obtener cantidad de búsquedas guardadas
      */
-    async getSavedSearchesCount(): Promise<number> {
+    export async function getSavedSearchesCount(): Promise<number> {
         try {
-            const count = await savedSearchesRepository.getSavedSearchesCount();
+            const count = await SavedSearchesRepository.getSavedSearchesCount();
             return count;
         } catch (error: any) {
             console.error('Error obteniendo cantidad de búsquedas guardadas:', error);
@@ -97,9 +97,9 @@ export class SavedSearchesService {
     /**
      * Verificar si una URL ya está guardada
      */
-    async isUrlAlreadySaved(url: string): Promise<boolean> {
+    export async function isUrlAlreadySaved(url: string): Promise<boolean> {
         try {
-            const isSaved = await savedSearchesRepository.isUrlAlreadySaved(url);
+            const isSaved = await SavedSearchesRepository.isUrlAlreadySaved(url);
             return isSaved;
         } catch (error: any) {
             console.error('Error verificando si la URL ya está guardada:', error);
@@ -110,9 +110,9 @@ export class SavedSearchesService {
     /**
      * Obtener búsquedas guardadas recientes
      */
-    async getRecentSavedSearches(limit: number = 5): Promise<SavedSearchesResponseDTO> {
+    export async function getRecentSavedSearches(limit: number = 5): Promise<SavedSearchesResponseDTO> {
         try {
-            const response = await savedSearchesRepository.getRecentSavedSearches(limit);
+            const response = await SavedSearchesRepository.getRecentSavedSearches(limit);
             return response;
         } catch (error: any) {
             throw new Error(`Error en el servicio de búsquedas guardadas - obtener recientes: ${error.message}`);
@@ -126,10 +126,10 @@ export class SavedSearchesService {
     /**
      * Crear búsqueda guardada con validación
      */
-    async createSavedSearchWithValidation(searchData: CreateSavedSearchDTO): Promise<CreateSavedSearchResponseDTO> {
+    export async function createSavedSearchWithValidation(searchData: CreateSavedSearchDTO): Promise<CreateSavedSearchResponseDTO> {
         try {
             // Validar que la URL no esté ya guardada
-            const isAlreadySaved = await this.isUrlAlreadySaved(searchData.url);
+            const isAlreadySaved = await isUrlAlreadySaved(searchData.url);
             if (isAlreadySaved) {
                 throw new Error('Esta búsqueda ya está guardada');
             }
@@ -146,7 +146,7 @@ export class SavedSearchesService {
             }
 
             // Crear la búsqueda guardada
-            const response = await this.createSavedSearch(searchData);
+            const response = await createSavedSearch(searchData);
             return response;
         } catch (error: any) {
             throw new Error(`Error en validación y creación: ${error.message}`);
@@ -156,14 +156,14 @@ export class SavedSearchesService {
     /**
      * Obtener búsquedas guardadas con paginación
      */
-    async getSavedSearchesPaginated(page: number = 1, limit: number = 10): Promise<{
+    export async function getSavedSearchesPaginated(page: number = 1, limit: number = 10): Promise<{
         searches: SavedSearchDTO[];
         total: number;
         page: number;
         totalPages: number;
     }> {
         try {
-            const allSearches = await this.getSavedSearches();
+            const allSearches = await getSavedSearches();
             const total = allSearches.searchs.length;
             const totalPages = Math.ceil(total / limit);
             const startIndex = (page - 1) * limit;
@@ -185,9 +185,9 @@ export class SavedSearchesService {
     /**
      * Buscar en búsquedas guardadas por nombre
      */
-    async searchInSavedSearches(searchTerm: string): Promise<SavedSearchDTO[]> {
+    export async function searchInSavedSearches(searchTerm: string): Promise<SavedSearchDTO[]> {
         try {
-            const searches = await this.getSavedSearches();
+            const searches = await getSavedSearches();
             const searchLower = searchTerm.toLowerCase();
 
             return searches.searchs.filter(search =>
@@ -202,14 +202,14 @@ export class SavedSearchesService {
     /**
      * Obtener estadísticas de búsquedas guardadas
      */
-    async getSavedSearchesStats(): Promise<{
+    export async function getSavedSearchesStats(): Promise<{
         total: number;
         byAlertType: Record<AlertType, number>;
         byDate: Record<string, number>;
         mostUsed: { name: string; count: number }[];
     }> {
         try {
-            const searches = await this.getSavedSearches();
+            const searches = await getSavedSearches();
             const searchList = searches.searchs;
 
             const byAlertType: Record<AlertType, number> = {
@@ -256,9 +256,9 @@ export class SavedSearchesService {
     /**
      * Duplicar búsqueda guardada existente
      */
-    async duplicateSavedSearch(searchId: number, newName?: string): Promise<CreateSavedSearchResponseDTO> {
+    export async function duplicateSavedSearch(searchId: number, newName?: string): Promise<CreateSavedSearchResponseDTO> {
         try {
-            const searches = await this.getSavedSearches();
+            const searches = await getSavedSearches();
             const originalSearch = searches.searchs.find(search => search.id === searchId);
 
             if (!originalSearch) {
@@ -271,7 +271,7 @@ export class SavedSearchesService {
                 url: originalSearch.url
             };
 
-            const response = await this.createSavedSearch(duplicatedSearch);
+            const response = await createSavedSearch(duplicatedSearch);
             return response;
         } catch (error: any) {
             throw new Error(`Error duplicando búsqueda guardada: ${error.message}`);
@@ -281,9 +281,9 @@ export class SavedSearchesService {
     /**
      * Exportar búsquedas guardadas
      */
-    async exportSavedSearches(format: 'json' | 'csv' = 'json'): Promise<string> {
+    export async function exportSavedSearches(format: 'json' | 'csv' = 'json'): Promise<string> {
         try {
-            const searches = await this.getSavedSearches();
+            const searches = await getSavedSearches();
 
             if (format === 'json') {
                 return JSON.stringify(searches.searchs, null, 2);
@@ -311,6 +311,3 @@ export class SavedSearchesService {
         }
     }
 }
-
-// Exportar instancia singleton
-export const savedSearchesService = new SavedSearchesService();

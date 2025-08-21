@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
-import '../styles/propertyCard.css';
+//import '../styles/propertyCard.css';
 
 export interface Property {
     url: string;

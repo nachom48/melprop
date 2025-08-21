@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { userService, favoritesService, savedSearchesService } from '../modules';
 import {
     CreateUserDTO,
     UpdateUserDTO,
-    CreateSavedSearchDTO
 } from '../modules';
+import { UserService } from '../modules/User/UserService';
+import { CreateSavedSearchDTO } from '../modules/SavedSearches/SavedSearches.dto';
+import { SavedSearchesService } from '../modules/SavedSearches/SavedSearchesService';
+import { FavoritesService } from '../modules/Favorites/FavoritesService';
 
 interface User {
     id: number;
@@ -101,7 +103,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Verificar si el usuario está logueado
     const isLogged = async (): Promise<boolean> => {
         try {
-            const response = await userService.checkUserLogged();
+            const response = await UserService.checkUserLogged();
             if (response.isLogged) {
                 const normalizedUser = normalizeUser(response.user);
                 setUser(normalizedUser);
@@ -123,7 +125,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Cargar favoritos
     const loadFavorites = async () => {
         try {
-            const response = await favoritesService.getFavorites();
+            const response = await FavoritesService.getFavorites();
             // El backend devuelve { properties: [...] }
             setFavorites(response.properties || []);
         } catch (error) {
@@ -135,7 +137,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Cargar búsquedas guardadas
     const loadSavedSearches = async () => {
         try {
-            const response = await savedSearchesService.getSavedSearches();
+            const response = await SavedSearchesService.getSavedSearches();
             // El backend devuelve { searchs: [...] }
             setSavedSearches(response.searchs || []);
         } catch (error) {
@@ -149,7 +151,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             console.log('🔐 Contexto: Iniciando login para:', email);
 
-            const response = await userService.login({ username: email, password }); // Backend espera 'username'
+            const response = await UserService.login({ username: email, password }); // Backend espera 'username'
             console.log('🔐 Contexto: Respuesta completa del backend:', JSON.stringify(response, null, 2));
 
             const normalizedUser = normalizeUser(response.user);
@@ -172,7 +174,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Registro
     const register = async (userData: CreateUserDTO) => {
         try {
-            const response = await userService.signup(userData);
+            const response = await UserService.signup(userData);
             const normalizedUser = normalizeUser(response.user);
             setUser(normalizedUser);
             setIsLoggedIn(true);
@@ -189,7 +191,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Login con Google
     const googleLogin = async (googleUser: any) => {
         try {
-            const response = await userService.googleLogin(googleUser);
+            const response = await UserService.googleLogin(googleUser);
             const normalizedUser = normalizeUser(response.user);
             setUser(normalizedUser);
             setIsLoggedIn(true);
@@ -215,7 +217,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Actualizar usuario
     const updateUser = async (userData: UpdateUserDTO) => {
         try {
-            const response = await userService.updateProfile(userData);
+            const response = await UserService.updateProfile(userData);
             // El backend devuelve { user: {...} }
             if (response.user) {
                 const normalizedUser = normalizeUser(response.user);
@@ -230,7 +232,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Agregar a favoritos
     const addToFavorites = async (propertyId: number) => {
         try {
-            const result = await favoritesService.toggleFavorite(propertyId);
+            const result = await FavoritesService.toggleFavorite(propertyId);
             if (result.success) {
                 // Solo recargar si realmente cambió el estado
                 if (result.isFavorite) {
@@ -246,7 +248,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Remover de favoritos
     const removeFromFavorites = async (propertyId: number) => {
         try {
-            const result = await favoritesService.toggleFavorite(propertyId);
+            const result = await FavoritesService.toggleFavorite(propertyId);
             if (result.success) {
                 // Solo recargar si realmente cambió el estado
                 if (!result.isFavorite) {
@@ -262,7 +264,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Guardar búsqueda
     const saveSearch = async (searchData: CreateSavedSearchDTO) => {
         try {
-            await savedSearchesService.createSavedSearch(searchData);
+            await SavedSearchesService.createSavedSearch(searchData);
             // Recargar la lista de búsquedas guardadas
             await loadSavedSearches();
         } catch (error) {
@@ -274,7 +276,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Remover búsqueda guardada
     const removeSavedSearch = async (searchId: number) => {
         try {
-            await savedSearchesService.removeSavedSearch({ id: searchId }); // Pasar objeto con id
+            await SavedSearchesService.removeSavedSearch({ id: searchId }); // Pasar objeto con id
             // Recargar la lista de búsquedas guardadas
             await loadSavedSearches();
         } catch (error) {

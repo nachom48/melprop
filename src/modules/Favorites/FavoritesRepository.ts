@@ -10,10 +10,9 @@ import {
     RemoveFavoriteResponseDTO
 } from './Favorites.dto';
 
-import { getApiUrl } from '../../config/index';
-import { axiosInstance } from '../../config/axios';
+import { apiClient } from '../../config/axios.config';
 
-export class FavoritesRepository {
+export namespace FavoritesRepository {
 
     // =====================================================
     // FAVORITES METHODS
@@ -22,9 +21,9 @@ export class FavoritesRepository {
     /**
      * Agregar propiedad a favoritos
      */
-    async addFavorite(favoriteData: AddFavoriteDTO): Promise<AddFavoriteResponseDTO> {
+    export async function addFavorite(favoriteData: AddFavoriteDTO): Promise<AddFavoriteResponseDTO> {
         try {
-            const response = await axiosInstance.post(getApiUrl('FAVORITES'), favoriteData);
+            const response = await apiClient.post('/favorites/', favoriteData);
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error agregando a favoritos');
@@ -34,9 +33,9 @@ export class FavoritesRepository {
     /**
      * Obtener lista de favoritos del usuario
      */
-    async getFavorites(): Promise<FavoritesResponseDTO> {
+    export async function getFavorites(): Promise<FavoritesResponseDTO> {
         try {
-            const response = await axiosInstance.get(getApiUrl('FAVORITES'));
+            const response = await apiClient.get('/favorites/');
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error obteniendo favoritos');
@@ -46,7 +45,7 @@ export class FavoritesRepository {
     /**
      * Toggle favorito (agregar/remover) - usa el endpoint que SÍ acepta X-User-ID
      */
-    async toggleFavorite(propertyId: number): Promise<FavoritesResponseDTO> {
+    export async function toggleFavorite(propertyId: number): Promise<FavoritesResponseDTO> {
         try {
             // Verificar que el usuario esté logueado antes de hacer la petición
             const user = localStorage.getItem('user');
@@ -80,7 +79,7 @@ export class FavoritesRepository {
             console.log('🔄 Usando endpoint alternativo para toggle de favoritos...');
 
             try {
-                const response = await axiosInstance.get(getApiUrl('FAVORITES_DELETE_ID', { id: propertyId }));
+                const response = await apiClient.get(`/favorites/delete/${propertyId}/`);
                 console.log('✅ Toggle de favorito completado:', response.data);
                 return response.data;
             } catch (error: any) {
@@ -92,7 +91,7 @@ export class FavoritesRepository {
                     user_id: userData.id
                 };
 
-                const postResponse = await axiosInstance.post(getApiUrl('FAVORITES'), requestData);
+                const postResponse = await apiClient.post('/favorites/', requestData);
                 console.log('✅ Toggle de favoritos con endpoint original:', postResponse.data);
                 return postResponse.data;
             }
@@ -112,9 +111,9 @@ export class FavoritesRepository {
     /**
      * Remover propiedad específica de favoritos
      */
-    async removeFavorite(favoriteData: RemoveFavoriteDTO): Promise<RemoveFavoriteResponseDTO> {
+    export async function removeFavorite(favoriteData: RemoveFavoriteDTO): Promise<RemoveFavoriteResponseDTO> {
         try {
-            const response = await axiosInstance.get(getApiUrl('FAVORITES_DELETE_ID', { id: favoriteData.id }));
+            const response = await apiClient.get(`/favorites/delete/${favoriteData.id}/`);
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error removiendo de favoritos');
@@ -124,9 +123,9 @@ export class FavoritesRepository {
     /**
      * Remover todos los favoritos del usuario
      */
-    async removeAllFavorites(): Promise<RemoveFavoriteResponseDTO> {
+    export async function removeAllFavorites(): Promise<RemoveFavoriteResponseDTO> {
         try {
-            const response = await axiosInstance.get(getApiUrl('FAVORITES_DELETE'));
+            const response = await apiClient.get('/favorites/delete/');
             return response.data;
         } catch (error: any) {
             throw new Error(error.response?.data?.message || 'Error removiendo todos los favoritos');
@@ -136,9 +135,9 @@ export class FavoritesRepository {
     /**
      * Verificar si una propiedad está en favoritos
      */
-    async isFavorite(propertyId: number): Promise<boolean> {
+    export async function isFavorite(propertyId: number): Promise<boolean> {
         try {
-            const favorites = await this.getFavorites();
+            const favorites = await getFavorites();
             return favorites.properties.some(property => property.id === propertyId);
         } catch (error: any) {
             console.error('Error verificando si es favorito:', error);
@@ -149,9 +148,9 @@ export class FavoritesRepository {
     /**
      * Obtener cantidad de favoritos
      */
-    async getFavoritesCount(): Promise<number> {
+    export async function getFavoritesCount(): Promise<number> {
         try {
-            const favorites = await this.getFavorites();
+            const favorites = await getFavorites();
             return favorites.properties.length;
         } catch (error: any) {
             console.error('Error obteniendo cantidad de favoritos:', error);
@@ -159,6 +158,3 @@ export class FavoritesRepository {
         }
     }
 }
-
-// Exportar instancia singleton
-export const favoritesRepository = new FavoritesRepository();

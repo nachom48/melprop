@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
-import { userService } from '../modules';
+import { UserService } from '../modules/User/UserService';
 import { useUser } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 interface LoginModalProps {
-    isShown: boolean;
-    onClose: () => void;
-    logOrReg?: string;
+  isShown: boolean;
+  onClose: () => void;
+  logOrReg?: string;
 }
 
 const ModalOverlay = styled.div<{ isShown: boolean }>`
@@ -704,351 +704,351 @@ const FooterLink = styled.a`
 `;
 
 const LoginModal: React.FC<LoginModalProps> = ({
-    isShown,
-    onClose,
-    logOrReg = 'login'
+  isShown,
+  onClose,
+  logOrReg = 'login'
 }) => {
-    const { login, register, googleLogin } = useUser();
-    const navigate = useNavigate();
-    const [content, setContent] = useState<'login' | 'register'>(logOrReg as 'login' | 'register');
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-        fullName: '',
-        confirmPassword: ''
-    });
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [isLoading, setIsLoading] = useState(false);
-    const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'error' | 'success', message: string } | null>(null);
+  const { login, register, googleLogin } = useUser();
+  const navigate = useNavigate();
+  const [content, setContent] = useState<'login' | 'register'>(logOrReg as 'login' | 'register');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    fullName: '',
+    confirmPassword: ''
+  });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'error' | 'success', message: string } | null>(null);
 
-    useEffect(() => {
-        setContent(logOrReg as 'login' | 'register');
-    }, [logOrReg]);
+  useEffect(() => {
+    setContent(logOrReg as 'login' | 'register');
+  }, [logOrReg]);
 
-    const handleTabChange = (tab: 'login' | 'register') => {
-        setContent(tab);
-        setErrors({});
-        setFeedbackMessage(null);
+  const handleTabChange = (tab: 'login' | 'register') => {
+    setContent(tab);
+    setErrors({});
+    setFeedbackMessage(null);
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formData.email) {
+      newErrors.email = 'El email es requerido';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'El email no es válido';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'La contraseña es requerida';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
+    }
+
+    if (content === 'register') {
+      if (!formData.fullName) {
+        newErrors.fullName = 'El nombre completo es requerido';
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = 'Las contraseñas no coinciden';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Función para normalizar el usuario del backend al formato esperado por el contexto
+  const normalizeUser = (rawUser: any) => {
+    console.log('Usuario raw del backend:', rawUser); // Debug log
+
+    return {
+      id: rawUser.id || rawUser.pk || rawUser.user_id || 0,
+      full_name: rawUser.full_name || rawUser.fullName || rawUser.name || '',
+      first_name: rawUser.first_name || rawUser.firstName || '',
+      last_name: rawUser.last_name || rawUser.lastName || '',
+      username: rawUser.username || rawUser.email || '',
+      email: rawUser.email || '',
+      type_id: rawUser.type_id || rawUser.typeId || '0000',
+      gender: rawUser.gender || 'masculino',
+      location: rawUser.location || '',
+      phone: rawUser.phone || rawUser.mobile || '',
+      dni: rawUser.dni || '',
+      birth_date: rawUser.birth_date || rawUser.birthDate || '',
+      subscription: rawUser.subscription || rawUser.acceptPromotional || false
     };
+  };
 
-    const handleInputChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-        if (errors[field]) {
-            setErrors(prev => ({ ...prev, [field]: '' }));
-        }
-    };
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-    const validateForm = () => {
-        const newErrors: { [key: string]: string } = {};
+    setIsLoading(true);
+    setFeedbackMessage(null);
 
-        if (!formData.email) {
-            newErrors.email = 'El email es requerido';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'El email no es válido';
-        }
+    try {
+      console.log('🔐 Iniciando login con:', formData.email);
 
-        if (!formData.password) {
-            newErrors.password = 'La contraseña es requerida';
-        } else if (formData.password.length < 8) {
-            newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
-        }
+      // Usar solo la función del contexto, que ya maneja la llamada al backend
+      await login(formData.email, formData.password);
 
-        if (content === 'register') {
-            if (!formData.fullName) {
-                newErrors.fullName = 'El nombre completo es requerido';
-            }
+      console.log('✅ Login exitoso, redirigiendo a página principal...');
+      setFeedbackMessage({ type: 'success', message: 'Login exitoso! Redirigiendo...' });
 
-            if (formData.password !== formData.confirmPassword) {
-                newErrors.confirmPassword = 'Las contraseñas no coinciden';
-            }
-        }
+      // Solo cerrar el modal después del login exitoso
+      setTimeout(() => {
+        console.log('🚀 Login exitoso, cerrando modal...');
+        onClose(); // Solo cerrar el modal, no navegar
+      }, 1500);
+    } catch (error: any) {
+      setFeedbackMessage({
+        type: 'error',
+        message: error.response?.data?.message || 'Error en el login'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-    // Función para normalizar el usuario del backend al formato esperado por el contexto
-    const normalizeUser = (rawUser: any) => {
-        console.log('Usuario raw del backend:', rawUser); // Debug log
+    setIsLoading(true);
+    setFeedbackMessage(null);
 
-        return {
-            id: rawUser.id || rawUser.pk || rawUser.user_id || 0,
-            full_name: rawUser.full_name || rawUser.fullName || rawUser.name || '',
-            first_name: rawUser.first_name || rawUser.firstName || '',
-            last_name: rawUser.last_name || rawUser.lastName || '',
-            username: rawUser.username || rawUser.email || '',
-            email: rawUser.email || '',
-            type_id: rawUser.type_id || rawUser.typeId || '0000',
-            gender: rawUser.gender || 'masculino',
-            location: rawUser.location || '',
-            phone: rawUser.phone || rawUser.mobile || '',
-            dni: rawUser.dni || '',
-            birth_date: rawUser.birth_date || rawUser.birthDate || '',
-            subscription: rawUser.subscription || rawUser.acceptPromotional || false
-        };
-    };
+    try {
+      console.log('📝 Iniciando registro con:', formData.email);
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!validateForm()) return;
+      // Usar solo la función del contexto, que ya maneja la llamada al backend
+      await register({
+        fullName: formData.fullName,
+        username: formData.email,
+        password: formData.password,
+        passwordB: formData.password
+      });
 
-        setIsLoading(true);
-        setFeedbackMessage(null);
+      console.log('✅ Registro exitoso, redirigiendo a página principal...');
+      setFeedbackMessage({ type: 'success', message: 'Registro exitoso! Redirigiendo...' });
 
-        try {
-            console.log('🔐 Iniciando login con:', formData.email);
+      // Solo cerrar el modal después del registro exitoso
+      setTimeout(() => {
+        console.log('🚀 Registro exitoso, cerrando modal...');
+        onClose(); // Solo cerrar el modal, no navegar
+      }, 1500);
+    } catch (error: any) {
+      setFeedbackMessage({
+        type: 'error',
+        message: error.response?.data?.message || 'Error en el registro'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            // Usar solo la función del contexto, que ya maneja la llamada al backend
-            await login(formData.email, formData.password);
+  const googleOAuthLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        console.log('🔐 Iniciando login con Google...');
 
-            console.log('✅ Login exitoso, redirigiendo a página principal...');
-            setFeedbackMessage({ type: 'success', message: 'Login exitoso! Redirigiendo...' });
+        // Usar solo la función del contexto
+        await googleLogin({ token: tokenResponse.access_token });
 
-            // Solo cerrar el modal después del login exitoso
-            setTimeout(() => {
-                console.log('🚀 Login exitoso, cerrando modal...');
-                onClose(); // Solo cerrar el modal, no navegar
-            }, 1500);
-        } catch (error: any) {
-            setFeedbackMessage({
-                type: 'error',
-                message: error.response?.data?.message || 'Error en el login'
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        console.log('✅ Login con Google exitoso, redirigiendo a página principal...');
+        setFeedbackMessage({ type: 'success', message: 'Login con Google exitoso! Redirigiendo...' });
 
-    const handleRegister = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!validateForm()) return;
-
-        setIsLoading(true);
-        setFeedbackMessage(null);
-
-        try {
-            console.log('📝 Iniciando registro con:', formData.email);
-
-            // Usar solo la función del contexto, que ya maneja la llamada al backend
-            await register({
-                fullName: formData.fullName,
-                username: formData.email,
-                password: formData.password,
-                passwordB: formData.password
-            });
-
-            console.log('✅ Registro exitoso, redirigiendo a página principal...');
-            setFeedbackMessage({ type: 'success', message: 'Registro exitoso! Redirigiendo...' });
-
-            // Solo cerrar el modal después del registro exitoso
-            setTimeout(() => {
-                console.log('🚀 Registro exitoso, cerrando modal...');
-                onClose(); // Solo cerrar el modal, no navegar
-            }, 1500);
-        } catch (error: any) {
-            setFeedbackMessage({
-                type: 'error',
-                message: error.response?.data?.message || 'Error en el registro'
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const googleOAuthLogin = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-            try {
-                console.log('🔐 Iniciando login con Google...');
-
-                // Usar solo la función del contexto
-                await googleLogin({ token: tokenResponse.access_token });
-
-                console.log('✅ Login con Google exitoso, redirigiendo a página principal...');
-                setFeedbackMessage({ type: 'success', message: 'Login con Google exitoso! Redirigiendo...' });
-
-                // Redirigir a la página principal después del login exitoso
-                setTimeout(() => {
-                    console.log('🚀 Redirigiendo a página principal...');
-                    onClose(); // Cerrar el modal primero
-                    navigate('/'); // Usar React Router para navegar
-                }, 1500);
-            } catch (error: any) {
-                setFeedbackMessage({
-                    type: 'error',
-                    message: error.response?.data?.message || 'Error en el login con Google'
-                });
-            }
-        },
-        onError: () => {
-            setFeedbackMessage({
-                type: 'error',
-                message: 'Error en el login con Google'
-            });
-        }
-    });
-
-    const handleFacebookLogin = async () => {
-        // Para Facebook necesitarías implementar el SDK de Facebook
-        // Por ahora mostramos un mensaje de error
+        // Redirigir a la página principal después del login exitoso
+        setTimeout(() => {
+          console.log('🚀 Redirigiendo a página principal...');
+          onClose(); // Cerrar el modal primero
+          navigate('/'); // Usar React Router para navegar
+        }, 1500);
+      } catch (error: any) {
         setFeedbackMessage({
-            type: 'error',
-            message: 'Login con Facebook no disponible en esta versión'
+          type: 'error',
+          message: error.response?.data?.message || 'Error en el login con Google'
         });
-    };
+      }
+    },
+    onError: () => {
+      setFeedbackMessage({
+        type: 'error',
+        message: 'Error en el login con Google'
+      });
+    }
+  });
 
-    if (!isShown) return null;
+  const handleFacebookLogin = async () => {
+    // Para Facebook necesitarías implementar el SDK de Facebook
+    // Por ahora mostramos un mensaje de error
+    setFeedbackMessage({
+      type: 'error',
+      message: 'Login con Facebook no disponible en esta versión'
+    });
+  };
 
-    return (
-        <ModalOverlay isShown={isShown} onClick={onClose}>
-            <ModalContainer onClick={(e) => e.stopPropagation()}>
-                <CloseButton onClick={onClose}>×</CloseButton>
+  if (!isShown) return null;
 
-                <ModalHeader>
-                    <Brand src="/mel_logo_login.png" alt="Mel Propiedades" />
-                </ModalHeader>
+  return (
+    <ModalOverlay isShown={isShown} onClick={onClose}>
+      <ModalContainer onClick={(e) => e.stopPropagation()}>
+        <CloseButton onClick={onClose}>×</CloseButton>
 
-                <ModalBody>
-                    <TabsWrapper>
-                        <Tab
-                            active={content === 'login'}
-                            onClick={() => handleTabChange('login')}
-                        >
-                            Ingresar
-                        </Tab>
-                        <Tab
-                            active={content === 'register'}
-                            onClick={() => handleTabChange('register')}
-                        >
-                            Crear cuenta
-                        </Tab>
-                    </TabsWrapper>
+        <ModalHeader>
+          <Brand src="/mel_logo_login.png" alt="Mel Propiedades" />
+        </ModalHeader>
 
-                    {feedbackMessage && (
-                        <FeedbackMessage type={feedbackMessage.type}>
-                            {feedbackMessage.message}
-                        </FeedbackMessage>
-                    )}
+        <ModalBody>
+          <TabsWrapper>
+            <Tab
+              active={content === 'login'}
+              onClick={() => handleTabChange('login')}
+            >
+              Ingresar
+            </Tab>
+            <Tab
+              active={content === 'register'}
+              onClick={() => handleTabChange('register')}
+            >
+              Crear cuenta
+            </Tab>
+          </TabsWrapper>
 
-                    {content === 'login' && (
-                        <Form onSubmit={handleLogin}>
-                            <div>
-                                <Input
-                                    type="email"
-                                    placeholder="Ingresa tu e-mail"
-                                    value={formData.email}
-                                    onChange={(e) => handleInputChange('email', e.target.value)}
-                                    error={!!errors.email}
-                                />
-                                {errors.email && <ErrorText>{errors.email}</ErrorText>}
-                            </div>
+          {feedbackMessage && (
+            <FeedbackMessage type={feedbackMessage.type}>
+              {feedbackMessage.message}
+            </FeedbackMessage>
+          )}
 
-                            <div>
-                                <Input
-                                    type="password"
-                                    placeholder="Ingresa tu clave"
-                                    value={formData.password}
-                                    onChange={(e) => handleInputChange('password', e.target.value)}
-                                    error={!!errors.password}
-                                />
-                                {errors.password && <ErrorText>{errors.password}</ErrorText>}
-                            </div>
+          {content === 'login' && (
+            <Form onSubmit={handleLogin}>
+              <div>
+                <Input
+                  type="email"
+                  placeholder="Ingresa tu e-mail"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  error={!!errors.email}
+                />
+                {errors.email && <ErrorText>{errors.email}</ErrorText>}
+              </div>
 
-                            <Button type="submit" disabled={isLoading}>
-                                {isLoading ? 'Ingresando...' : 'Ingresar'}
-                            </Button>
+              <div>
+                <Input
+                  type="password"
+                  placeholder="Ingresa tu clave"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  error={!!errors.password}
+                />
+                {errors.password && <ErrorText>{errors.password}</ErrorText>}
+              </div>
 
-                            <SessionWrapper>
-                                <CheckboxWrapper>
-                                    <input type="checkbox" id="remember" />
-                                    <span>Mantener sesión iniciada</span>
-                                </CheckboxWrapper>
-                                <ForgotPassword href="#">¿Olvidaste tu contraseña?</ForgotPassword>
-                            </SessionWrapper>
-                        </Form>
-                    )}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Ingresando...' : 'Ingresar'}
+              </Button>
 
-                    {content === 'register' && (
-                        <Form onSubmit={handleRegister}>
-                            <div>
-                                <Input
-                                    type="text"
-                                    placeholder="Ingresa nombre y apellido"
-                                    value={formData.fullName}
-                                    onChange={(e) => handleInputChange('fullName', e.target.value)}
-                                    error={!!errors.fullName}
-                                />
-                                {errors.fullName && <ErrorText>{errors.fullName}</ErrorText>}
-                            </div>
+              <SessionWrapper>
+                <CheckboxWrapper>
+                  <input type="checkbox" id="remember" />
+                  <span>Mantener sesión iniciada</span>
+                </CheckboxWrapper>
+                <ForgotPassword href="#">¿Olvidaste tu contraseña?</ForgotPassword>
+              </SessionWrapper>
+            </Form>
+          )}
 
-                            <div>
-                                <Input
-                                    type="email"
-                                    placeholder="Ingresa tu e-mail"
-                                    value={formData.email}
-                                    onChange={(e) => handleInputChange('email', e.target.value)}
-                                    error={!!errors.email}
-                                />
-                                {errors.email && <ErrorText>{errors.email}</ErrorText>}
-                            </div>
+          {content === 'register' && (
+            <Form onSubmit={handleRegister}>
+              <div>
+                <Input
+                  type="text"
+                  placeholder="Ingresa nombre y apellido"
+                  value={formData.fullName}
+                  onChange={(e) => handleInputChange('fullName', e.target.value)}
+                  error={!!errors.fullName}
+                />
+                {errors.fullName && <ErrorText>{errors.fullName}</ErrorText>}
+              </div>
 
-                            <div>
-                                <Input
-                                    type="password"
-                                    placeholder="Ingresa tu clave"
-                                    value={formData.password}
-                                    onChange={(e) => handleInputChange('password', e.target.value)}
-                                    error={!!errors.password}
-                                />
-                                {errors.password && <ErrorText>{errors.password}</ErrorText>}
-                            </div>
+              <div>
+                <Input
+                  type="email"
+                  placeholder="Ingresa tu e-mail"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  error={!!errors.email}
+                />
+                {errors.email && <ErrorText>{errors.email}</ErrorText>}
+              </div>
 
-                            <div>
-                                <Input
-                                    type="password"
-                                    placeholder="Repite tu clave"
-                                    value={formData.confirmPassword}
-                                    onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                                    error={!!errors.confirmPassword}
-                                />
-                                {errors.confirmPassword && <ErrorText>{errors.confirmPassword}</ErrorText>}
-                            </div>
+              <div>
+                <Input
+                  type="password"
+                  placeholder="Ingresa tu clave"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  error={!!errors.password}
+                />
+                {errors.password && <ErrorText>{errors.password}</ErrorText>}
+              </div>
 
-                            <Button type="submit" disabled={isLoading}>
-                                {isLoading ? 'Creando cuenta...' : 'Crear una cuenta'}
-                            </Button>
+              <div>
+                <Input
+                  type="password"
+                  placeholder="Repite tu clave"
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                  error={!!errors.confirmPassword}
+                />
+                {errors.confirmPassword && <ErrorText>{errors.confirmPassword}</ErrorText>}
+              </div>
 
-                            <FooterText>
-                                Al hacer click en el botón estás aceptando los{' '}
-                                <FooterLink href="#">Términos y condiciones</FooterLink>
-                            </FooterText>
-                        </Form>
-                    )}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Creando cuenta...' : 'Crear una cuenta'}
+              </Button>
 
-                    <SocialSection>
-                        <SocialTitle>O también puedes:</SocialTitle>
+              <FooterText>
+                Al hacer click en el botón estás aceptando los{' '}
+                <FooterLink href="#">Términos y condiciones</FooterLink>
+              </FooterText>
+            </Form>
+          )}
 
-                        <SocialButton
-                            variant="google"
-                            onClick={() => googleOAuthLogin()}
-                            type="button"
-                        >
-                            <SocialIcon src="/google_logo.png" alt="Google" />
-                            Continuar con Google
-                        </SocialButton>
+          <SocialSection>
+            <SocialTitle>O también puedes:</SocialTitle>
 
-                        <SocialButton
-                            variant="facebook"
-                            onClick={handleFacebookLogin}
-                            type="button"
-                        >
-                            <SocialIcon src="/fb_logo.png" alt="Facebook" />
-                            Continuar con Facebook
-                        </SocialButton>
-                    </SocialSection>
-                </ModalBody>
-            </ModalContainer>
-        </ModalOverlay>
-    );
+            <SocialButton
+              variant="google"
+              onClick={() => googleOAuthLogin()}
+              type="button"
+            >
+              <SocialIcon src="/google_logo.png" alt="Google" />
+              Continuar con Google
+            </SocialButton>
+
+            <SocialButton
+              variant="facebook"
+              onClick={handleFacebookLogin}
+              type="button"
+            >
+              <SocialIcon src="/fb_logo.png" alt="Facebook" />
+              Continuar con Facebook
+            </SocialButton>
+          </SocialSection>
+        </ModalBody>
+      </ModalContainer>
+    </ModalOverlay>
+  );
 };
 
 export default LoginModal; 

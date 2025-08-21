@@ -2,7 +2,7 @@
 // USER MODULE - SERVICE LAYER
 // =====================================================
 
-import { userRepository } from './UserRepository';
+import { UserRepository } from './UserRepository';
 import {
   CreateUserDTO,
   LoginUserDTO,
@@ -19,7 +19,7 @@ import {
   UserResponseDTO
 } from './User.dto';
 
-export class UserService {
+export namespace UserService {
 
   // =====================================================
   // AUTHENTICATION METHODS
@@ -28,9 +28,9 @@ export class UserService {
   /**
    * Login de usuario con credenciales
    */
-  async login(credentials: LoginUserDTO): Promise<LoginResponseDTO> {
+  export async function login(credentials: LoginUserDTO): Promise<LoginResponseDTO> {
     try {
-      const response = await userRepository.login(credentials);
+      const response = await UserRepository.login(credentials);
       return response;
     } catch (error: any) {
       throw new Error(`Error en el servicio de login: ${error.message}`);
@@ -40,9 +40,9 @@ export class UserService {
   /**
    * Registro de nuevo usuario
    */
-  async signup(userData: CreateUserDTO): Promise<LoginResponseDTO> {
+  export async function signup(userData: CreateUserDTO): Promise<LoginResponseDTO> {
     try {
-      const response = await userRepository.signup(userData);
+      const response = await UserRepository.signup(userData);
       return response;
     } catch (error: any) {
       throw new Error(`Error en el servicio de registro: ${error.message}`);
@@ -52,9 +52,9 @@ export class UserService {
   /**
    * Verificar si el usuario está logueado
    */
-  async checkUserLogged(): Promise<CheckUserResponseDTO> {
+  export async function checkUserLogged(): Promise<CheckUserResponseDTO> {
     try {
-      const response = await userRepository.checkUserLogged();
+      const response = await UserRepository.checkUserLogged();
       return response;
     } catch (error: any) {
       throw new Error(`Error en el servicio de verificación: ${error.message}`);
@@ -64,9 +64,9 @@ export class UserService {
   /**
    * Logout del usuario
    */
-  async logout(): Promise<ApiResponseDTO> {
+  export async function logout(): Promise<ApiResponseDTO> {
     try {
-      const response = await userRepository.logout();
+      const response = await UserRepository.logout();
       return response;
     } catch (error: any) {
       throw new Error(`Error en el servicio de logout: ${error.message}`);
@@ -76,9 +76,9 @@ export class UserService {
   /**
    * Login con Google OAuth
    */
-  async googleLogin(tokenData: GoogleLoginDTO): Promise<LoginResponseDTO> {
+  export async function googleLogin(tokenData: GoogleLoginDTO): Promise<LoginResponseDTO> {
     try {
-      const response = await userRepository.googleLogin(tokenData);
+      const response = await UserRepository.googleLogin(tokenData);
       return response;
     } catch (error: any) {
       throw new Error(`Error en el servicio de login con Google: ${error.message}`);
@@ -88,9 +88,9 @@ export class UserService {
   /**
    * Login con Facebook OAuth
    */
-  async facebookLogin(userData: FacebookLoginDTO): Promise<LoginResponseDTO> {
+  export async function facebookLogin(userData: FacebookLoginDTO): Promise<LoginResponseDTO> {
     try {
-      const response = await userRepository.facebookLogin(userData);
+      const response = await UserRepository.facebookLogin(userData);
       return response;
     } catch (error: any) {
       throw new Error(`Error en el servicio de login con Facebook: ${error.message}`);
@@ -104,9 +104,9 @@ export class UserService {
   /**
    * Actualizar datos del perfil del usuario
    */
-  async updateProfile(userData: UpdateUserDTO): Promise<ApiResponseDTO<UserResponseDTO>> {
+  export async function updateProfile(userData: UpdateUserDTO): Promise<ApiResponseDTO<UserResponseDTO>> {
     try {
-      const response = await userRepository.updateProfile(userData);
+      const response = await UserRepository.updateProfile(userData);
       return response;
     } catch (error: any) {
       throw new Error(`Error en el servicio de actualización de perfil: ${error.message}`);
@@ -116,9 +116,9 @@ export class UserService {
   /**
    * Cambiar contraseña del usuario
    */
-  async changePassword(passwordData: ChangePasswordDTO): Promise<ApiResponseDTO> {
+  export async function changePassword(passwordData: ChangePasswordDTO): Promise<ApiResponseDTO> {
     try {
-      const response = await userRepository.changePassword(passwordData);
+      const response = await UserRepository.changePassword(passwordData);
       return response;
     } catch (error: any) {
       throw new Error(`Error en el servicio de cambio de contraseña: ${error.message}`);
@@ -132,9 +132,9 @@ export class UserService {
   /**
    * Solicitar recuperación de contraseña
    */
-  async forgotPassword(emailData: ForgotPasswordDTO): Promise<ApiResponseDTO> {
+  export async function forgotPassword(emailData: ForgotPasswordDTO): Promise<ApiResponseDTO> {
     try {
-      const response = await userRepository.forgotPassword(emailData);
+      const response = await UserRepository.forgotPassword(emailData);
       return response;
     } catch (error: any) {
       throw new Error(`Error en el servicio de recuperación de contraseña: ${error.message}`);
@@ -144,9 +144,9 @@ export class UserService {
   /**
    * Establecer nueva contraseña con token
    */
-  async resetPassword(resetData: ResetPasswordDTO): Promise<ApiResponseDTO> {
+  export async function resetPassword(resetData: ResetPasswordDTO): Promise<ApiResponseDTO> {
     try {
-      const response = await userRepository.resetPassword(resetData);
+      const response = await UserRepository.resetPassword(resetData);
       return response;
     } catch (error: any) {
       throw new Error(`Error en el servicio de reset de contraseña: ${error.message}`);
@@ -156,9 +156,9 @@ export class UserService {
   /**
    * Validar token de recuperación
    */
-  async validateToken(tokenData: TokenValidatorDTO): Promise<ApiResponseDTO> {
+  export async function validateToken(tokenData: TokenValidatorDTO): Promise<ApiResponseDTO> {
     try {
-      const response = await userRepository.validateToken(tokenData);
+      const response = await UserRepository.validateToken(tokenData);
       return response;
     } catch (error: any) {
       throw new Error(`Error en el servicio de validación de token: ${error.message}`);
@@ -172,7 +172,7 @@ export class UserService {
   /**
    * Normalizar usuario del backend al formato esperado
    */
-  normalizeUser(rawUser: any): UserResponseDTO {
+  export function normalizeUser(rawUser: any): UserResponseDTO {
     return {
       id: rawUser.id || rawUser.pk || rawUser.user_id || 0,
       full_name: rawUser.full_name || rawUser.fullName || rawUser.name || '',
@@ -194,14 +194,14 @@ export class UserService {
   /**
    * Validar si el usuario está autenticado
    */
-  isUserAuthenticated(user: UserResponseDTO | null): boolean {
+  export function isUserAuthenticated(user: UserResponseDTO | null): boolean {
     return user !== null && user.id > 0;
   }
 
   /**
    * Obtener nombre completo del usuario
    */
-  getUserFullName(user: UserResponseDTO | null): string {
+  export function getUserFullName(user: UserResponseDTO | null): string {
     if (!user) return '';
     if (user.full_name) return user.full_name;
     if (user.first_name && user.last_name) {
@@ -210,6 +210,3 @@ export class UserService {
     return user.username || user.email || 'Usuario';
   }
 }
-
-// Exportar instancia singleton
-export const userService = new UserService();

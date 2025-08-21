@@ -1,5 +1,5 @@
 import React from 'react';
-import { Development } from '../repositories/developmentRepository';
+import { Development } from '../modules/Developments/interfaces/development.interface';
 import './DevelopmentCard.css';
 
 export interface DevelopmentCardProps {

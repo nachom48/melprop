@@ -2,8 +2,7 @@
 // USER MODULE - REPOSITORY LAYER
 // =====================================================
 
-import { getApiUrl } from '../../config';
-import { axiosInstance } from '../../config/axios';
+import { apiClient } from '../../config/axios.config';
 import {
   CreateUserDTO,
   LoginUserDTO,
@@ -20,9 +19,7 @@ import {
   UserResponseDTO
 } from './User.dto';
 
-// La configuración de cookies ya está en axiosInstance
-
-export class UserRepository {
+export namespace UserRepository {
 
   // =====================================================
   // AUTHENTICATION METHODS
@@ -31,9 +28,9 @@ export class UserRepository {
   /**
    * Login de usuario con credenciales
    */
-  async login(credentials: LoginUserDTO): Promise<LoginResponseDTO> {
+  export async function login(credentials: LoginUserDTO): Promise<LoginResponseDTO> {
     try {
-      const response = await axiosInstance.post(getApiUrl('LOGIN'), credentials);
+      const response = await apiClient.post('/auth/login/', credentials);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error en el login');
@@ -43,9 +40,9 @@ export class UserRepository {
   /**
    * Registro de nuevo usuario
    */
-  async signup(userData: CreateUserDTO): Promise<LoginResponseDTO> {
+  export async function signup(userData: CreateUserDTO): Promise<LoginResponseDTO> {
     try {
-      const response = await axiosInstance.post(getApiUrl('SIGNUP'), userData);
+      const response = await apiClient.post('/auth/signup/', userData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error en el registro');
@@ -55,9 +52,9 @@ export class UserRepository {
   /**
    * Verificar si el usuario está logueado
    */
-  async checkUserLogged(): Promise<CheckUserResponseDTO> {
+  export async function checkUserLogged(): Promise<CheckUserResponseDTO> {
     try {
-      const response = await axiosInstance.post(getApiUrl('ME'), {});
+      const response = await apiClient.post('/auth/me/', {});
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error verificando usuario');
@@ -67,9 +64,9 @@ export class UserRepository {
   /**
    * Logout del usuario
    */
-  async logout(): Promise<ApiResponseDTO> {
+  export async function logout(): Promise<ApiResponseDTO> {
     try {
-      const response = await axiosInstance.post(getApiUrl('LOGOUT'), {});
+      const response = await apiClient.post('/auth/logout/', {});
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error en el logout');
@@ -79,9 +76,9 @@ export class UserRepository {
   /**
    * Login con Google OAuth
    */
-  async googleLogin(tokenData: GoogleLoginDTO): Promise<LoginResponseDTO> {
+  export async function googleLogin(tokenData: GoogleLoginDTO): Promise<LoginResponseDTO> {
     try {
-      const response = await axiosInstance.post(getApiUrl('LOGIN_GOOGLE'), tokenData);
+      const response = await apiClient.post('/auth/google-login/', tokenData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error en login con Google');
@@ -91,9 +88,9 @@ export class UserRepository {
   /**
    * Login con Facebook OAuth
    */
-  async facebookLogin(userData: FacebookLoginDTO): Promise<LoginResponseDTO> {
+  export async function facebookLogin(userData: FacebookLoginDTO): Promise<LoginResponseDTO> {
     try {
-      const response = await axiosInstance.post(getApiUrl('LOGIN_FACEBOOK'), userData);
+      const response = await apiClient.post('/auth/facebook-login/', userData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error en login con Facebook');
@@ -107,9 +104,9 @@ export class UserRepository {
   /**
    * Actualizar datos del perfil del usuario
    */
-  async updateProfile(userData: UpdateUserDTO): Promise<ApiResponseDTO<UserResponseDTO>> {
+  export async function updateProfile(userData: UpdateUserDTO): Promise<ApiResponseDTO<UserResponseDTO>> {
     try {
-      const response = await axiosInstance.patch(getApiUrl('ME'), userData);
+      const response = await apiClient.patch('/auth/me/', userData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error actualizando perfil');
@@ -119,9 +116,9 @@ export class UserRepository {
   /**
    * Cambiar contraseña del usuario
    */
-  async changePassword(passwordData: ChangePasswordDTO): Promise<ApiResponseDTO> {
+  export async function changePassword(passwordData: ChangePasswordDTO): Promise<ApiResponseDTO> {
     try {
-      const response = await axiosInstance.post(getApiUrl('CHANGE_PASSWORD'), passwordData);
+      const response = await apiClient.post('/auth/change-password/', passwordData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error cambiando contraseña');
@@ -135,9 +132,9 @@ export class UserRepository {
   /**
    * Solicitar recuperación de contraseña
    */
-  async forgotPassword(emailData: ForgotPasswordDTO): Promise<ApiResponseDTO> {
+  export async function forgotPassword(emailData: ForgotPasswordDTO): Promise<ApiResponseDTO> {
     try {
-      const response = await axiosInstance.post(getApiUrl('FORGOT_PASSWORD'), emailData);
+      const response = await apiClient.post('/auth/forgot-password/', emailData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error solicitando recuperación');
@@ -147,9 +144,9 @@ export class UserRepository {
   /**
    * Establecer nueva contraseña con token
    */
-  async resetPassword(resetData: ResetPasswordDTO): Promise<ApiResponseDTO> {
+  export async function resetPassword(resetData: ResetPasswordDTO): Promise<ApiResponseDTO> {
     try {
-      const response = await axiosInstance.post(`${getApiUrl('SET_PASSWORD')}${resetData.uidb64}/${resetData.token}/`, resetData);
+      const response = await apiClient.post(`/auth/set-password/${resetData.uidb64}/${resetData.token}/`, resetData);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error estableciendo nueva contraseña');
@@ -159,15 +156,12 @@ export class UserRepository {
   /**
    * Validar token de recuperación
    */
-  async validateToken(tokenData: TokenValidatorDTO): Promise<ApiResponseDTO> {
+  export async function validateToken(tokenData: TokenValidatorDTO): Promise<ApiResponseDTO> {
     try {
-      const response = await axiosInstance.post(`${getApiUrl('TOKEN_VALIDATOR')}${tokenData.uidb64}/${tokenData.token}/`);
+      const response = await apiClient.post(`/auth/token-validator/${tokenData.uidb64}/${tokenData.token}/`);
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Error validando token');
     }
   }
 }
-
-// Exportar instancia singleton
-export const userRepository = new UserRepository();

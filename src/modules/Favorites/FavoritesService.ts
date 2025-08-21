@@ -2,7 +2,7 @@
 // FAVORITES MODULE - SERVICE LAYER
 // =====================================================
 
-import { favoritesRepository } from './FavoritesRepository';
+import { FavoritesRepository } from './FavoritesRepository';
 import {
     AddFavoriteDTO,
     RemoveFavoriteDTO,
@@ -12,7 +12,7 @@ import {
     FavoritePropertyDTO
 } from './Favorites.dto';
 
-export class FavoritesService {
+export namespace FavoritesService {
 
     // =====================================================
     // FAVORITES METHODS
@@ -21,9 +21,9 @@ export class FavoritesService {
     /**
      * Agregar propiedad a favoritos
      */
-    async addFavorite(favoriteData: AddFavoriteDTO): Promise<AddFavoriteResponseDTO> {
+    export async function addFavorite(favoriteData: AddFavoriteDTO): Promise<AddFavoriteResponseDTO> {
         try {
-            const response = await favoritesRepository.addFavorite(favoriteData);
+            const response = await FavoritesRepository.addFavorite(favoriteData);
             return response;
         } catch (error: any) {
             throw new Error(`Error en el servicio de favoritos - agregar: ${error.message}`);
@@ -33,9 +33,9 @@ export class FavoritesService {
     /**
      * Obtener lista de favoritos del usuario
      */
-    async getFavorites(): Promise<FavoritesResponseDTO> {
+    export async function getFavorites(): Promise<FavoritesResponseDTO> {
         try {
-            const response = await favoritesRepository.getFavorites();
+            const response = await FavoritesRepository.getFavorites();
             return response;
         } catch (error: any) {
             throw new Error(`Error en el servicio de favoritos - obtener: ${error.message}`);
@@ -45,9 +45,9 @@ export class FavoritesService {
     /**
      * Remover propiedad específica de favoritos
      */
-    async removeFavorite(favoriteData: RemoveFavoriteDTO): Promise<RemoveFavoriteResponseDTO> {
+    export async function removeFavorite(favoriteData: RemoveFavoriteDTO): Promise<RemoveFavoriteResponseDTO> {
         try {
-            const response = await favoritesRepository.removeFavorite(favoriteData);
+            const response = await FavoritesRepository.removeFavorite(favoriteData);
             return response;
         } catch (error: any) {
             throw new Error(`Error en el servicio de favoritos - remover: ${error.message}`);
@@ -57,10 +57,10 @@ export class FavoritesService {
     /**
      * Toggle favorito (agregar/remover) - usa el endpoint del backend
      */
-    async toggleFavorite(propertyId: number): Promise<{ success: boolean; isFavorite: boolean; message: string }> {
+    export async function toggleFavorite(propertyId: number): Promise<{ success: boolean; isFavorite: boolean; message: string }> {
         try {
             // Hacer la petición al backend directamente sin verificar estado previo
-            const response = await favoritesRepository.toggleFavorite(propertyId);
+            const response = await FavoritesRepository.toggleFavorite(propertyId);
 
             // El backend devuelve la lista actualizada de favoritos
             // Verificar si la propiedad está en la nueva lista
@@ -79,9 +79,9 @@ export class FavoritesService {
     /**
      * Remover todos los favoritos del usuario
      */
-    async removeAllFavorites(): Promise<RemoveFavoriteResponseDTO> {
+    export async function removeAllFavorites(): Promise<RemoveFavoriteResponseDTO> {
         try {
-            const response = await favoritesRepository.removeAllFavorites();
+            const response = await FavoritesRepository.removeAllFavorites();
             return response;
         } catch (error: any) {
             throw new Error(`Error en el servicio de favoritos - remover todos: ${error.message}`);
@@ -91,9 +91,9 @@ export class FavoritesService {
     /**
      * Verificar si una propiedad está en favoritos
      */
-    async isFavorite(propertyId: number): Promise<boolean> {
+    export async function isFavorite(propertyId: number): Promise<boolean> {
         try {
-            const isFav = await favoritesRepository.isFavorite(propertyId);
+            const isFav = await FavoritesRepository.isFavorite(propertyId);
             return isFav;
         } catch (error: any) {
             console.error('Error verificando si es favorito:', error);
@@ -104,9 +104,9 @@ export class FavoritesService {
     /**
      * Obtener cantidad de favoritos
      */
-    async getFavoritesCount(): Promise<number> {
+    export async function getFavoritesCount(): Promise<number> {
         try {
-            const favorites = await this.getFavorites();
+            const favorites = await getFavorites();
             return favorites.properties.length;
         } catch (error: any) {
             console.error('Error obteniendo cantidad de favoritos:', error);
@@ -121,7 +121,7 @@ export class FavoritesService {
     /**
      * Normalizar datos de propiedad favorita
      */
-    normalizeFavoriteProperty(rawProperty: any): FavoritePropertyDTO {
+    export function normalizeFavoriteProperty(rawProperty: any): FavoritePropertyDTO {
         return {
             id: rawProperty.id || 0,
             title: rawProperty.name || rawProperty.title || '',
@@ -147,13 +147,13 @@ export class FavoritesService {
     /**
      * Obtener estadísticas de favoritos
      */
-    async getFavoritesStats(): Promise<{
+    export async function getFavoritesStats(): Promise<{
         total: number;
         byType: Record<string, number>;
         byNeighborhood: Record<string, number>;
     }> {
         try {
-            const favorites = await this.getFavorites();
+            const favorites = await getFavorites();
             const stats = {
                 total: favorites.properties.length,
                 byType: {} as Record<string, number>,
@@ -180,7 +180,7 @@ export class FavoritesService {
     /**
      * Obtener favoritos paginados
      */
-    async getFavoritesPaginated(page: number = 1, limit: number = 10): Promise<{
+    export async function getFavoritesPaginated(page: number = 1, limit: number = 10): Promise<{
         properties: FavoritePropertyDTO[];
         pagination: {
             currentPage: number;
@@ -191,7 +191,7 @@ export class FavoritesService {
         };
     }> {
         try {
-            const favorites = await this.getFavorites();
+            const favorites = await getFavorites();
             const totalItems = favorites.properties.length;
             const totalPages = Math.ceil(totalItems / limit);
             const startIndex = (page - 1) * limit;
@@ -200,7 +200,7 @@ export class FavoritesService {
             const paginatedProperties = favorites.properties.slice(startIndex, endIndex);
 
             return {
-                properties: paginatedProperties.map(prop => this.normalizeFavoriteProperty(prop)),
+                properties: paginatedProperties.map(prop => normalizeFavoriteProperty(prop)),
                 pagination: {
                     currentPage: page,
                     totalPages,
@@ -217,7 +217,7 @@ export class FavoritesService {
     /**
      * Filtrar favoritos por criterios
      */
-    async filterFavorites(filters: {
+    export async function filterFavorites(filters: {
         type?: string;
         neighborhood?: string;
         minPrice?: number;
@@ -226,7 +226,7 @@ export class FavoritesService {
         maxM2?: number;
     }): Promise<FavoritePropertyDTO[]> {
         try {
-            const favorites = await this.getFavorites();
+            const favorites = await getFavorites();
             let filteredProperties = favorites.properties;
 
             if (filters.type) {
@@ -265,12 +265,9 @@ export class FavoritesService {
                 );
             }
 
-            return filteredProperties.map(prop => this.normalizeFavoriteProperty(prop));
+            return filteredProperties.map(prop => normalizeFavoriteProperty(prop));
         } catch (error: any) {
             throw new Error(`Error filtrando favoritos: ${error.message}`);
         }
     }
 }
-
-// Exportar instancia singleton
-export const favoritesService = new FavoritesService();

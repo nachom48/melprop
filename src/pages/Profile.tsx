@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { userService } from '../modules';
+import { UserService } from '../modules/User/UserService';
 import ProfileLayout from '../components/ProfileLayout';
 import styled from 'styled-components';
 
@@ -202,7 +202,7 @@ const Profile: React.FC = () => {
 
             console.log('Datos a enviar al backend:', updateData); // Debug log
 
-            const response = await userService.updateProfile(updateData);
+            const response = await UserService.updateProfile(updateData);
 
             if (response.success) {
                 // Actualizar el contexto del usuario

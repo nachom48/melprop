@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import propertiesService from '../services/propertiesService';
-import { Property, SearchFilters as PropertySearchFilters } from '../repositories/propertiesRepository';
+import { PropertiesService } from '../modules/Properties/property.service';
+import { Property } from '../modules/Properties/interfaces/property.interface';
+import { PropertySearchFilters } from '../modules/Properties/interfaces/propertiesSearchFilters.interface';
 import PropertyCard from '../components/PropertyCard';
 import SearchFilters, { FilterValues } from '../components/SearchFilters';
 import PropertyMap from '../components/PropertyMap';
@@ -182,7 +183,7 @@ const Resultados: React.FC = () => {
             console.log('🔍 Ordenamiento en URL:', filters.order_by);
             console.log('🔍 URL completa:', window.location.href);
 
-            const response = await propertiesService.getAllProperties(filters);
+            const response = await PropertiesService.getAllProperties(filters);
             console.log('📡 Respuesta de la API:', response);
 
             setProperties(response.objects);

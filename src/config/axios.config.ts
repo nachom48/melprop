@@ -4,6 +4,14 @@
 
 import axios from 'axios';
 
+// Si estás usando TypeScript y ves el error de declaración de tipos de axios,
+// puedes instalar los tipos con: npm install --save-dev @types/axios
+// Sin embargo, axios ya provee sus propios tipos desde la versión 0.14.0 en adelante.
+// Si el error persiste, asegúrate de que tu versión de axios sea >=0.14.0
+// o agrega una declaración temporal para evitar el error de tipado:
+
+// @ts-ignore
+
 // Configuración base de la API
 const API_URI = 'http://backend-dev-melpropiedades.pre-produccion.com/api';
 
@@ -19,14 +27,14 @@ export const apiClient = axios.create({
 
 // Interceptor para requests
 apiClient.interceptors.request.use(
-    (config) => {
+    (config: any) => {
         // Log de requests en desarrollo
         if (process.env.NODE_ENV === 'development') {
             console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
         }
         return config;
     },
-    (error) => {
+    (error: any) => {
         console.error('❌ Request Error:', error);
         return Promise.reject(error);
     }
@@ -34,14 +42,14 @@ apiClient.interceptors.request.use(
 
 // Interceptor para responses
 apiClient.interceptors.response.use(
-    (response) => {
+    (response: { status: any; config: { url: any; }; data: any; statusText: any; headers: any; }) => {
         // Log de responses en desarrollo
         if (process.env.NODE_ENV === 'development') {
             console.log(`✅ API Response: ${response.status} ${response.config.url}`);
         }
         return response;
     },
-    (error) => {
+    (error: { response: { status: any; data: any; }; request: any; message: any; }) => {
         // Log de errores
         console.error('❌ Response Error:', error);
 

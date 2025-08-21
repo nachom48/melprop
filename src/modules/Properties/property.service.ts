@@ -1,13 +1,16 @@
-import propertiesRepository, { SearchFilters, PropertiesResponse, Property } from '../repositories/propertiesRepository';
+import { PropertiesRepository } from './properties.repository';
+import { PropertySearchFilters } from './interfaces/propertiesSearchFilters.interface';
+import { PropertiesResponse } from './interfaces/propertiesResponse.interface';
+import { Property } from './interfaces/property.interface';
 
-class PropertiesService {
-    async getAllProperties(filters: SearchFilters): Promise<PropertiesResponse> {
+export namespace PropertiesService {
+    export async function getAllProperties(filters: PropertySearchFilters): Promise<PropertiesResponse> {
         try {
             // Validar y limpiar filtros
-            const cleanFilters = this.cleanFilters(filters);
+            const cleanFilters = cleanFiltersInternal(filters);
 
             // Llamar al repository
-            const response = await propertiesRepository.getAllProperties(cleanFilters);
+            const response = await PropertiesRepository.getAllProperties(cleanFilters);
 
             return response;
         } catch (error) {
@@ -16,9 +19,9 @@ class PropertiesService {
         }
     }
 
-    async getPropertyById(id: number): Promise<Property> {
+    export async function getPropertyById(id: number): Promise<Property> {
         try {
-            const property = await propertiesRepository.getPropertyById(id);
+            const property = await PropertiesRepository.getPropertyById(id);
             return property;
         } catch (error) {
             console.error('Error in PropertiesService.getPropertyById:', error);
@@ -26,8 +29,8 @@ class PropertiesService {
         }
     }
 
-    private cleanFilters(filters: SearchFilters): SearchFilters {
-        const cleanFilters: SearchFilters = {};
+    function cleanFiltersInternal(filters: PropertySearchFilters): PropertySearchFilters {
+        const cleanFilters: PropertySearchFilters = {};
 
         // Solo incluir filtros que tengan valor
         Object.entries(filters).forEach(([key, value]) => {
@@ -44,7 +47,3 @@ class PropertiesService {
         return cleanFilters;
     }
 }
-
-const propertiesService = new PropertiesService();
-
-export default propertiesService;

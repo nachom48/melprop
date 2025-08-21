@@ -3,7 +3,7 @@ import DevelopmentCard from './DevelopmentCard';
 import NuestrosServicios from './NuestrosServicios';
 import Oportunidades from './Oportunidades';
 import BarriosSection from './BarriosSection';
-import developmentService from '../services/developmentService';
+import { DevelopmentService } from '../modules/Developments/developmentService';
 
 const EmprendimientosSection: React.FC = () => {
     const [developments, setDevelopments] = useState<any[]>([]);
@@ -13,7 +13,7 @@ const EmprendimientosSection: React.FC = () => {
         const loadDevelopments = async () => {
             try {
                 setLoading(true);
-                const response = await developmentService.getAllDevelopments({ add_to_homepage: true });
+                const response = await DevelopmentService.getAllDevelopments({ add_to_homepage: true });
                 setDevelopments(response.objects);
             } catch (error) {
                 console.error('Error al cargar emprendimientos:', error);

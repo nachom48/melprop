@@ -1,18 +1,20 @@
-import developmentRepository, { DevelopmentSearchFilters, DevelopmentsResponse } from '../repositories/developmentRepository';
+import { DevelopmentRepository } from './developmentRepository';
+import { DevelopmentSearchFilters } from './interfaces/developmentSearchFilters.interface';
+import { DevelopmentsResponse } from './interfaces/developmentResponse.interface';
 
 // Re-exportar la interfaz para que esté disponible
 export type { DevelopmentSearchFilters };
 
-class DevelopmentService {
-    async getAllDevelopments(filters: DevelopmentSearchFilters = {}): Promise<DevelopmentsResponse> {
+export namespace DevelopmentService {
+    export async function getAllDevelopments(filters: DevelopmentSearchFilters = {}): Promise<DevelopmentsResponse> {
         try {
             console.log('🔍 DevelopmentService.getAllDevelopments - Filtros recibidos:', filters);
 
             // Limpiar filtros antes de enviarlos
-            const cleanFilters = this.cleanFilters(filters);
+            const cleanFilters = cleanFiltersInternal(filters);
             console.log('🔍 Filtros limpios:', cleanFilters);
 
-            const response = await developmentRepository.getAllDevelopments(cleanFilters);
+            const response = await DevelopmentRepository.getAllDevelopments(cleanFilters);
             console.log('✅ DevelopmentService - Respuesta del repository:', response);
 
             return response;
@@ -22,7 +24,7 @@ class DevelopmentService {
         }
     }
 
-    private cleanFilters(filters: DevelopmentSearchFilters): DevelopmentSearchFilters {
+    function cleanFiltersInternal(filters: DevelopmentSearchFilters): DevelopmentSearchFilters {
         const cleanFilters: DevelopmentSearchFilters = {};
 
         Object.entries(filters).forEach(([key, value]) => {
@@ -38,23 +40,21 @@ class DevelopmentService {
         return cleanFilters;
     }
 
-    async getDevelopmentById(id: number) {
+    export async function getDevelopmentById(id: number) {
         try {
-            return await developmentRepository.getDevelopmentById(id);
+            return await DevelopmentRepository.getDevelopmentById(id);
         } catch (error) {
             console.error('Error en DevelopmentService.getDevelopmentById:', error);
             throw error;
         }
     }
 
-    async getDevelopmentBySlug(slug: string) {
+    export async function getDevelopmentBySlug(slug: string) {
         try {
-            return await developmentRepository.getDevelopmentBySlug(slug);
+            return await DevelopmentRepository.getDevelopmentBySlug(slug);
         } catch (error) {
             console.error('Error en DevelopmentService.getDevelopmentBySlug:', error);
             throw error;
         }
     }
 }
-
-export default new DevelopmentService();

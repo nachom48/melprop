@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import developmentService from '../services/developmentService';
-import { Development } from '../repositories/developmentRepository';
+import { DevelopmentService } from '../modules/Developments/developmentService';
+import { Development } from '../modules/Developments/interfaces/development.interface';
 import DevelopmentCard from '../components/DevelopmentCard';
 import DevelopmentMap from '../components/DevelopmentMap';
 import ServiciosExclusivos from '../components/ServiciosExclusivos';
@@ -118,7 +118,7 @@ const Emprendimientos: React.FC = () => {
       console.log('🔍 Emprendimientos - Filtros convertidos para backend:', backendFilters);
       console.log('🔍 Emprendimientos - Página actual:', currentPage);
 
-      const response = await developmentService.getAllDevelopments(backendFilters);
+      const response = await DevelopmentService.getAllDevelopments(backendFilters);
       console.log('✅ Emprendimientos - Respuesta del servicio:', response);
       console.log('📊 Emprendimientos - Total de resultados:', response.total);
 

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import PropertyCard from './PropertyCard';
-import Pagination from './Pagination';
-import { Property } from '../repositories/propertiesRepository';
+import { Property } from '../modules/Properties/interfaces/property.interface';
 
 const Oportunidades: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
