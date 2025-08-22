@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Development } from '../modules/Developments/interfaces/development.interface';
 import './DevelopmentCard.css';
 
@@ -15,6 +16,11 @@ const DevelopmentCard: React.FC<DevelopmentCardProps> = ({
     showAdditionalInfo = false,
     className = ""
 }) => {
+    const navigate = useNavigate();
+
+    const handleCardClick = () => {
+        navigate(`/emprendimiento/${development.slug}`);
+    };
     const formatRooms = (rooms: number[]) => {
         if (!rooms || rooms.length === 0) return '';
         if (rooms.length > 1) {
@@ -51,7 +57,11 @@ const DevelopmentCard: React.FC<DevelopmentCardProps> = ({
 
     if (variant === 'XL') {
         return (
-            <div className={`slide ${className}`.trim()}>
+            <div
+                className={`slide ${className}`.trim()}
+                onClick={handleCardClick}
+                style={{ cursor: 'pointer' }}
+            >
                 <div className="relative overflow-hidden rounded-lg h-full">
                     <img
                         className="w-full h-full object-cover"
@@ -106,7 +116,11 @@ const DevelopmentCard: React.FC<DevelopmentCardProps> = ({
 
     // Variante L (mantiene el diseño original pero con estructura unificada)
     return (
-        <div className={`slide ${className}`.trim()}>
+        <div
+            className={`slide ${className}`.trim()}
+            onClick={handleCardClick}
+            style={{ cursor: 'pointer' }}
+        >
             <div className="relative overflow-hidden rounded-lg h-full">
                 <img
                     src={development.main_image}

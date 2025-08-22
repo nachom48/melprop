@@ -10,9 +10,9 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({
     className = ""
 }) => {
     return (
-        <div className={`my-10 ${className}`}>
+        <div className={`my-10 ${className} w-3/5 mx-auto`}>
             <div className="container-lg">
-                <h2 className="m-auto mb-6 w-full max-w-[500px] text-center text-4xl">
+                <h2 className="m-auto mb-6 w-full max-w-[500px] text-center text-3xl">
                     {title}
                 </h2>
                 <div className="flex gap-8">
@@ -56,7 +56,7 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({
                                 </li>
                             </ul>
                         </div>
-                        <a href="#" className="btn">Quiero saber más!</a>
+                        <a href="#" className="btn w-fit">Quiero saber más!</a>
                     </div>
                     <div className="bg-medium-grey flex flex-1 flex-col items-center justify-between rounded-2xl py-6">
                         <div className="flex flex-col items-center flex-1">
@@ -101,7 +101,7 @@ const BenefitsSection: React.FC<BenefitsSectionProps> = ({
                                 </li>
                             </ul>
                         </div>
-                        <a href="#" className="btn">Quiero saber más!</a>
+                        <a href="#" className="btn w-fit">Quiero saber más!</a>
                     </div>
                 </div>
             </div>

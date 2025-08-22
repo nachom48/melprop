@@ -114,10 +114,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     };
 
     return (
-        <div className={`border-grey-border-light rounded-3xl border-1 overflow-hidden ${className}`.trim()}>
+        <div className={`border border-[#b7b7b7] rounded-3xl overflow-hidden ${className}`.trim()}>
             <div className="image relative overflow-hidden rounded-tl-3xl rounded-tr-3xl">
                 <img
-                    className="w-full"
+                    className="w-full h-64 object-cover"
                     src={property.main_image || '/placeholder.jpg'}
                     alt={property.name || `Propiedad en ${property.address}`}
                 />
@@ -134,26 +134,26 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </div>
             <div className="content p-4">
                 <div className="operation-badge text-green-menu text-sm font-semibold mb-2">
-                    {property.operation_type} - {property.neighborhood}
+                    {property.operation_type === 'venta' ? 'Venta' : property.operation_type === 'alquiler' ? 'Alquiler' : property.operation_type} - {property.neighborhood}
                 </div>
-                <div className="price text-green-menu text-2xl font-bold mb-3">
+                <div className="price text-green-menu text-2xl font-bold mb-3 price-with-line">
                     {property.currency_symbol} {property.price ? property.price.toLocaleString() : 'Consultar'}
                 </div>
                 <div className="address mb-3">
-                    <strong className="block text-sm font-semibold mb-1">
+                    <strong className="block text-sm text-green-text font-semibold mb-1">
                         {property.name || property.address}
                     </strong>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-green-text">
                         {property.neighborhood}, {property.city}
                     </p>
                 </div>
                 <ul className="features flex flex-wrap gap-2 text-xs">
-                    {property.total_m2 && <li className="bg-gray-100 px-2 py-1 rounded">
+                    {property.total_m2 && <li className=" px-2 py-1 ">
                         {typeof property.total_m2 === 'number' ? property.total_m2 : property.total_m2.parsedValue} m²
                     </li>}
-                    {property.rooms && <li className="bg-gray-100 px-2 py-1 rounded">{property.rooms} Ambientes</li>}
-                    {property.bathrooms && <li className="bg-gray-100 px-2 py-1 rounded">{property.bathrooms} Baños</li>}
-                    {property.parking_lots > 0 && <li className="bg-gray-100 px-2 py-1 rounded">{property.parking_lots} Cochera</li>}
+                    {property.rooms && <li className=" px-2 py-1 ">{property.rooms} Ambientes</li>}
+                    {property.bathrooms && <li className=" px-2 py-1 ">{property.bathrooms} Baños</li>}
+                    {property.parking_lots > 0 && <li className=" px-2 py-1 ">{property.parking_lots} Cochera</li>}
                 </ul>
             </div>
         </div>

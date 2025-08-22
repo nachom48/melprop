@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import BestPropertyCard, { BestProperty } from './BestPropertyCard';
+import { ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface LosMejoresProps {
     variant?: 'default' | 'reversed'; // Nueva prop para variantes

@@ -389,6 +389,8 @@ const Resultados: React.FC = () => {
                                             currentPage={currentPage}
                                             totalPages={totalPages}
                                             onPageChange={handlePageChange}
+                                            totalItems={total}
+                                            itemsPerPage={10}
                                         />
                                     </div>
                                 )}

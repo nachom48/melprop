@@ -24,6 +24,7 @@ import VentaAlquiler from './pages/VentaAlquiler';
 import Resultados from './pages/Resultados';
 import AdministracionAlquileres from './pages/AdministracionAlquileres';
 import Barrios from './pages/Barrios';
+import DevelopmentDetailPage from './pages/DevelopmentDetailPage';
 import './index.css';
 
 function App() {
@@ -62,6 +63,7 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/adm-alquileres" element={<AdministracionAlquileres />} />
                 <Route path="/barrios" element={<Barrios />} />
+                <Route path="/emprendimiento/:slug" element={<DevelopmentDetailPage />} />
               </Routes>
             </main>
             <Footer />

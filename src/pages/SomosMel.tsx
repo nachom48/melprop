@@ -46,7 +46,8 @@ const SomosMel: React.FC = () => {
                     display: 'flex',
                     alignItems: 'flex-start',
                     justifyContent: 'flex-start',
-                    paddingTop: '6%',
+                    paddingTop: '10%',
+                    paddingLeft: '8%',
                     zIndex: 3
                 }}>
                     <div style={{ maxWidth: '1200px', margin: '0', padding: '0 1rem' }}>
@@ -88,9 +89,11 @@ const SomosMel: React.FC = () => {
                                         clientes, lo que nos posiciona como una empresa de gran reconocimiento, confiabilidad y respaldo.
                                     </p>
                                 </div>
-                                <div className="hidden flex-1 md:flex">
+                                <div className="hidden flex-1 md:flex mb-8">
                                     <img className="translate-y-10" src="/historia_slide_1.png" alt="Historia Mel" />
+
                                 </div>
+
                             </div>
                         </div>
                     </div>

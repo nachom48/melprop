@@ -1,140 +1,117 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../styles/pagination.css';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
-interface PaginationProps {
+export interface PaginationProps {
     currentPage: number;
     totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
     onPageChange: (page: number) => void;
-    onHomeClick?: () => void;
     className?: string;
 }
 
 const Pagination: React.FC<PaginationProps> = ({
     currentPage,
     totalPages,
+    totalItems,
+    itemsPerPage,
     onPageChange,
-    onHomeClick,
     className = ""
 }) => {
-    const navigate = useNavigate();
+    // ✅ Calcular información de paginación
+    const startItem = (currentPage - 1) * itemsPerPage + 1;
+    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
-    const handleHomeClick = () => {
-        if (onHomeClick) {
-            onHomeClick();
+    // ✅ Generar array de páginas a mostrar
+    const getVisiblePages = () => {
+        const pages: (number | string)[] = [];
+        const maxVisible = 5;
+
+        if (totalPages <= maxVisible) {
+            // Mostrar todas las páginas si hay pocas
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
         } else {
-            // Redirigir a la página principal
-            navigate('/');
+            // Mostrar páginas con ellipsis
+            if (currentPage <= 3) {
+                for (let i = 1; i <= 4; i++) {
+                    pages.push(i);
+                }
+                pages.push('...');
+                pages.push(totalPages);
+            } else if (currentPage >= totalPages - 2) {
+                pages.push(1);
+                pages.push('...');
+                for (let i = totalPages - 3; i <= totalPages; i++) {
+                    pages.push(i);
+                }
+            } else {
+                pages.push(1);
+                pages.push('...');
+                for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                    pages.push(i);
+                }
+                pages.push('...');
+                pages.push(totalPages);
+            }
         }
+
+        return pages;
     };
 
-    const handlePrevClick = () => {
-        if (currentPage > 1) {
-            onPageChange(currentPage - 1);
-        }
-    };
-
-    const handleNextClick = () => {
-        if (currentPage < totalPages) {
-            onPageChange(currentPage + 1);
-        }
-    };
-
-    const isPrevDisabled = currentPage <= 1;
-    const isNextDisabled = currentPage >= totalPages;
+    if (totalPages <= 1) {
+        return null; // No mostrar paginación si solo hay una página
+    }
 
     return (
-        <div className={`flex items-center justify-center gap-4 ${className}`}>
-            {/* Botón Home */}
-            <div className="navButton">
+        <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${className}`}>
+            <div className="flex items-center gap-2">
+                {/* Botón anterior */}
                 <button
-                    onClick={handleHomeClick}
-                    style={{ outline: 'none' }}
-                    aria-label="Pantalla Inicio"
+                    onClick={() => onPageChange(currentPage - 1)}
                     disabled={currentPage === 1}
+                    className={`p-2 rounded-lg transition-all duration-200 ${currentPage === 1
+                        ? 'text-light-medium-grey cursor-not-allowed'
+                        : 'text-black hover:bg-green-text-dark hover:text-yellow'
+                        }`}
+                    aria-label="Página anterior"
                 >
-                    <span role="img" className="SVGInline">
-                        <svg
-                            className="SVGInline-svg"
-                            viewBox="0 0 22 22"
-                            version="1.1"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="22px"
-                            height="22px"
-                        >
-                            <g id="Background">
-                                <path
-                                    d="M 11.7168 3.1748 C 11.3276 2.7646 10.7573 2.7246 10.3477 3.1147 L 3.0073 10.1748 C 2.5977 10.5947 2.5977 11.2749 3.0176 11.6846 C 3.2173 11.875 3.4775 11.9844 3.7476 11.9844 L 5.0073 12.0254 L 5.0073 17.4844 C 5.0073 17.7852 5.2373 18.0254 5.5376 18.0254 L 9.0073 18.0254 L 9.0073 12.0254 L 13.0078 12.0254 L 13.0078 18.0254 L 16.4873 18.0254 C 16.7773 18.0254 17.0078 17.7852 17.0078 17.4941 L 17.0078 12.0254 L 18.2578 12.0254 C 18.8379 12.0547 19.3281 11.6055 19.3574 11.0249 C 19.377 10.7246 19.2578 10.4248 19.0371 10.2148 L 11.7168 3.1748 Z"
-                                    fill={currentPage === 1 ? "#B0B0B0" : "#707070"}
-                                />
-                            </g>
-                        </svg>
-                    </span>
+                    <ChevronLeftIcon className="w-5 h-5" />
                 </button>
-            </div>
 
-            {/* Botón Anterior */}
-            <div className="navButton">
+                {/* Números de página */}
+                <div className="flex items-center gap-1">
+                    {getVisiblePages().map((page, index) => (
+                        <React.Fragment key={index}>
+                            {page === '...' ? (
+                                <span className="px-3 py-2 text-dark-medium-grey">...</span>
+                            ) : (
+                                <button
+                                    onClick={() => onPageChange(page as number)}
+                                    className={`px-3 py-2 rounded-lg font-raleway font-medium transition-all duration-200 ${currentPage === page
+                                        ? 'bg-green-text-dark text-white shadow-button'
+                                        : 'text-dark-medium-grey hover:bg-light-grey hover:text-yellow'
+                                        }`}
+                                >
+                                    {page}
+                                </button>
+                            )}
+                        </React.Fragment>
+                    ))}
+                </div>
+
+                {/* Botón siguiente */}
                 <button
-                    onClick={handlePrevClick}
-                    style={{ outline: 'none' }}
-                    aria-label="Pantalla anterior"
-                    disabled={isPrevDisabled}
+                    onClick={() => onPageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className={`p-2 rounded-lg transition-all duration-200 ${currentPage === totalPages
+                        ? 'text-light-medium-grey cursor-not-allowed'
+                        : 'text-black hover:bg-light-grey hover:text-yellow'
+                        }`}
+                    aria-label="Página siguiente"
                 >
-                    <span role="img" className="SVGInline">
-                        <svg
-                            className="SVGInline-svg"
-                            viewBox="0 0 22 22"
-                            version="1.1"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="22px"
-                            height="22px"
-                        >
-                            <g id="Layer%201">
-                                <path
-                                    d="M 7.2092 10.3975 L 12.3992 5.2178 C 12.699 4.9277 13.1692 4.9277 13.469 5.2178 C 13.759 5.5078 13.759 5.9775 13.469 6.2778 L 8.8089 10.9277 L 13.469 15.5879 C 13.759 15.8779 13.759 16.3477 13.469 16.6475 C 13.1692 16.9277 12.699 16.9277 12.3992 16.6475 L 7.219 11.4575 C 6.929 11.1577 6.929 10.6875 7.2092 10.3975 L 7.2092 10.3975 Z"
-                                    fill={isPrevDisabled ? "#B0B0B0" : "#707070"}
-                                />
-                            </g>
-                        </svg>
-                    </span>
-                </button>
-            </div>
-
-            {/* Números de página */}
-            <div
-                data-auto="screenNumbers"
-                className="screenNumbers"
-                style={{ minWidth: '41.8667px' }}
-            >
-                {currentPage} de {totalPages}
-            </div>
-
-            {/* Botón Siguiente */}
-            <div className="navButton">
-                <button
-                    onClick={handleNextClick}
-                    style={{ outline: 'none' }}
-                    aria-label="Pantalla siguiente"
-                    disabled={isNextDisabled}
-                >
-                    <span role="img" className="SVGInline">
-                        <svg
-                            className="SVGInline-svg"
-                            viewBox="0 0 22 22"
-                            version="1.1"
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="22px"
-                            height="22px"
-                        >
-                            <g id="Layer%201">
-                                <path
-                                    d="M 14.4775 10.3975 L 9.2876 5.2178 C 8.9878 4.9277 8.5176 4.9277 8.2178 5.2178 C 7.9277 5.5078 7.9277 5.9775 8.2178 6.2778 L 12.8779 10.9277 L 8.2178 15.5879 C 7.9277 15.8779 7.9277 16.3477 8.2178 16.6475 C 8.5176 16.9277 8.9878 16.9277 9.2876 16.6475 L 14.4678 11.4575 C 14.7578 11.1577 14.7578 10.6875 14.4775 10.3975 L 14.4775 10.3975 Z"
-                                    fill={isNextDisabled ? "#B0B0B0" : "#707070"}
-                                />
-                            </g>
-                        </svg>
-                    </span>
+                    <ChevronRightIcon className="w-5 h-5" />
                 </button>
             </div>
         </div>

@@ -16,7 +16,7 @@ const Emprendimientos: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useUser();
-  const [developments, setDevelopments] = useState<Development[]>([]);
+  const [allDevelopments, setAllDevelopments] = useState<Development[]>([]); // ✅ TODOS los emprendimientos
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -114,25 +114,44 @@ const Emprendimientos: React.FC = () => {
     try {
       setLoading(true);
       const backendFilters = convertFiltersForBackend(filters);
-      console.log('🔍 Emprendimientos - Filtros originales:', filters);
-      console.log('🔍 Emprendimientos - Filtros convertidos para backend:', backendFilters);
-      console.log('🔍 Emprendimientos - Página actual:', currentPage);
+
 
       const response = await DevelopmentService.getAllDevelopments(backendFilters);
-      console.log('✅ Emprendimientos - Respuesta del servicio:', response);
-      console.log('📊 Emprendimientos - Total de resultados:', response.total);
 
-      setDevelopments(response.objects);
-      setTotalPages(response.pages);
-      setTotalResults(response.total);
+      // ✅ GUARDAR TODOS los emprendimientos (no solo los de la página actual)
+      setAllDevelopments(response.objects);
+      setTotalResults(response.objects.length);
 
-      console.log('📊 Emprendimientos - totalResults actualizado a:', response.total);
+      // ✅ Calcular páginas correctamente
+      setTotalPages(Math.ceil(response.objects.length / 10));
+
     } catch (error) {
       console.error('❌ Error al cargar emprendimientos:', error);
-      setDevelopments([]);
+      setAllDevelopments([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  // ✅ NUEVA FUNCIÓN: Obtener emprendimientos de la página actual
+  const getCurrentPageDevelopments = () => {
+    if (!allDevelopments || allDevelopments.length === 0) return [];
+
+    const itemsPerPage = 10;
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+
+    const pageDevelopments = allDevelopments.slice(start, end);
+    console.log(`🔄 Emprendimientos - Página ${currentPage}:`, {
+      start,
+      end,
+      total: allDevelopments.length,
+      pageItems: pageDevelopments.length,
+      firstItem: pageDevelopments[0]?.id,
+      lastItem: pageDevelopments[pageDevelopments.length - 1]?.id
+    });
+
+    return pageDevelopments;
   };
 
   const handleFiltersChange = (newFilters: any) => {
@@ -159,9 +178,11 @@ const Emprendimientos: React.FC = () => {
   };
 
   const handlePageChange = (page: number) => {
+    console.log(`🔄 Emprendimientos - Cambiando a página ${page}`);
     setCurrentPage(page);
-    const activeFilters = getActiveFiltersFromURL();
-    loadDevelopments({ ...activeFilters, page });
+
+    // ✅ NO necesitamos recargar del backend, solo cambiar la página
+    // Los emprendimientos ya están cargados en allDevelopments
 
     // Actualizar URL con la nueva página
     const params = new URLSearchParams(searchParams);
@@ -185,9 +206,9 @@ const Emprendimientos: React.FC = () => {
     loadDevelopments(activeFilters);
   }, []);
 
-  // Debug: mostrar totalResults
-  console.log('🔍 Emprendimientos - totalResults en render:', totalResults);
-  console.log('🔍 Emprendimientos - developments.length:', developments.length);
+  // ✅ Obtener emprendimientos de la página actual
+  const currentPageDevelopments = getCurrentPageDevelopments();
+
 
   if (loading) {
     return (
@@ -231,7 +252,7 @@ const Emprendimientos: React.FC = () => {
       {!isMapView && (
         <div className="container mx-auto px-4 py-8">
           {/* Mensaje cuando no hay desarrollos */}
-          {developments.length === 0 && !loading && (
+          {currentPageDevelopments.length === 0 && !loading && (
             <div className="text-center py-16">
               <h2 className="text-2xl font-bold text-gray-800 mb-4">
                 No se encontraron emprendimientos
@@ -262,11 +283,11 @@ const Emprendimientos: React.FC = () => {
           )}
 
           {/* Primera fila: 1 XL + 1 L */}
-          {developments.length >= 2 && (
+          {currentPageDevelopments.length >= 2 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 items-stretch">
               <div className="md:col-span-2 h-[500px]">
                 <DevelopmentCard
-                  development={developments[0]}
+                  development={currentPageDevelopments[0]}
                   variant="XL"
                   showAdditionalInfo={false}
                   className="h-full"
@@ -274,7 +295,7 @@ const Emprendimientos: React.FC = () => {
               </div>
               <div className="h-[500px]">
                 <DevelopmentCard
-                  development={developments[1]}
+                  development={currentPageDevelopments[1]}
                   variant="L"
                   showAdditionalInfo={false}
                   className="h-full"
@@ -287,9 +308,9 @@ const Emprendimientos: React.FC = () => {
           <ServiciosExclusivos />
 
           {/* Segunda fila: 3 L (L L L) */}
-          {developments.length >= 5 && (
+          {currentPageDevelopments.length >= 5 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 items-stretch">
-              {developments.slice(2, 5).map((development) => (
+              {currentPageDevelopments.slice(2, 5).map((development) => (
                 <div key={development.id} className="h-[500px]">
                   <DevelopmentCard
                     development={development}
@@ -303,11 +324,11 @@ const Emprendimientos: React.FC = () => {
           )}
 
           {/* Tercera fila: 1 L + 1 XL */}
-          {developments.length >= 7 && (
+          {currentPageDevelopments.length >= 7 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 items-stretch">
               <div className="h-[500px]">
                 <DevelopmentCard
-                  development={developments[5]}
+                  development={currentPageDevelopments[5]}
                   variant="L"
                   showAdditionalInfo={false}
                   className="h-full"
@@ -315,7 +336,7 @@ const Emprendimientos: React.FC = () => {
               </div>
               <div className="md:col-span-2 h-[500px]">
                 <DevelopmentCard
-                  development={developments[6]}
+                  development={currentPageDevelopments[6]}
                   variant="XL"
                   showAdditionalInfo={false}
                   className="h-full"
@@ -325,9 +346,9 @@ const Emprendimientos: React.FC = () => {
           )}
 
           {/* Cuarta fila: 3 L (L L L) */}
-          {developments.length >= 10 && (
+          {currentPageDevelopments.length >= 10 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 items-stretch">
-              {developments.slice(7, 10).map((development) => (
+              {currentPageDevelopments.slice(7, 10).map((development) => (
                 <div key={development.id} className="h-[500px]">
                   <DevelopmentCard
                     development={development}
@@ -353,7 +374,7 @@ const Emprendimientos: React.FC = () => {
         <div className="container mx-auto px-4 py-8">
           <div className="my-6">
             <DevelopmentMap
-              developments={developments}
+              developments={currentPageDevelopments}
               onOpenLoginModal={handleOpenLoginModal}
             />
           </div>
@@ -361,16 +382,21 @@ const Emprendimientos: React.FC = () => {
       )}
 
       {/* Resultados filtrados - SOLO cuando NO está en vista de mapa */}
-      {!isMapView && developments.length > 0 && (
+      {!isMapView && currentPageDevelopments.length > 0 && (
         <div className="container mx-auto px-4 py-8">
 
           {/* Paginación */}
           {totalPages > 1 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
+            <div className="flex justify-center">
+
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                totalItems={totalResults}
+                itemsPerPage={10}
+              />
+            </div>
           )}
         </div>
       )}

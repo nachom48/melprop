@@ -2,6 +2,7 @@ export interface DevelopmentSearchFilters {
     operation?: string;
     properties?: string;
     page?: number;
+    limit?: number;
     locations?: string;
     rooms?: string;
     min_price?: string;

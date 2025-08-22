@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import LoginModal from './LoginModal';
 import { useUser } from '../context/UserContext';
 import './Navbar.css';
+import '@fortawesome/fontawesome-free/css/all.css';
 
 const Navbar: React.FC = () => {
     const { user, isLoggedIn, logout } = useUser();
@@ -205,7 +206,7 @@ const Navbar: React.FC = () => {
 
     return (
         <>
-            <header className={`navbar-header ${isScrolled ? 'scrolled' : ''} w-full`}>
+            <header className={`navbar-header border-b-[1px] border-border-header ${isScrolled ? 'scrolled' : ''} w-full`}>
                 <div className="navbar-container w-full">
                     {/* Logo */}
                     <div className="navbar-logo">
@@ -223,7 +224,7 @@ const Navbar: React.FC = () => {
                                 onMouseLeave={handleMouseLeave}
                             >
                                 <span className="nav-link">
-                                    Comprar <i className={`fa-solid ${hoveredItem === 'comprar' ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                                    Comprar <i className={`fas ${hoveredItem === 'comprar' ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
                                 </span>
                                 {hoveredItem === 'comprar' && (
                                     <div className="submenu-wrapper">
@@ -322,7 +323,7 @@ const Navbar: React.FC = () => {
                                 onMouseLeave={handleMouseLeave}
                             >
                                 <span className="nav-link">
-                                    Alquilar <i className={`fa-solid ${hoveredItem === 'alquilar' ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                                    Alquilar <i className={`fas ${hoveredItem === 'alquilar' ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
                                 </span>
                                 {hoveredItem === 'alquilar' && (
                                     <div className="submenu-wrapper">
@@ -426,7 +427,7 @@ const Navbar: React.FC = () => {
                                 onMouseLeave={handleMouseLeave}
                             >
                                 <span className="nav-link">
-                                    Somos Mel <i className={`fa-solid ${hoveredItem === 'somos' ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                                    Somos Mel <i className={`fas ${hoveredItem === 'somos' ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
                                 </span>
                                 {hoveredItem === 'somos' && (
                                     <div className="submenu-wrapper submenu-small">
@@ -448,7 +449,7 @@ const Navbar: React.FC = () => {
                                 onMouseLeave={handleMouseLeave}
                             >
                                 <span className="nav-link">
-                                    Servicios <i className={`fa-solid ${hoveredItem === 'servicios' ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                                    Servicios <i className="fas fa-chevron-down"></i>
                                 </span>
                                 {hoveredItem === 'servicios' && (
                                     <div className="submenu-wrapper submenu-small">
@@ -556,7 +557,7 @@ const Navbar: React.FC = () => {
                                     className="mobile-nav-link"
                                     onClick={() => toggleMobileSubmenu('comprar')}
                                 >
-                                    Comprar <i className="fa-solid fa-chevron-down"></i>
+                                    Comprar <i className="fas fa-chevron-down"></i>
                                 </button>
                                 <div className="mobile-submenu">
                                     <form onSubmit={(e) => {
@@ -755,7 +756,7 @@ const Navbar: React.FC = () => {
                                     className="mobile-nav-link"
                                     onClick={() => toggleMobileSubmenu('alquilar')}
                                 >
-                                    Alquilar <i className="fa-solid fa-chevron-down"></i>
+                                    Alquilar <i className="fas fa-chevron-down"></i>
                                 </button>
                                 <div className="mobile-submenu">
                                     <form onSubmit={(e) => {
@@ -960,7 +961,7 @@ const Navbar: React.FC = () => {
                                     className="mobile-nav-link"
                                     onClick={() => toggleMobileSubmenu('somos-mel')}
                                 >
-                                    Somos Mel <i className="fa-solid fa-chevron-down"></i>
+                                    Somos Mel <i className="fas fa-chevron-down"></i>
                                 </button>
                                 <div className="mobile-submenu-small">
                                     <ul className="mobile-submenu-list">
@@ -978,7 +979,7 @@ const Navbar: React.FC = () => {
                                     className="mobile-nav-link"
                                     onClick={() => toggleMobileSubmenu('servicios')}
                                 >
-                                    Servicios <i className="fa-solid fa-chevron-down"></i>
+                                    Servicios <i className="fas fa-chevron-down"></i>
                                 </button>
                                 <div className="mobile-submenu-small">
                                     <ul className="mobile-submenu-list">

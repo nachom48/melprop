@@ -18,13 +18,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
     className = ""
 }) => {
     return (
-        <div className={`relative ${className}`}>
-            <img
-                src="/buildings_1.png"
-                alt="Buildings background"
-                className="absolute inset-0 w-full h-full object-cover object-bottom"
-                style={{ zIndex: -1 }}
-            />
+        <div className={`relative bg-buildings ${className}`}>
             <div className="bg-light-grey m-auto w-full max-w-[668px] rounded-t-2xl rounded-tr-2xl px-10 py-6 md:px-16">
                 <div className="flex flex-col items-center">
                     <h2 className="!text-green-text-dark mb-10 text-center text-2xl md:text-3xl">

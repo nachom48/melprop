@@ -1,9 +1,10 @@
 import { DevelopmentRepository } from './developmentRepository';
 import { DevelopmentSearchFilters } from './interfaces/developmentSearchFilters.interface';
 import { DevelopmentsResponse } from './interfaces/developmentResponse.interface';
+import { DevelopmentDetailResponse } from './interfaces/developmentDetailResponse.interface';
 
-// Re-exportar la interfaz para que esté disponible
-export type { DevelopmentSearchFilters };
+// Re-exportar las interfaces para que estén disponibles
+export type { DevelopmentSearchFilters, DevelopmentDetailResponse };
 
 export namespace DevelopmentService {
     export async function getAllDevelopments(filters: DevelopmentSearchFilters = {}): Promise<DevelopmentsResponse> {
@@ -49,7 +50,7 @@ export namespace DevelopmentService {
         }
     }
 
-    export async function getDevelopmentBySlug(slug: string) {
+    export async function getDevelopmentBySlug(slug: string): Promise<DevelopmentDetailResponse> {
         try {
             return await DevelopmentRepository.getDevelopmentBySlug(slug);
         } catch (error) {

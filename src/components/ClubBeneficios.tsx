@@ -14,7 +14,9 @@ const ClubBeneficios: React.FC = () => {
                         </p>
                     </div>
                     <div className="relative rounded-2xl border-1">
-                        <div className="bg-green-highcontrast flex translate-x-[-25px] translate-y-[-10px] flex-wrap justify-between gap-5 rounded-2xl px-10 pt-6 pb-16">
+                        <div className="bg-green-highcontrast flex translate-x-[-25px] translate-y-[-10px] flex-wrap justify-between gap-5 rounded-2xl px-10 pt-6 pb-16 
+                        shadow-[8px_8px_0px_0px_rgba(19,120,46,1)]
+                        ">
                             <img src="/simmons.svg" alt="" />
                             <img src="/volf.svg" alt="" />
                             <img src="/fravega.svg" alt="" />

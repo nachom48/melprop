@@ -15,4 +15,5 @@ export { default as NuestrosServicios } from './NuestrosServicios';
 export { default as Oportunidades } from './Oportunidades';
 export { default as BarriosSection } from './BarriosSection';
 export { default as HomeLayout } from './HomeLayout';
-export { default as BestDevelopments } from './BestDevelopments'; 
+export { default as BestDevelopments } from './BestDevelopments';
+export { default as DevelopmentDetail } from './DevelopmentDetail'; 

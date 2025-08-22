@@ -18,8 +18,8 @@ const VentaAlquiler: React.FC = () => {
             />
 
             {/* Sección de videos con fondo verde */}
-            <div className="bg-green-highcontrast mb-10 pt-20 pb-12">
-                <div className="container">
+            <div className="bg-green-highcontrast mb-10 pt-20 ">
+                <div className="container w-4/5 mx-auto">
                     {/* Video principal */}
                     <iframe
                         className="widescreen-video"
