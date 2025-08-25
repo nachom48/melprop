@@ -1,20 +1,20 @@
 export interface Development {
     id: number;
     name: string;
-    slug: string;
-    type: string;
-    operation_type: string;
     description: string;
     address: string;
     neighborhood: string;
-    country: string;
     city: string;
-    status: string;
+    country: string;
+    slug: string;
+    stage: string;
+    posesion: string;
+    min_price: number;
+    currency_symbol: string;
     main_image: string;
-    latitude: number | { source: string; parsedValue: number };
-    longitude: number | { source: string; parsedValue: number };
-    reference_code: string;
-    add_to_homepage: boolean;
+    media: {
+        images: Array<{ url: string }>;
+    };
     amenities: Array<{
         id: number;
         name: string;
@@ -23,14 +23,19 @@ export interface Development {
             url: string;
         };
     }>;
-    posesion: string;
-    stage: string;
-    media: {
-        images: Array<{ url: string }>;
-    };
-    external_url: string;
-    updated: string;
-    min_price: number;
     rooms: number[];
-    url?: string;
+    add_to_homepage: boolean;
+    status: string;
+    updated: string;
+}
+
+export interface DevelopmentResponse {
+    limit: number;
+    count: number;
+    objects: Development[];
+}
+
+export interface DevelopmentStage {
+    stage: string;
+    count: number;
 }

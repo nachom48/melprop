@@ -9,6 +9,7 @@ import PropertyMap from '../components/PropertyMap';
 import Pagination from '../components/Pagination';
 import { useUser } from '../context/UserContext';
 import LoginModal from '../components/LoginModal';
+import PropiedadQueSoñas from '../components/PropiedadQueSoñas';
 
 const Resultados: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -187,9 +188,9 @@ const Resultados: React.FC = () => {
             console.log('📡 Respuesta de la API:', response);
 
             setProperties(response.objects);
-            setTotal(response.count);
+            setTotal(response.objects.length);
             setCurrentPage(filters.page || 1);
-            setTotalPages(Math.ceil(response.count / response.limit));
+            setTotalPages(Math.ceil(response.objects.length / 11)); // Cambiado de 10 a 11
 
             console.log('✅ Propiedades cargadas:', response);
         } catch (err) {
@@ -372,8 +373,9 @@ const Resultados: React.FC = () => {
                         {/* Grid de propiedades */}
                         {properties.length > 0 ? (
                             <>
-                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
-                                    {properties.map((property) => (
+                                {/* Primera fila: 2 propiedades que ocupan la mitad cada una */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    {properties.slice(0, 2).map((property) => (
                                         <PropertyCard
                                             key={property.id}
                                             property={property}
@@ -381,6 +383,38 @@ const Resultados: React.FC = () => {
                                         />
                                     ))}
                                 </div>
+
+                                {/* Resto de propiedades: 3 por fila */}
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+                                    {/* Segunda fila: 3 propiedades */}
+                                    {properties.slice(2, 5).map((property) => (
+                                        <PropertyCard
+                                            key={property.id}
+                                            property={property}
+                                            showFavoriteButton={true}
+                                        />
+                                    ))}
+
+                                    {/* Tercera fila: 3 propiedades */}
+                                    {properties.slice(5, 8).map((property) => (
+                                        <PropertyCard
+                                            key={property.id}
+                                            property={property}
+                                            showFavoriteButton={true}
+                                        />
+                                    ))}
+
+                                    {/* Cuarta fila: 3 propiedades */}
+                                    {properties.slice(8, 11).map((property) => (
+                                        <PropertyCard
+                                            key={property.id}
+                                            property={property}
+                                            showFavoriteButton={true}
+                                        />
+                                    ))}
+                                </div>
+
+                                <PropiedadQueSoñas />
 
                                 {/* Paginación */}
                                 {totalPages > 1 && (
@@ -390,7 +424,7 @@ const Resultados: React.FC = () => {
                                             totalPages={totalPages}
                                             onPageChange={handlePageChange}
                                             totalItems={total}
-                                            itemsPerPage={10}
+                                            itemsPerPage={11}
                                         />
                                     </div>
                                 )}

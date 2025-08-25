@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 //import '../styles/propertyCard.css';
 
@@ -53,6 +54,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     isFavorite: externalIsFavorite,
     onToggleFavorite
 }) => {
+    const navigate = useNavigate();
     const { isLoggedIn, favorites, addToFavorites, removeFromFavorites } = useUser();
     const [isFavorite, setIsFavorite] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -69,6 +71,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             setIsFavorite(false);
         }
     }, [favorites, property.id, externalIsFavorite]);
+
+    const handleCardClick = () => {
+        navigate(`/propiedad/${property.slug}`);
+    };
 
     const handleFavoriteClick = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -114,7 +120,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     };
 
     return (
-        <div className={`border border-[#b7b7b7] rounded-3xl overflow-hidden ${className}`.trim()}>
+        <div
+            className={`hover:cursor-pointer border border-[#b7b7b7] rounded-3xl overflow-hidden transition-transform duration-200 hover:scale-[1.02] hover:shadow-lg ${className}`.trim()}
+            onClick={handleCardClick}
+        >
             <div className="image relative overflow-hidden rounded-tl-3xl rounded-tr-3xl">
                 <img
                     className="w-full h-64 object-cover"

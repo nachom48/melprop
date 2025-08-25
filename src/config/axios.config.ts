@@ -19,7 +19,7 @@ const API_URI = 'http://backend-dev-melpropiedades.pre-produccion.com/api';
 export const apiClient = axios.create({
     baseURL: API_URI,
     withCredentials: true,
-    timeout: 10000,
+    timeout: 20000, // Aumentado de 10000ms a 20000ms (20 segundos)
     headers: {
         'Content-Type': 'application/json',
     }

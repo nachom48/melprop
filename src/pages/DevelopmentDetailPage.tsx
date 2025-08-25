@@ -3,8 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { DevelopmentService } from '../modules/Developments/developmentService';
 import { DevelopmentDetailResponse } from '../modules/Developments/interfaces/developmentDetailResponse.interface';
 import DevelopmentDetail from '../components/DevelopmentDetail';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+import DevelopmentNavbar from '../components/DevelopmentNavbar';
 
 const DevelopmentDetailPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
@@ -45,7 +44,7 @@ const DevelopmentDetailPage: React.FC = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-white">
-                <Navbar />
+                <DevelopmentNavbar developmentName="Cargando..." />
                 <main className="flex items-center justify-center min-h-[60vh]">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow mx-auto mb-4"></div>
@@ -54,7 +53,6 @@ const DevelopmentDetailPage: React.FC = () => {
                         </p>
                     </div>
                 </main>
-                <Footer />
             </div>
         );
     }
@@ -62,7 +60,7 @@ const DevelopmentDetailPage: React.FC = () => {
     if (error || !development) {
         return (
             <div className="min-h-screen bg-white">
-                <Navbar />
+                <DevelopmentNavbar developmentName="Error" />
                 <main className="flex items-center justify-center min-h-[60vh]">
                     <div className="text-center max-w-md mx-auto px-4">
                         <div className="mb-6">
@@ -102,42 +100,17 @@ const DevelopmentDetailPage: React.FC = () => {
                         </div>
                     </div>
                 </main>
-                <Footer />
             </div>
         );
     }
 
     return (
         <div className="min-h-screen bg-white">
-            <Navbar />
-            <main className="py-8">
-                {/* Breadcrumb */}
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
-                    <nav className="flex items-center space-x-2 text-font-size-14 text-dark-medium-grey font-raleway">
-                        <button
-                            onClick={() => navigate('/')}
-                            className="hover:text-yellow transition-colors duration-200"
-                        >
-                            Inicio
-                        </button>
-                        <span>/</span>
-                        <button
-                            onClick={handleBackToEmprendimientos}
-                            className="hover:text-yellow transition-colors duration-200"
-                        >
-                            Emprendimientos
-                        </button>
-                        <span>/</span>
-                        <span className="text-black font-semibold truncate max-w-xs">
-                            {development.name}
-                        </span>
-                    </nav>
-                </div>
-
+            <DevelopmentNavbar developmentName={development.name} />
+            <main>
                 {/* Componente de detalle del desarrollo */}
                 <DevelopmentDetail development={development} />
             </main>
-            <Footer />
         </div>
     );
 };

@@ -1,0 +1,1 @@
+const o=document.querySelector("ul.nav"),s=document.querySelector("#nav-button");console.log(s);s.addEventListener("click",()=>{o.classList.toggle("show"),s.classList.toggle("active"),s.children[0].classList.toggle("fa-bars"),s.children[0].classList.toggle("fa-xmark"),console.log(s),console.log(o),console.log(o.classList),console.log(s.classList)});

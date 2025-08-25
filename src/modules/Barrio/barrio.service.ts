@@ -10,4 +10,6 @@ export namespace BarrioService {
             throw error; // Re-lanzar el error para que el componente lo maneje
         }
     }
+
+
 }

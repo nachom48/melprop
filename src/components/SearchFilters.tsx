@@ -235,7 +235,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
     // Opciones para los dropdowns
     const operationOptions = [
         { value: 'venta', label: 'Comprar' },
-        { value: 'venta', label: 'Vender' },
+        { value: 'vender', label: 'Vender' },
         { value: 'alquiler', label: 'Alquilar' }
     ];
 
@@ -325,7 +325,10 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
                                 : 'border-gray-300'
                                 }`}
                         >
-                            {filters.operation ? (filters.operation === 'venta' ? 'Comprar' : 'Alquilar') : 'Comprar'}
+                            {filters.operation ? (
+                                filters.operation === 'venta' ? 'Comprar' :
+                                    filters.operation === 'vender' ? 'Vender' : 'Alquilar'
+                            ) : 'Comprar'}
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                             </svg>

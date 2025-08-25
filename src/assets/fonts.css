@@ -1,0 +1,126 @@
+/* Declaración de la fuente Larken */
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-Thin-B6zdHY07.woff2") format("woff2"),
+    url("./Larken-Thin-BmxggMzm.woff") format("woff");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-ThinItalic-CQygxRLc.woff2") format("woff2"),
+    url("./Larken-ThinItalic-DKohYjDp.woff") format("woff");
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-Light-hUp-kZxY.woff2") format("woff2"),
+    url("./Larken-Light-BlhSv97g.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-LightItalic-DNgAtqsY.woff2") format("woff2"),
+    url("./Larken-LightItalic-BlHVCkvK.woff") format("woff");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-Regular-CBomjeib.woff2") format("woff2"),
+    url("./Larken-Regular-BtQPEunZ.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-Italic-CLfuZk1-.woff2") format("woff2"),
+    url("./Larken-Italic-BH28cYhO.woff") format("woff");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-Medium-COPefjhJ.woff2") format("woff2"),
+    url("./Larken-Medium-pZBw2_Wb.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-MediumItalic-DU8qFgp4.woff2") format("woff2"),
+    url("./Larken-MediumItalic-6olgA_fB.woff") format("woff");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-Bold-CdLu24fw.woff2") format("woff2"),
+    url("./Larken-Bold-DZqXouB5.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-BoldItalic-C9VjQyHD.woff2") format("woff2"),
+    url("./Larken-BoldItalic-B23-piqT.woff") format("woff");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-ExtraBold-CAeFpMW_.woff2") format("woff2"),
+    url("./Larken-ExtraBold-BwbZpZtq.woff") format("woff");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-ExtraBoldItalic-zK3YnRZh.woff2") format("woff2"),
+    url("./Larken-ExtraBoldItalic-DVXaqGdu.woff") format("woff");
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-Black-DevBofax.woff2") format("woff2"),
+    url("./Larken-Black-Bd3Lzje8.woff") format("woff");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Larken";
+  src: url("./Larken-BlackItalic-CYnY9Pwg.woff2") format("woff2"),
+    url("./Larken-BlackItalic-BacU50Rn.woff") format("woff");
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}

@@ -25,6 +25,7 @@ import Resultados from './pages/Resultados';
 import AdministracionAlquileres from './pages/AdministracionAlquileres';
 import Barrios from './pages/Barrios';
 import DevelopmentDetailPage from './pages/DevelopmentDetailPage';
+import PropertyDetailPage from './pages/PropertyDetailPage';
 import './index.css';
 
 function App() {
@@ -64,6 +65,8 @@ function App() {
                 <Route path="/adm-alquileres" element={<AdministracionAlquileres />} />
                 <Route path="/barrios" element={<Barrios />} />
                 <Route path="/emprendimiento/:slug" element={<DevelopmentDetailPage />} />
+                <Route path="/propiedad/:slug" element={<PropertyDetailPage />} />
+                <Route path="/terreno/:slug" element={<PropertyDetailPage />} />
               </Routes>
             </main>
             <Footer />

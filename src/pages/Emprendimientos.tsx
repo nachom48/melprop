@@ -175,6 +175,9 @@ const Emprendimientos: React.FC = () => {
 
     setSearchParams(params);
     loadDevelopments(newFilters);
+
+    // 🔄 Hacer scroll hacia arriba cuando cambien los filtros
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handlePageChange = (page: number) => {
@@ -188,6 +191,9 @@ const Emprendimientos: React.FC = () => {
     const params = new URLSearchParams(searchParams);
     params.set('page', page.toString());
     setSearchParams(params);
+
+    // 🔄 Hacer scroll hacia arriba de la página
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Toggle entre vista de listado y mapa
@@ -223,6 +229,16 @@ const Emprendimientos: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Indicador de carga al inicio */}
+      {loading && (
+        <div className="fixed top-0 left-0 w-full bg-green-600 text-white py-3 z-50 text-center">
+          <div className="flex items-center justify-center gap-3">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+            <span>Cargando emprendimientos...</span>
+          </div>
+        </div>
+      )}
+
       {/* Header con título */}
       <div className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-6">

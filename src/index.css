@@ -1,4 +1,5 @@
 @import "@fortawesome/fontawesome-free/css/all.css";
+@import "./assets/fonts.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -83,6 +84,7 @@
   --color-light-grey: #f2f2f2;
   --color-lighter-grey: #f3f5f1;
   --color-medium-grey: #f5f5f5;
+  --color-dark-medium-grey: #645e5a;
   --color-input-border: #e0e0e0;
   --color-label: #ffc022;
   --color-disabled: #eaecef;
@@ -91,6 +93,10 @@
   --color-chevron: #707070;
   --font-jakarta: "Plus Jakarta Sans", sans-serif;
   --font-larken: "Larken", sans-serif;
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
   --text-xxs: 0.688rem;
 }
 
@@ -1893,4 +1899,70 @@
 .divider-gradient {
   background: linear-gradient(90deg, #013b20, #b1f253, #013b20);
   height: 1px;
+}
+
+/* Clase para fondo gris oscuro medio */
+.bg-dark-medium-grey {
+  background-color: var(--color-dark-medium-grey);
+}
+
+/* Estilos personalizados para la galería de imágenes */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+/* Mejoras para el modal de imágenes */
+.image-gallery-modal {
+  backdrop-filter: blur(10px);
+}
+
+/* Animaciones suaves para las imágenes */
+.image-gallery-image {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Efectos hover mejorados para los botones de navegación */
+.nav-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos para los thumbnails */
+.gallery-thumbnail {
+  transition: all 0.2s ease-in-out;
+}
+
+.gallery-thumbnail:hover {
+  transform: scale(1.05);
+}
+
+.gallery-thumbnail.active {
+  box-shadow: 0 0 0 3px #aca81f;
+}
+
+/* Estilos para el mapa de Leaflet */
+.leaflet-container {
+  font-family: inherit;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.property-location-popup {
+  border-radius: 8px;
 }
